@@ -36,7 +36,7 @@ export default function Edit() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    useTitle('edit_fo_lokasi');
+    useTitle('Edit FO Lokasi');
 
     const [lokasi, setLokasi] = useState<FoLokasi | null>(null);
     const [errors, setErrors] = useState<ValidationBag>();

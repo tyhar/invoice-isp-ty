@@ -39,7 +39,7 @@ export function CreateFoLokasi(props: Props) {
 
     return (
         <Card title={t('New Lokasi')}>
-            <Element leftSide={t('nama lokasi')} required>
+            <Element leftSide={t('Nama lokasi')} required>
                 <InputField
                     required
                     value={foLokasi.nama_lokasi}
@@ -50,7 +50,7 @@ export function CreateFoLokasi(props: Props) {
                 />
             </Element>
 
-            <Element leftSide={t('deskripsi')}>
+            <Element leftSide={t('Deskripsi')}>
                 <InputField
                     element="textarea"
                     value={foLokasi.deskripsi || ''}
@@ -61,7 +61,7 @@ export function CreateFoLokasi(props: Props) {
                 />
             </Element>
 
-            <Element leftSide={t('latitude')} required>
+            <Element leftSide={t('Latitude')} required>
                 <InputField
                     required
                     type="number"
@@ -73,7 +73,7 @@ export function CreateFoLokasi(props: Props) {
                 />
             </Element>
 
-            <Element leftSide={t('longitude')} required>
+            <Element leftSide={t('Longitude')} required>
                 <InputField
                     required
                     type="number"

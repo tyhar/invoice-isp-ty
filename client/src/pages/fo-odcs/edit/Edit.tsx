@@ -22,7 +22,7 @@ interface LokasiOption {
 }
 
 export default function Edit() {
-    useTitle('edit_odc');
+    useTitle('Edit FO ODC');
     const [t] = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();

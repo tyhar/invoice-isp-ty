@@ -16,10 +16,12 @@ import { useFoLokasiBulkAction } from '$app/common/queries/foLokasi';
 import { request } from '$app/common/helpers/request';
 import { endpoint } from '$app/common/helpers';
 import { toast } from 'react-hot-toast';
+import { useQueryClient } from 'react-query';
 
 export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
     const [t] = useTranslation();
     const bulkAction = useFoLokasiBulkAction();
+    const queryClient = useQueryClient();
 
     const handleForceGeocode = async (id: string) => {
         try {
@@ -27,8 +29,17 @@ export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
 
             if (response.data.status === 'success') {
                 toast.success('Location geocoded successfully!');
-                // Refresh the page to show updated data
-                window.location.reload();
+
+                // Invalidate queries instead of reloading the page
+                queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
+                queryClient.invalidateQueries(['fo-lokasis']);
+
+                // Dispatch custom event for DataTable2 refresh
+                window.dispatchEvent(
+                    new CustomEvent('invalidate.combobox.queries', {
+                        detail: { url: endpoint('/api/v1/fo-lokasis') },
+                    })
+                );
             } else {
                 toast.error('Failed to geocode location');
             }
@@ -63,9 +74,9 @@ export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
             if (state === EntityState.Active) {
                 return (
                     <DropdownElement
-                        onClick={() =>
-                            bulkAction([res.id], 'archive')
-                        }
+                        onClick={async () => {
+                            await bulkAction([res.id], 'archive');
+                        }}
                         icon={<Icon element={MdArchive} />}
                     >
                         {t('archive')!}
@@ -79,9 +90,9 @@ export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
             ) {
                 return (
                     <DropdownElement
-                        onClick={() =>
-                            bulkAction([res.id], 'restore')
-                        }
+                        onClick={async () => {
+                            await bulkAction([res.id], 'restore');
+                        }}
                         icon={<Icon element={MdRestore} />}
                     >
                         {t('restore')!}

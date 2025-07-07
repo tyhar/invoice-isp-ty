@@ -25,6 +25,14 @@ export function useFoLokasiBulkAction() {
 
             // Invalidate all fo-lokasis related queries
             queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
+            queryClient.invalidateQueries(['fo-lokasis']);
+
+            // Dispatch custom event for DataTable2 refresh
+            window.dispatchEvent(
+                new CustomEvent('invalidate.combobox.queries', {
+                    detail: { url: endpoint('/api/v1/fo-lokasis') },
+                })
+            );
         });
     };
 }

@@ -370,7 +370,7 @@ export function Default(props: Props) {
             icon: Radio,
             current:
                 location.pathname.startsWith('/fo-lokasis') ||
-                location.pathname.startsWith('/fo-odc') ||
+                location.pathname.startsWith('/fo-odcs') ||
                 location.pathname.startsWith('/fo-kabel-odcs') ||
                 location.pathname.startsWith('/fo-kabel-tube-odcs') ||
                 location.pathname.startsWith('/fo-kabel-core-odcs') ||
@@ -457,7 +457,7 @@ export function Default(props: Props) {
                                 hasPermission('edit_product'),
                             rightButton: {
                                 icon: PlusCircle,
-                                to: '/fo-odc/create',
+                                to: '/fo-kabel-tube-odcs/create',
                                 label: t('new_product'),
                                 visible: hasPermission('create_product'),
                             },

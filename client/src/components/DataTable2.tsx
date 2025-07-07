@@ -329,7 +329,6 @@ export function DataTable2<T extends { id: string }>(props: Props<T>) {
     const { data, isLoading, isError } = useQuery(
         [
             ...(queryIdentificator ? [queryIdentificator] : []),
-            apiEndpoint.pathname,
             props.endpoint,
             perPage,
             currentPage,

@@ -58,13 +58,7 @@ export default function Create() {
                 // Invalidate related queries
                 queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
 
-                navigate(
-                    route('/fo-lokasis/:id/edit', {
-                        id: response.data.data.id,
-                    }),
-                    //adding this for pop up info
-                    { state: { toast: 'created_fo_lokasi' } }
-                );
+                navigate('/fo-lokasis');
             })
             .catch((error) => {
                 if (error.response?.status === 422) {

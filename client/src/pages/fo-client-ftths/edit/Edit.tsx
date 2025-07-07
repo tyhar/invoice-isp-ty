@@ -149,10 +149,10 @@ export default function Edit() {
 
     return (
         <Default
-            title={t('edit_client_ftth')}
+            title={t('Edit Client FTTH')}
             breadcrumbs={[
                 { name: t('Client FTTH'), href: '/fo-client-ftths' },
-                { name: t('edit_client_ftth'), href: '' }
+                { name: t('Edit Client FTTH'), href: '' }
             ]}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

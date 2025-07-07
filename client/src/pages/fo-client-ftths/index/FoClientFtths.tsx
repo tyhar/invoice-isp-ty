@@ -19,7 +19,7 @@ export default function FoClientFtths() {
     return (
         <Default title={t('Client FTTH')} breadcrumbs={pages}>
             <DataTable2<FoClientFtth>
-                resource="fo-client-ftths"
+                resource="FO Client FTTH"
                 columns={columns}
                 endpoint="/api/v1/fo-client-ftths"
                 linkToCreate="/fo-client-ftths/create"
@@ -29,6 +29,7 @@ export default function FoClientFtths() {
                 customBulkActions={useFoClientFtthBulkActions()}
                 customActions={useFoClientFtthActions()}
                 withoutDefaultBulkActions={true}
+                queryIdentificator="fo-client-ftths"
             />
         </Default>
     );

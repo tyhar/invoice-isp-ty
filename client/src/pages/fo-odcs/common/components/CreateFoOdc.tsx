@@ -40,11 +40,11 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
     return (
         <Card
             title={t(
-                values.create_new_lokasi ? 'new lokasi and odc' : 'new odc'
+                values.create_new_lokasi ? 'New Lokasi and ODC' : 'New ODC'
             )}
         >
             {/* Create New Lokasi Toggle */}
-            <Element leftSide={t('create new lokasi')}>
+            <Element leftSide={t('Create New Lokasi')}>
                 <Checkbox
                     checked={values.create_new_lokasi}
                     onChange={(e: { target: { checked: boolean } }) =>
@@ -56,7 +56,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
             {/* Lokasi Fields */}
             {values.create_new_lokasi ? (
                 <>
-                    <Element leftSide={t('nama lokasi')} required>
+                    <Element leftSide={t('Nama Lokasi')} required>
                         <InputField
                             required
                             value={values.lokasi_name}
@@ -64,7 +64,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
                             errorMessage={errors?.errors.nama_lokasi}
                         />
                     </Element>
-                    <Element leftSide={t('deskripsi')}>
+                    <Element leftSide={t('Deskripsi')}>
                         <InputField
                             element="textarea"
                             value={values.lokasi_deskripsi}
@@ -74,7 +74,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
                             errorMessage={errors?.errors.deskripsi}
                         />
                     </Element>
-                    <Element leftSide={t('latitude')} required>
+                    <Element leftSide={t('Latitude')} required>
                         <InputField
                             required
                             type="number"
@@ -85,7 +85,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
                             errorMessage={errors?.errors.latitude}
                         />
                     </Element>
-                    <Element leftSide={t('longitude')} required>
+                    <Element leftSide={t('Longitude')} required>
                         <InputField
                             required
                             type="number"
@@ -98,7 +98,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
                     </Element>
                 </>
             ) : (
-                <Element leftSide={t('lokasi')} required>
+                <Element leftSide={t('Lokasi')} required>
                     <SelectField
                         required
                         value={values.lokasi_id}
@@ -116,7 +116,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
             )}
 
             {/* ODC Fields */}
-            <Element leftSide={t('nama odc')} required>
+            <Element leftSide={t('Nama ODC')} required>
                 <InputField
                     required
                     value={values.nama_odc}
@@ -125,7 +125,7 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
                 />
             </Element>
 
-            <Element leftSide={t('tipe splitter')} required>
+            <Element leftSide={t('Tipe splitter')} required>
                 <SelectField
                     required
                     value={values.tipe_splitter}

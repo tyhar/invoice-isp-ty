@@ -96,6 +96,7 @@ export default function FoKabelOdcs() {
                 customBulkActions={useFoKabelOdcBulkActions()}
                 customActions={useFoKabelOdcActions()}
                 withoutDefaultBulkActions={true}
+                queryIdentificator="fo-kabel-odcs"
             />
         </Default>
     );

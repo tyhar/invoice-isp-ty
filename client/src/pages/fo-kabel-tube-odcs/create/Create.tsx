@@ -66,12 +66,7 @@ export default function Create() {
         request('POST', endpoint('/api/v1/fo-kabel-tube-odcs'), form)
             .then((response: GenericSingleResourceResponse<any>) => {
                 toast.success('created tube odc');
-                navigate(
-                    route('/fo-kabel-tube-odcs/:id/edit', {
-                        id: response.data.data.id,
-                    }),
-                    { state: { toast: 'created_tube_odc' } }
-                );
+                navigate('/fo-kabel-tube-odcs');
                 queryClient.invalidateQueries('fo-kabel-tube-odcs');
             })
             .catch((error) => {
