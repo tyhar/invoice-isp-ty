@@ -34,6 +34,8 @@ export default function WAChat() {
 
   const [searchKeyword, setSearchKeyword] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [statusFilter, setStatusFilter] = useState('');
+
 
   const pages: Page[] = [
     { name: t('WhatsApp Gateway'), href: '/wa-gateway' },
@@ -113,9 +115,16 @@ export default function WAChat() {
     });
   };
 
-  const filteredChats = chats.filter((chat) =>
-    `${chat.message ?? ''} ${chat.client?.phone ?? ''}`.toLowerCase().includes(searchKeyword)
-  );
+  const filteredChats = chats.filter((chat) => {
+    const keywordMatch = `${chat.message ?? ''} ${chat.client?.phone ?? ''}`
+      .toLowerCase()
+      .includes(searchKeyword);
+
+    const statusMatch = statusFilter ? chat.status === statusFilter : true;
+
+    return keywordMatch && statusMatch;
+  });
+
 
   const sortedChats = [...filteredChats].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
@@ -158,15 +167,27 @@ export default function WAChat() {
           </div>
           <div className="flex justify-between items-center mt-2">
             <h2 className="text-lg font-semibold">History Pesan</h2>
-            <div className="relative w-[300px]">
-              <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl" />
-              <input
-                type="text"
-                placeholder="Cari pesan atau nomor WA"
-                value={searchKeyword}
-                onChange={handleSearchChange}
-                className="border pl-10 pr-3 py-2 rounded w-full"
-              />
+            <div className="flex gap-2 items-center">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border rounded px-3 py-2"
+              >
+                <option value="">Semua Status</option>
+                <option value="sent">Pesan Terkirim</option>
+                <option value="received">Menerima Pesan</option>
+                <option value="failed">Gagal Terkirim</option>
+              </select>
+              <div className="relative w-[300px]">
+                <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xl" />
+                <input
+                  type="text"
+                  placeholder="Cari pesan atau nomor WA"
+                  value={searchKeyword}
+                  onChange={handleSearchChange}
+                  className="border pl-10 pr-3 py-2 rounded w-full"
+                />
+              </div>
             </div>
           </div>
         </div>

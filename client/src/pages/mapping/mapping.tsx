@@ -48,11 +48,21 @@ interface AddMarkerFormProps {
 }
 
 const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, initialData, editingId }) => {
-  const [position, setPosition] = useState<LatLng | null>(
-    initialData && initialData.latitude && initialData.longitude
-      ? new L.LatLng(parseFloat(initialData.latitude), parseFloat(initialData.longitude))
-      : null
-  );
+  const parseCoordinate = (value: any): number | null => {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
+  };
+
+  const [position, setPosition] = useState<LatLng | null>(() => {
+    const lat = parseCoordinate(initialData?.latitude);
+    const lng = parseCoordinate(initialData?.longitude);
+    if (lat !== null && lng !== null) {
+      return new L.LatLng(lat, lng);
+    }
+    return null;
+  });
+
+  const api = "http://localhost:8000";
 
   const [form, setForm] = useState({
     nama_lokasi: initialData?.nama_lokasi || '',
@@ -72,7 +82,6 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
   const [odpList, setOdpList] = useState<any[]>([]);
   const [odcCoreList, setOdcCoreList] = useState<any[]>([]);
   const [clientList, setClientList] = useState<any[]>([]);
-  const API_BASE_URL = 'http://localhost:8000';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,13 +91,13 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
       try {
         if (mode === 'client') {
           const [odpRes, clientRes] = await Promise.all([
-            axios.get(`${API_BASE_URL}/api/v1/fo-odps`, headers),
-            axios.get(`${API_BASE_URL}/api/v1/clients`, headers),
+            axios.get(`${api}/api/v1/fo-odps`, headers),
+            axios.get(`${api}/api/v1/clients`, headers),
           ]);
           setOdpList(odpRes.data.data);
           setClientList(clientRes.data.data);
         } else if (mode === 'odp') {
-          const res = await axios.get(`${API_BASE_URL}/api/v1/fo-kabel-core-odcs/no-odp`, headers);
+          const res = await axios.get(`${api}/api/v1/fo-kabel-core-odcs/no-odp`, headers);
           setOdcCoreList(res.data.data);
         }
       } catch (error) {
@@ -141,7 +150,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
 
       if (editingId) {
         await axios.put(
-          `${API_BASE_URL}/api/v1/fo-lokasis/${initialData?.lokasi_id}`,
+          `${api}/api/v1/fo-lokasis/${initialData?.lokasi_id}`,
           {
             nama_lokasi: form.nama_lokasi,
             deskripsi: form.deskripsi,
@@ -153,7 +162,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
 
         if (mode === 'client') {
           await axios.put(
-            `${API_BASE_URL}/api/v1/fo-client-ftths/${editingId}`,
+            `${api}/api/v1/fo-client-ftths/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
               odp_id: form.odp_id,
@@ -164,7 +173,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odp') {
           await axios.put(
-            `${API_BASE_URL}/api/v1/fo-odps/${editingId}`,
+            `${api}/api/v1/fo-odps/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
@@ -175,7 +184,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odc') {
           await axios.put(
-            `${API_BASE_URL}/api/v1/fo-odcs/${editingId}`,
+            `${api}/api/v1/fo-odcs/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
               nama_odc: form.nama,
@@ -188,7 +197,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
         window.alert('Data berhasil diperbarui.');
       } else {
         const lokasiRes = await axios.post(
-          '${API_BASE_URL}/api/v1/fo-lokasis',
+          `${api}/api/v1/fo-lokasis`,
           {
             nama_lokasi: form.nama_lokasi,
             deskripsi: form.deskripsi,
@@ -202,7 +211,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
 
         if (mode === 'client') {
           await axios.post(
-            '${API_BASE_URL}/api/v1/fo-client-ftths',
+            `${api}/api/v1/fo-client-ftths`,
             {
               lokasi_id,
               odp_id: form.odp_id || null,
@@ -214,7 +223,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odp') {
           await axios.post(
-            '${API_BASE_URL}/api/v1/fo-odps',
+            `${api}/api/v1/fo-odps`,
             {
               lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
@@ -225,7 +234,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odc') {
           await axios.post(
-            `${API_BASE_URL}/api/v1/fo-odcs`,
+            `${api}/api/v1/fo-odcs`,
             {
               lokasi_id,
               nama_odc: form.nama,
@@ -245,16 +254,55 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
     }
   };
 
+  const clientIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
+  const odpIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
+  const odcIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
   return (
     <>
       {position && (
-        <Marker position={position} draggable eventHandlers={{ dragend: onMarkerDragEnd }} />
+        <Marker
+          position={position}
+          draggable
+          icon={
+            mode === 'client'
+              ? clientIcon
+              : mode === 'odp'
+                ? odpIcon
+                : odcIcon
+          }
+          eventHandlers={{ dragend: onMarkerDragEnd }}
+        />
       )}
-      <div className="absolute top-16 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
+
+      <div className="absolute top-10 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
         <h3 className="font-semibold mb-2">
           {editingId ? mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : 'Edit ODC' : mode === 'client' ? 'Tambah Client' : mode === 'odp' ? 'Tambah ODP' : 'Tambah ODC'}</h3>
         <p className="mb-2 text-xs text-gray-600">Klik peta untuk memilih lokasi atau edit latitude dan longitude di bawah</p>
-        <div className="max-h-[60vh] overflow-y-auto px-4">
+        <div className="max-h-[55vh] overflow-y-auto px-4">
           <form onSubmit={handleSubmit} className="space-y-3 text-sm">
             <div>
               <label className="block mb-1">Nama Lokasi</label>
@@ -429,7 +477,6 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
   );
 };
 
-
 const MappingPage: React.FC = () => {
   const [formMode, setFormMode] = useState<FormMode>(null);
   const [clients, setClients] = useState<any[]>([]);
@@ -445,8 +492,10 @@ const MappingPage: React.FC = () => {
   const [filterLokasi, setFilterLokasi] = useState<any[]>([]);
   const [statistikData, setStatistikData] = useState<any[]>([]);
   const [jumlahData, setJumlahData] = useState<{ client: number; odp: number; odc: number } | null>(null);
-  
-  const API_BASE_URL = 'http://localhost:8000';
+  const [coordinateWarning, setCoordinateWarning] = useState(false);
+  const [validClients, setValidClients] = useState<any[]>([]);
+  const [validOdps, setValidOdps] = useState<any[]>([]);
+  const api = "http://localhost:8000";
 
   // Default CENTER MAP
   const mapDefaultCenter: [number, number] = [-7.56526, 110.81653];
@@ -459,9 +508,9 @@ const MappingPage: React.FC = () => {
     const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
     const [clientRes, odpRes, odcRes] = await Promise.all([
-      axios.get(`${API_BASE_URL}/api/v1/fo-client-ftths`, headers),
-      axios.get(`${API_BASE_URL}/api/v1/fo-odps`, headers),
-      axios.get(`${API_BASE_URL}/api/v1/fo-odcs`, headers),
+      axios.get(`${api}/api/v1/fo-client-ftths`, headers),
+      axios.get(`${api}/api/v1/fo-odps`, headers),
+      axios.get(`${api}/api/v1/fo-odcs`, headers),
     ]);
 
     setClients(clientRes.data.data);
@@ -469,13 +518,14 @@ const MappingPage: React.FC = () => {
     setOdcs(odcRes.data.data);
   };
 
+
   // GET DATA FILTER DARI API
   const fetchFilterLokasi = async () => {
     try {
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
-      const res = await axios.get(`${API_BASE_URL}/api/v1/filter-lokasi`, headers);
+      const res = await axios.get(`${api}/api/v1/filter-lokasi`, headers);
       setFilterLokasi(res.data.data);
     } catch (err) {
       console.error('Gagal fetch filter lokasi:', err);
@@ -487,7 +537,7 @@ const MappingPage: React.FC = () => {
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
-      const res = await axios.get(`${API_BASE_URL}/api/v1/filter-lokasi/statistik`, headers);
+      const res = await axios.get(`${api}/api/v1/filter-lokasi/statistik`, headers);
       setStatistikData(res.data.data);
     } catch (err) {
       console.error('Gagal fetch statistik lokasi:', err);
@@ -500,6 +550,37 @@ const MappingPage: React.FC = () => {
     fetchFilterLokasi();
     fetchStatistikData();
   }, []);
+
+  useEffect(() => {
+    let hasInvalid = false;
+
+    const filteredClients = clients.filter((client) => {
+      const clientPos = getLatLng(client);
+      const odpPos = getLatLng(client.odp);
+      const odcPos = getLatLng(client.odc);
+
+      const isValid = clientPos && odpPos && odcPos;
+
+      if (!isValid) hasInvalid = true;
+
+      return isValid;
+    });
+
+    const filteredOdps = odps.filter((odp) => {
+      const odpPos = getLatLng(odp);
+      const odcPos = getLatLng(odp.odc);
+
+      const isValid = odpPos && odcPos;
+
+      if (!isValid) hasInvalid = true;
+
+      return isValid;
+    });
+
+    setValidClients(filteredClients);
+    setValidOdps(filteredOdps);
+    setCoordinateWarning(hasInvalid);
+  }, [clients, odps]);
 
   const provinsiOptionsFormatted = Array.from(
     new Set(filterLokasi.map(l => l.provinsi).filter(Boolean))
@@ -576,15 +657,15 @@ const MappingPage: React.FC = () => {
 
       // Hapus data client/odp
       if (mode === 'client') {
-        await axios.delete(`${API_BASE_URL}/api/v1/fo-client-ftths/${id}`, headers);
+        await axios.delete(`${api}/api/v1/fo-client-ftths/${id}`, headers);
       } else if (mode === 'odp') {
-        await axios.delete(`${API_BASE_URL}/api/v1/fo-odps/${id}`, headers);
+        await axios.delete(`${api}/api/v1/fo-odps/${id}`, headers);
       } else if (mode === 'odc') {
-        await axios.delete(`${API_BASE_URL}/api/v1/fo-odcs/${id}`, headers);
+        await axios.delete(`${api}/api/v1/fo-odcs/${id}`, headers);
       }
 
       // Hapus lokasi terkait
-      await axios.delete(`${API_BASE_URL}/api/v1/fo-lokasis/${lokasi_id}`, headers);
+      await axios.delete(`${api}/api/v1/fo-lokasis/${lokasi_id}`, headers);
 
       alert('Data berhasil dihapus.');
       fetchData();
@@ -623,12 +704,42 @@ const MappingPage: React.FC = () => {
   });
 
   const getLatLng = (item: any): [number, number] | null => {
-    if (!item?.lokasi) return null;
-    const lat = parseFloat(item.lokasi.latitude);
-    const lng = parseFloat(item.lokasi.longitude);
-    return (!isNaN(lat) && !isNaN(lng)) ? [lat, lng] : null;
+    const lokasi = item?.lokasi ?? item;
+
+    const latRaw = lokasi?.latitude;
+    const lngRaw = lokasi?.longitude;
+
+    if (
+      latRaw === null || lngRaw === null ||
+      latRaw === undefined || lngRaw === undefined ||
+      latRaw === '' || lngRaw === ''
+    ) {
+      console.warn('Koordinat kosong atau tidak valid:', lokasi);
+      return null;
+    }
+
+    const lat = typeof latRaw === 'number' ? latRaw : parseFloat(latRaw);
+    const lng = typeof lngRaw === 'number' ? lngRaw : parseFloat(lngRaw);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn('Koordinat tidak bisa diubah ke angka:', lokasi);
+      return null;
+    }
+
+    return [lat, lng];
   };
 
+  const safeParseLatLng = (lat: any, lng: any): [number, number] | null => {
+    const parsedLat = typeof lat === 'number' ? lat : parseFloat(lat);
+    const parsedLng = typeof lng === 'number' ? lng : parseFloat(lng);
+
+    if (isNaN(parsedLat) || isNaN(parsedLng)) {
+      console.warn('Invalid LatLng:', { lat, lng });
+      return null;
+    }
+
+    return [parsedLat, parsedLng];
+  };
 
   // Menghitung Jarak
   const haversineDistance = (
@@ -655,6 +766,11 @@ const MappingPage: React.FC = () => {
   const createSmoothArc = (start: [number, number], end: [number, number], segments = 10): [number, number][] => {
     const [lat1, lng1] = start;
     const [lat2, lng2] = end;
+
+    if ([lat1, lng1, lat2, lng2].some(coord => isNaN(coord))) {
+      console.warn('createSmoothArc menerima nilai NaN:', { start, end });
+      return [];
+    }
 
     const midLat = (lat1 + lat2) / 2;
     const midLng = (lng1 + lng2) / 2;
@@ -750,12 +866,11 @@ const MappingPage: React.FC = () => {
           />
 
           {clients
-            .filter(c => c.lokasi && !isNaN(parseFloat(c.lokasi.latitude)) && !isNaN(parseFloat(c.lokasi.longitude)))
-            .map(client => {
-              const lat = parseFloat(client.lokasi.latitude);
-              const lng = parseFloat(client.lokasi.longitude);
+            .map((client) => {
+              const pos = safeParseLatLng(client?.lokasi?.latitude, client?.lokasi?.longitude);
+              if (!pos) return null;
               return (
-                <Marker key={`client-${client.id}`} position={[lat, lng]} icon={clientIcon}
+                <Marker key={`client-${client.id}`} position={pos} icon={clientIcon}
                 >
                   <Popup>
                     <div>
@@ -818,17 +933,11 @@ const MappingPage: React.FC = () => {
             })}
 
           {odps
-            .filter(odp => odp.lokasi)
-            .filter(odp => {
-              const lat = parseFloat(odp.lokasi.latitude);
-              const lng = parseFloat(odp.lokasi.longitude);
-              return !isNaN(lat) && !isNaN(lng);
-            })
-            .map(odp => {
-              const lat = parseFloat(odp.lokasi.latitude);
-              const lng = parseFloat(odp.lokasi.longitude);
+            .map((odp) => {
+              const pos = safeParseLatLng(odp?.lokasi?.latitude, odp?.lokasi?.longitude);
+              if (!pos) return null;
               return (
-                <Marker key={`odp-${odp.id}`} position={[lat, lng]} icon={odpIcon}>
+                <Marker key={`odp-${odp.id}`} position={pos} icon={odpIcon}>
                   <Popup>
                     <div className="text-sm">
                       <strong>ODP:</strong> {odp.nama_odp}<br />
@@ -869,12 +978,11 @@ const MappingPage: React.FC = () => {
             })}
 
           {odcs
-            .filter(odc => odc.lokasi && !isNaN(parseFloat(odc.lokasi.latitude)) && !isNaN(parseFloat(odc.lokasi.longitude)))
-            .map(odc => {
-              const lat = parseFloat(odc.lokasi.latitude);
-              const lng = parseFloat(odc.lokasi.longitude);
+            .map((odc) => {
+              const pos = safeParseLatLng(odc?.lokasi?.latitude, odc?.lokasi?.longitude);
+              if (!pos) return null;
               return (
-                <Marker key={`odc-${odc.id}`} position={[lat, lng]} icon={odcIcon}>
+                <Marker key={`odc-${odc.id}`} position={pos} icon={odcIcon}>
                   <Popup>
                     <div className="text-sm">
                       <strong>ODC:</strong> {odc.nama_odc}<br />
@@ -912,48 +1020,54 @@ const MappingPage: React.FC = () => {
               );
             })}
 
-          {clients.map((client) => {
+          {validClients.map((client) => {
             const clientPos = getLatLng(client);
             const odpPos = getLatLng(client.odp);
-            const odcPos = getLatLng(client.odc);
 
-            if (!clientPos || !odpPos || !odcPos) return null;
+            if (!clientPos || !odpPos) return null;
+
+            if (isNaN(clientPos[0]) || isNaN(clientPos[1]) || isNaN(odpPos[0]) || isNaN(odpPos[1])) return null;
 
             const distance = haversineDistance(clientPos, odpPos);
+            const arc = createSmoothArc(odpPos, clientPos);
+
+            if (!arc || arc.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
 
             return (
-              <>
-                {/* ODP → Client */}
-                <Polyline
-                  key={`line-odp-client-${client.id}`}
-                  positions={createSmoothArc(odpPos, clientPos)}
-                  pathOptions={{
-                    color: 'rgba(0, 0, 230, 0.6)',
-                    weight: 2,
-                  }}
-                >
-                  <Popup>
-                    <div>
-                      <strong>ODP ➝ Client</strong><br />
-                      Dari: {client.odp?.nama_odp}<br />
-                      Ke: {client.nama_client}<br />
-                      <span>Jarak: {distance.toFixed(2)} km</span>
-                    </div>
-                  </Popup>
-                </Polyline>
-              </>
+              <Polyline
+                key={`line-odp-client-${client.id}`}
+                positions={createSmoothArc(odpPos, clientPos)}
+                pathOptions={{
+                  color: 'rgba(0, 0, 230, 0.6)',
+                  weight: 2,
+                }}
+              >
+                <Popup>
+                  <div>
+                    <strong>ODP ➝ Client</strong><br />
+                    Dari: {client.odp?.nama_odp}<br />
+                    Ke: {client.nama_client}<br />
+                    <span>Jarak: {distance.toFixed(2)} km</span>
+                  </div>
+                </Popup>
+              </Polyline>
             );
           })}
 
 
-          {odps.map((odp) => {
+
+          {validOdps.map((odp) => {
             const odpPos = getLatLng(odp);
-            const odc = odp.odc;
-            const odcPos = getLatLng(odc);
+            const odcPos = getLatLng(odp.odc);
 
             if (!odpPos || !odcPos) return null;
 
-            const distance = haversineDistance(odcPos, odpPos);
+            if (isNaN(odpPos[0]) || isNaN(odpPos[1]) || isNaN(odcPos[0]) || isNaN(odcPos[1])) return null;
+
+            const distance = haversineDistance(odpPos, odcPos);
+            const arc = createSmoothArc(odcPos, odpPos);
+
+            if (!arc || arc.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
 
             return (
               <Polyline
@@ -967,14 +1081,22 @@ const MappingPage: React.FC = () => {
                 <Popup>
                   <div>
                     <strong>ODC ➝ ODP</strong><br />
-                    Dari: {odc?.nama_odc || 'ODC'}<br />
-                    Ke: {odp?.nama_odp}<br />
+                    Dari: {odp.odc?.nama_odc || 'ODC'}<br />
+                    Ke: {odp.nama_odp}<br />
                     <span>Jarak: {distance.toFixed(2)} km</span>
                   </div>
                 </Popup>
               </Polyline>
             );
           })}
+
+
+          {coordinateWarning && (
+            <div style={{ color: 'red', marginTop: '10px' }}>
+              ⚠️ Ada koordinat yang tidak terdeteksi. Beberapa garis mungkin tidak ditampilkan.
+            </div>
+          )}
+
 
           {/* Modal Kabel */}
           {showKabelModal && (

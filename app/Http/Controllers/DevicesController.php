@@ -16,6 +16,13 @@ class DevicesController extends Controller
             'data' => Device::all(),
         ]);
     }
+    public function setDefault($id)
+    {
+        Device::where('is_default', true)->update(['is_default' => false]);
+        Device::where('id', $id)->update(['is_default' => true]);
+
+        return response()->json(['message' => 'Device set as default']);
+    }
 
     public function addDevice(Request $request): JsonResponse
     {

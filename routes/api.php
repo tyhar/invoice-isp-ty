@@ -565,6 +565,7 @@ Route::group(['middleware' => ['throttle:api', 'api_db', 'token_auth', 'locale']
     // WA GATEWAY
     Route::prefix('devices')->controller(DevicesController::class)->group(function () {
         Route::get('/', 'getAllDevices');
+        Route::post('/{id}/default', 'setDefault');
         Route::post('/', 'addDevice');
         Route::put('/{id}', 'updateDevice');
         Route::post('/{id}/connect', 'connectDevice');
@@ -601,7 +602,7 @@ Route::group(['middleware' => ['throttle:api', 'api_db', 'token_auth', 'locale']
     Route::post('wa/message', [MessagesController::class, 'sendMessage']);
     Route::post('wa/message/resend/{id}', [MessagesController::class, 'resend']);
     Route::post('wa/message/payment-confirmation', [MessagesController::class, 'sendPaymentConfirmation']);
-    Route::post('wa/message/send-invoice/{invoice}', [MessagesController::class, 'sendInvoice']);
+    Route::post('wa/message/send-invoice', [MessagesController::class, 'sendInvoice']);
     Route::apiResource('admin-contacts', AdminContactController::class);
 });
 

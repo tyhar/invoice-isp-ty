@@ -20,6 +20,7 @@ interface ScheduleDetail {
     text: string;
     frequency: string;
     next_run_date: string;
+    include_invoice: boolean;
     created_at: string;
 }
 
@@ -123,6 +124,12 @@ export default function WaChatRecurringDetail() {
                         <div className="mb-4">
                             <h3 className="text-lg font-semibold mb-1">{t("Frekuensi")}</h3>
                             <p className="text-gray-700">{frequencyLabel(schedule.frequency)}</p>
+                        </div>
+                        <div className="mb-4">
+                            <h3 className="text-lg font-semibold mb-1">{t("Include Invoice?")}</h3>
+                            <p className="text-gray-700">
+                                {schedule.include_invoice ? t("Ya") : t("Tidak")}
+                            </p>
                         </div>
                         <div className="mb-4">
                             <h3 className="text-lg font-semibold mb-1">{t("Next Run")}</h3>

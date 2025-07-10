@@ -18,6 +18,7 @@ class ScheduledMessage extends Model
         'text',
         'frequency',
         'next_run_date',
+        'include_invoice'
     ];
 
     protected $dates = [

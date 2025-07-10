@@ -191,7 +191,7 @@ export function useActions(params?: Params) {
       invoice.client_id && (
         <DropdownElement
           icon={<Icon element={MdOutlineWhatsapp} />}
-          onClick={() => handleSendInvoice(invoice)}
+          onClick={() => handleSendInvoice([invoice])}
         >
           {t('Kirim Invoice lewat WA')}
         </DropdownElement>
