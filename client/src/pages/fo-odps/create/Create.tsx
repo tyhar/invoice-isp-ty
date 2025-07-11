@@ -104,10 +104,7 @@ export default function Create() {
                 .then(() => {
                     toast.success('created odp');
                     queryClient.invalidateQueries('fo-odps');
-                    navigate(
-                        route('/fo-odps/:id/edit', { id: resp.data.data.id }),
-                        { state: { toast: 'created_odp' } }
-                    );
+                    navigate('/fo-odps');
                 })
                 .catch((err) => {
                     if (err.response?.status === 422) {

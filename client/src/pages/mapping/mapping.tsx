@@ -428,16 +428,11 @@ const MappingPage: React.FC = () => {
   const [mapCenter, setMapCenter] = useState<[number, number]>([-7.56526, 110.81653]);
   const [showKabelModal, setShowKabelModal] = useState(false);
   const navigate = useNavigate();
-<<<<<<< Updated upstream
-=======
   const [filterLokasi, setFilterLokasi] = useState<any[]>([]);
   const [statistikData, setStatistikData] = useState<any[]>([]);
   const [jumlahData, setJumlahData] = useState<{ client: number; odp: number; odc: number } | null>(null);
 
   const API_BASE_URL = 'http://localhost:8000';
->>>>>>> Stashed changes
-
-
 
   const pages: Page[] = [{ name: t('Mapping'), href: '/map' }];
 
@@ -566,15 +561,11 @@ const MappingPage: React.FC = () => {
   };
 
   // Membuat Garis Melengkung
-<<<<<<< Updated upstream
-  const createSmoothArc = (start: [number, number], end: [number, number], segments = 50): [number, number][] => {
-=======
   const createSmoothArc = (start: [number, number], end: [number, number], segments = 10): [number, number][] => {
     if (!start || !end || start.some(isNaN) || end.some(isNaN)) {
       console.warn('Invalid input to createSmoothArc:', { start, end });
       return [];
     }
->>>>>>> Stashed changes
     const [lat1, lng1] = start;
     const [lat2, lng2] = end;
 
@@ -654,55 +645,6 @@ const MappingPage: React.FC = () => {
       </div>
 
       <div className="h-[80vh] relative z-0">
-<<<<<<< Updated upstream
-        <MapContainer center={mapCenter} zoom={13} className="h-full w-full">
-          <MapCenterUpdater center={mapCenter} />
-          <TileLayer
-            attribution="&copy; OpenStreetMap contributors"
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          {clients
-            .filter(c => c.lokasi && !isNaN(parseFloat(c.lokasi.latitude)) && !isNaN(parseFloat(c.lokasi.longitude)))
-            .map(client => {
-              const lat = parseFloat(client.lokasi.latitude);
-              const lng = parseFloat(client.lokasi.longitude);
-              return (
-                <Marker key={`client-${client.id}`} position={[lat, lng]} icon={clientIcon}
-                >
-                  <Popup>
-                    <div>
-                      <b>Client:</b> {client.nama_client}<br />
-                      <b>Alamat:</b> {client.alamat}<br />
-                      <b>ODC:</b> {client.odc?.nama_odc}<br />
-                      <b>ODP:</b> {client.odp?.nama_odp}<br />
-                      <div className="mt-2 flex gap-2">
-                        <button
-                          className="bg-yellow-400 px-2 py-1 rounded text-xs"
-                          onClick={() => setEditData({
-                            mode: 'client', data: {
-                              id: client.id,
-                              lokasi_id: client.lokasi.id,
-                              nama_lokasi: client.lokasi.nama_lokasi,
-                              deskripsi: client.lokasi.deskripsi,
-                              latitude: client.lokasi.latitude,
-                              longitude: client.lokasi.longitude,
-                              nama_client: client.nama_client,
-                              alamat: client.alamat,
-                              odp_id: client.odp_id,
-                              client_id: client.client_id
-                            }
-                          })}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                          onClick={() => handleDelete('client', client.id, client.lokasi.id)}
-                        >
-                          Delete
-                        </button>
-=======
         {(selectedProvinsi || selectedKota) && jumlahData && (
           <div className="absolute top-4 right-4 z-[999] bg-white rounded shadow-md p-4 w-64">
             <h3 className="text-lg font-semibold mb-2">Statistik Daerah</h3>
@@ -784,7 +726,6 @@ const MappingPage: React.FC = () => {
                             Delete
                           </button>
                         </div>
->>>>>>> Stashed changes
                       </div>
                     </Popup>
                   </Marker>
@@ -963,72 +904,6 @@ const MappingPage: React.FC = () => {
               );
             })}
 
-<<<<<<< Updated upstream
-            if (!odpPos || !odcPos) return null;
-
-            const distance = haversineDistance(odcPos, odpPos);
-
-            return (
-              <Polyline
-                key={`line-odc-odp-${odp.id}`}
-                positions={createSmoothArc(odcPos, odpPos)}
-                pathOptions={{
-                  color: 'rgba(0, 0, 230, 0.6)',
-                  weight: 3,
-                }}
-              >
-                <Popup>
-                  <div>
-                    <strong>ODC ➝ ODP</strong><br />
-                    Dari: {odc?.nama_odc || 'ODC'}<br />
-                    Ke: {odp?.nama_odp}<br />
-                    <span>Jarak: {distance.toFixed(2)} km</span>
-                  </div>
-                </Popup>
-              </Polyline>
-            );
-          })}
-
-          {/* Modal Kabel */}
-          {showKabelModal && (
-            <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
-              <div className="bg-white rounded-lg p-6 w-80 shadow-lg z-[1001]">
-                <h2 className="text-lg font-semibold mb-4 text-center">Pilih Jenis Kabel</h2>
-                <div className="flex flex-col gap-2">
-                  <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                    onClick={() => {
-                      navigate('/fo-kabel-odcs/create');
-                      setShowKabelModal(false);
-                    }}
-                  >
-                    Kabel ODC
-                  </button>
-                  <button
-                    className="bg-green-500 text-white px-4 py-2 rounded"
-                    onClick={() => {
-                      navigate('/fo-kabel-core-odcs/create');
-                      setShowKabelModal(false);
-                    }}
-                  >
-                    Kabel Core ODC
-                  </button>
-                  <button
-                    className="bg-purple-600 text-white px-4 py-2 rounded"
-                    onClick={() => {
-                      navigate('/fo-kabel-tube-odcs/create');
-                      setShowKabelModal(false);
-                    }}
-                  >
-                    Kabel Tube ODC
-                  </button>
-                  <button
-                    className="mt-2 text-gray-600 hover:underline"
-                    onClick={() => setShowKabelModal(false)}
-                  >
-                    Batal
-                  </button>
-=======
             {/* Modal Kabel */}
             {showKabelModal && (
               <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
@@ -1069,7 +944,6 @@ const MappingPage: React.FC = () => {
                       Batal
                     </button>
                   </div>
->>>>>>> Stashed changes
                 </div>
               </div>
             )}
@@ -1107,9 +981,3 @@ const MappingPage: React.FC = () => {
 };
 
 export default MappingPage;
-<<<<<<< Updated upstream
-
-
-
-=======
->>>>>>> Stashed changes

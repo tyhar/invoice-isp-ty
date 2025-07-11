@@ -90,10 +90,10 @@ export function CreateFoOdp({
     return (
         <Card
             title={t(
-                values.create_new_lokasi ? 'new_lokasi_and_odp' : 'new_odp'
+                values.create_new_lokasi ? 'New Lokasi and ODP' : 'New ODP'
             )}
         >
-            <Element leftSide={t('create_new_lokasi')}>
+            <Element leftSide={t('Create New Lokasi')}>
                 <Checkbox
                     checked={values.create_new_lokasi}
                     onChange={(e: { target: { checked: boolean } }) =>
@@ -104,7 +104,7 @@ export function CreateFoOdp({
 
             {values.create_new_lokasi ? (
                 <>
-                    <Element leftSide={t('nama_lokasi')} required>
+                    <Element leftSide={t('Nama Lokasi')} required>
                         <InputField
                             required
                             value={values.lokasi_name}
@@ -112,7 +112,7 @@ export function CreateFoOdp({
                             errorMessage={errors?.errors.nama_lokasi}
                         />
                     </Element>
-                    <Element leftSide={t('deskripsi')}>
+                    <Element leftSide={t('Deskripsi')}>
                         <InputField
                             element="textarea"
                             value={values.lokasi_deskripsi}
@@ -122,7 +122,7 @@ export function CreateFoOdp({
                             errorMessage={errors?.errors.deskripsi}
                         />
                     </Element>
-                    <Element leftSide={t('latitude')} required>
+                    <Element leftSide={t('Latitude')} required>
                         <InputField
                             required
                             type="number"
@@ -133,7 +133,7 @@ export function CreateFoOdp({
                             errorMessage={errors?.errors.latitude}
                         />
                     </Element>
-                    <Element leftSide={t('longitude')} required>
+                    <Element leftSide={t('Longitude')} required>
                         <InputField
                             required
                             type="number"
@@ -146,14 +146,14 @@ export function CreateFoOdp({
                     </Element>
                 </>
             ) : (
-                <Element leftSide={t('lokasi')} required>
+                <Element leftSide={t('Lokasi')} required>
                     <SelectField
                         required
                         value={values.lokasi_id}
                         onValueChange={(v) => onChange('lokasi_id', v)}
                         errorMessage={errors?.errors.lokasi_id}
                     >
-                        <option value="">{t('select_lokasi')}</option>
+                        <option value="">{t('select lokasi')}</option>
                         {lokasis.map((l) => (
                             <option key={l.id} value={l.id.toString()}>
                                 {l.nama_lokasi}
@@ -163,7 +163,7 @@ export function CreateFoOdp({
                 </Element>
             )}
 
-            <Element leftSide={t('kabel_odc')} required>
+            <Element leftSide={t('Kabel ODC')} required>
                 <SelectField
                     required
                     value={values.kabel_odc_id}
@@ -175,7 +175,7 @@ export function CreateFoOdp({
                     }}
                     errorMessage={errors?.errors.kabel_odc_id}
                 >
-                    <option value="">{t('select_kabel_odc')}</option>
+                    <option value="">{t('select kabel odc')}</option>
                     {kabelOptions.map((k) => (
                         <option key={k.id} value={k.id.toString()}>
                             {k.nama_kabel}
@@ -184,7 +184,7 @@ export function CreateFoOdp({
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('kabel_tube_odc')} required>
+            <Element leftSide={t('Kabel Tube ODC')} required>
                 <SelectField
                     required
                     value={values.kabel_tube_odc_id}
@@ -194,7 +194,7 @@ export function CreateFoOdp({
                     }}
                     errorMessage={errors?.errors.kabel_tube_odc_id}
                 >
-                    <option value="">{t('select_tube_odc')}</option>
+                    <option value="">{t('select tube odc')}</option>
                     {tubeOptions.map((t) => (
                         <option key={t.id} value={t.id.toString()}>
                             {t.warna_tube}
@@ -203,14 +203,14 @@ export function CreateFoOdp({
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('kabel_core_odc')}>
+            <Element leftSide={t('Kabel Core ODC')}>
                 <SelectField
                     required
                     value={values.kabel_core_odc_id}
                     onValueChange={(v) => onChange('kabel_core_odc_id', v)}
                     errorMessage={errors?.errors.kabel_core_odc_id}
                 >
-                    <option value="">{t('unassigned_core') || '—'}</option>
+                    <option value="">{t('unassigned core') || '—'}</option>
                     {coreOptions.map((c) => (
                         <option key={c.id} value={c.id.toString()}>
                             {c.warna_core}
@@ -219,7 +219,7 @@ export function CreateFoOdp({
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('nama_odp')} required>
+            <Element leftSide={t('Nama ODP')} required>
                 <InputField
                     required
                     value={values.nama_odp}

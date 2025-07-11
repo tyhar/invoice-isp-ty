@@ -116,20 +116,12 @@ export default function Edit() {
 
     const pages = [
         { name: t('FO Kabel ODC')!, href: '/fo-kabel-odcs' },
-<<<<<<< Updated upstream
-        { name: t('edit_kabel_odc')!, href: `/fo-kabel-odcs/${id}/edit` },
-=======
         { name: t('Edit Kabel ODC')!, href: `/fo-kabel-odcs/${id}/edit` },
->>>>>>> Stashed changes
     ];
 
     return (
         <Default
-<<<<<<< Updated upstream
-            title={t('edit_kabel_odc')!}
-=======
             title={t('Edit Kabel ODC')!}
->>>>>>> Stashed changes
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

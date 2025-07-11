@@ -37,8 +37,8 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
     const onChange = <K extends keyof FoClientFtthFormValues>(field: K, value: FoClientFtthFormValues[K]) => setValues(v => ({ ...v, [field]: value }));
 
     return (
-        <Card title={isEdit ? t('edit_client_ftth') : t('new_client_ftth')}>
-            <Element leftSide={t('create_new_lokasi')}>
+        <Card title={isEdit ? t('Edit Client FTTH') : t('New Client FTTH')}>
+            <Element leftSide={t('Create New Lokasi')}>
                 <Checkbox
                     checked={values.create_new_lokasi}
                     onChange={(e: { target: { checked: boolean } }) =>
@@ -49,7 +49,7 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
 
             {values.create_new_lokasi ? (
                 <>
-                    <Element leftSide={t('nama_lokasi')} required>
+                    <Element leftSide={t('Nama Lokasi')} required>
                         <InputField
                             required
                             value={values.lokasi_name}
@@ -65,7 +65,7 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                             errorMessage={errors?.errors.deskripsi}
                         />
                     </Element>
-                    <Element leftSide={t('latitude')} required>
+                    <Element leftSide={t('Latitude')} required>
                         <InputField
                             required
                             type="number"
@@ -74,7 +74,7 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                             errorMessage={errors?.errors.latitude}
                         />
                     </Element>
-                    <Element leftSide={t('longitude')} required>
+                    <Element leftSide={t('Longitude')} required>
                         <InputField
                             required
                             type="number"
@@ -85,14 +85,14 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                     </Element>
                 </>
             ) : (
-                <Element leftSide={t('lokasi')} required>
+                <Element leftSide={t('Lokasi')} required>
                     <SelectField
                         required
                         value={values.lokasi_id}
                         onValueChange={v => onChange('lokasi_id', v)}
                         errorMessage={errors?.errors.lokasi_id}
                     >
-                        <option value="">{t('select_lokasi')}</option>
+                        <option value="">{t('select lokasi')}</option>
                         {lokasis.map(l => (
                             <option key={l.id} value={l.id.toString()}>{l.nama_lokasi}</option>
                         ))}
@@ -100,21 +100,21 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                 </Element>
             )}
 
-            <Element leftSide={t('odp')} required>
+            <Element leftSide={t('ODP')} required>
                 <SelectField
                     required
                     value={values.odp_id}
                     onValueChange={v => onChange('odp_id', v)}
                     errorMessage={errors?.errors.odp_id}
                 >
-                    <option value="">{t('select_odp')}</option>
+                    <option value="">{t('select odp')}</option>
                     {odps.map(o => (
                         <option key={o.id} value={o.id.toString()}>{o.nama_odp}</option>
                     ))}
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('client')}>
+            <Element leftSide={t('Client')}>
                 <SelectField
                     value={values.client_id}
                     onValueChange={v => onChange('client_id', v)}
@@ -127,11 +127,7 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                 </SelectField>
             </Element>
 
-<<<<<<< Updated upstream
-            <Element leftSide={t('nama_client')}>
-=======
             <Element leftSide={t('Nama Client FTTH')}>
->>>>>>> Stashed changes
                 <InputField
                     value={values.nama_client}
                     onValueChange={v => onChange('nama_client', v)}
@@ -139,11 +135,7 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                 />
             </Element>
 
-<<<<<<< Updated upstream
-            <Element leftSide={t('alamat')}>
-=======
             <Element leftSide={t('Alamat FTTH')}>
->>>>>>> Stashed changes
                 <InputField
                     value={values.alamat}
                     onValueChange={v => onChange('alamat', v)}

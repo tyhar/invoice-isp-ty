@@ -141,10 +141,10 @@ export default function Create() {
 
     return (
         <Default
-            title={t('new_client_ftth')}
+            title={t('New Client FTTH')}
             breadcrumbs={[
                 { name: t('Client FTTH'), href: '/fo-client-ftths' },
-                { name: t('new_client_ftth'), href: '' },
+                { name: t('New Client FTTH'), href: '' },
             ]}
             disableSaveButton={loading || optionsLoading}
             onSaveClick={handleSave}

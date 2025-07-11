@@ -19,6 +19,10 @@ interface FoLokasi {
     deskripsi?: string;
     latitude: number;
     longitude: number;
+    city?: string;
+    province?: string;
+    country?: string;
+    geocoded_at?: string;
 }
 
 export default function Create() {
@@ -53,13 +57,7 @@ export default function Create() {
                 queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
                 queryClient.invalidateQueries(['fo-lokasis']);
 
-                navigate(
-                    route('/fo-lokasis/:id/edit', {
-                        id: response.data.data.id,
-                    }),
-                    //adding this for pop up info
-                    { state: { toast: 'created_fo_lokasi' } }
-                );
+                navigate('/fo-lokasis');
             })
             .catch((error) => {
                 if (error.response?.status === 422) {

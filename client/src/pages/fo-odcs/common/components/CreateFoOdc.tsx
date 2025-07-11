@@ -45,11 +45,11 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
     return (
         <Card
             title={t(
-                values.create_new_lokasi ? 'new_lokasi_and_odc' : 'new_odc'
+                values.create_new_lokasi ? 'New Lokasi and ODC' : 'New ODC'
             )}
         >
             {/* Create New Lokasi Toggle */}
-            <Element leftSide={t('create_new_lokasi')}>
+            <Element leftSide={t('Create New Lokasi')}>
                 <Checkbox
                     checked={values.create_new_lokasi}
                     onChange={(e: { target: { checked: boolean } }) =>
@@ -61,7 +61,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
             {/* Lokasi Fields */}
             {values.create_new_lokasi ? (
                 <>
-                    <Element leftSide={t('nama_lokasi')} required>
+                    <Element leftSide={t('Nama Lokasi')} required>
                         <InputField
                             required
                             value={values.lokasi_name}
@@ -69,7 +69,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                             errorMessage={errors?.errors.nama_lokasi}
                         />
                     </Element>
-                    <Element leftSide={t('deskripsi')}>
+                    <Element leftSide={t('Deskripsi')}>
                         <InputField
                             element="textarea"
                             value={values.lokasi_deskripsi}
@@ -79,7 +79,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                             errorMessage={errors?.errors.deskripsi}
                         />
                     </Element>
-                    <Element leftSide={t('latitude')} required>
+                    <Element leftSide={t('Latitude')} required>
                         <InputField
                             required
                             type="number"
@@ -90,7 +90,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                             errorMessage={errors?.errors.latitude}
                         />
                     </Element>
-                    <Element leftSide={t('longitude')} required>
+                    <Element leftSide={t('Longitude')} required>
                         <InputField
                             required
                             type="number"
@@ -103,14 +103,14 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                     </Element>
                 </>
             ) : (
-                <Element leftSide={t('lokasi')} required>
+                <Element leftSide={t('Lokasi')} required>
                     <SelectField
                         required
                         value={values.lokasi_id}
                         onValueChange={(v) => onChange('lokasi_id', v)}
                         errorMessage={errors?.errors.lokasi_id}
                     >
-                        <option value="">{t('select_lokasi')}</option>
+                        <option value="">{t('select lokasi')}</option>
                         {lokasis.map((l) => (
                             <option key={l.id} value={l.id.toString()}>
                                 {l.nama_lokasi}
@@ -121,7 +121,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
             )}
 
             {/* ODC Fields */}
-            <Element leftSide={t('nama_odc')} required>
+            <Element leftSide={t('Nama ODC')} required>
                 <InputField
                     required
                     value={values.nama_odc}
@@ -130,9 +130,6 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                 />
             </Element>
 
-<<<<<<< Updated upstream
-            <Element leftSide={t('tipe_splitter')} required>
-=======
             <Element leftSide={t('Kabel ODC')} required>
                 <SelectField
                     required
@@ -148,7 +145,6 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
             </Element>
 
             <Element leftSide={t('Tipe splitter')} required>
->>>>>>> Stashed changes
                 <SelectField
                     required
                     value={values.tipe_splitter}

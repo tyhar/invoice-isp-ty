@@ -66,19 +66,6 @@ export default function Create() {
         e.preventDefault();
         if (isBusy) return;
         setIsBusy(true);
-<<<<<<< Updated upstream
-
-        request('POST', endpoint('/api/v1/fo-kabel-odcs'), form)
-            .then((response: GenericSingleResourceResponse<any>) => {
-                toast.success('created_kabel_odc');
-                navigate(
-                    route('/fo-kabel-odcs/:id/edit', {
-                        id: response.data.data.id,
-                    }),
-                    { state: { toast: 'created_kabel_odc' } }
-                );
-                queryClient.invalidateQueries('fo-kabel-odcs');
-=======
         request('POST', endpoint('/api/v1/fo-kabel-odcs'), {
             ...form,
             tube_colors: form.tube_colors,
@@ -88,7 +75,6 @@ export default function Create() {
                 // Invalidate Kabel ODC list so index page reloads latest data
                 await queryClient.invalidateQueries('fo-kabel-odcs');
                 navigate('/fo-kabel-odcs');
->>>>>>> Stashed changes
             })
             .catch((err) => {
                 setErrors(err.response?.data?.errors || {});

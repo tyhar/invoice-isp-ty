@@ -43,10 +43,19 @@ class FoJointBoxController extends Controller
             }
         });
 
-        // Optional text filtering on nama_joint_box
+        // Optional text filtering on nama_joint_box, lokasi.nama_lokasi, lokasi.deskripsi, kabelOdc.nama_kabel
         if ($request->filled('filter')) {
             $term = $request->query('filter');
-            $query->where('nama_joint_box', 'LIKE', "%{$term}%");
+            $query->where(function ($q) use ($term) {
+                $q->where('nama_joint_box', 'LIKE', "%{$term}%")
+                  ->orWhereHas('lokasi', function ($q2) use ($term) {
+                      $q2->where('nama_lokasi', 'LIKE', "%{$term}%")
+                         ->orWhere('deskripsi', 'LIKE', "%{$term}%");
+                  })
+                  ->orWhereHas('kabelOdc', function ($q3) use ($term) {
+                      $q3->where('nama_kabel', 'LIKE', "%{$term}%");
+                  });
+            });
         }
 
         // Optional sorting

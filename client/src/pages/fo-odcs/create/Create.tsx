@@ -97,11 +97,7 @@ export default function Create() {
                 queryClient.invalidateQueries(['fo-odcs']);
                 queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
 
-                navigate(
-                    route('/fo-odcs/:id/edit', {
-                        id: response.data.data.id,
-                    })
-                );
+                navigate('/fo-odcs');
             })
             .catch((err) => {
                 if (err.response?.status === 422) {

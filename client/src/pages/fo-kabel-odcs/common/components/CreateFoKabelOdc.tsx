@@ -39,29 +39,8 @@ export function CreateFoKabelOdc(props: Props) {
     };
 
     return (
-<<<<<<< Updated upstream
-        <Card title={t('new_kabel_odc')}>
-            <Element leftSide={t('nama_odc')} required>
-                <SelectField
-                    required
-                    value={form.odc_id || ''}
-                    onValueChange={(v) => change('odc_id', parseInt(v))}
-                    errorMessage={errors?.errors.odc_id}
-                >
-                    <option value="">{t('select_odc')}</option>
-                    {odcs.map((o) => (
-                        <option key={o.id} value={o.id}>
-                            {o.nama_odc}
-                        </option>
-                    ))}
-                </SelectField>
-            </Element>
-
-            <Element leftSide={t('nama_kabel')} required>
-=======
         <Card title={t('New Kabel ODC')}>
             <Element leftSide={t('Nama Kabel')} required>
->>>>>>> Stashed changes
                 <InputField
                     required
                     value={form.nama_kabel}
@@ -70,11 +49,7 @@ export function CreateFoKabelOdc(props: Props) {
                 />
             </Element>
 
-<<<<<<< Updated upstream
-            <Element leftSide={t('tipe_kabel')} required>
-=======
             <Element leftSide={t('Tipe Kabel')} required>
->>>>>>> Stashed changes
                 <SelectField
                     required
                     value={form.tipe_kabel}
@@ -86,11 +61,7 @@ export function CreateFoKabelOdc(props: Props) {
                 </SelectField>
             </Element>
 
-<<<<<<< Updated upstream
-            <Element leftSide={t('panjang_kabel')} required>
-=======
             <Element leftSide={t('Panjang Kabel (m)')} required>
->>>>>>> Stashed changes
                 <InputField
                     type="number"
                     required
@@ -102,31 +73,6 @@ export function CreateFoKabelOdc(props: Props) {
                 />
             </Element>
 
-<<<<<<< Updated upstream
-            <Element leftSide={t('jumlah_tube')} required>
-                <SelectField
-                    required
-                    customSelector
-                    menuPlacement='bottom'
-                    value={form.jumlah_tube.toString()}
-                    onValueChange={(v) => change('jumlah_tube', parseInt(v))}
-                    errorMessage={errors?.errors.jumlah_tube}
-                >
-                    <option value="2">2</option>
-                    <option value="4">4</option>
-                    <option value="6">6</option>
-                    <option value="8">8</option>
-                    <option value="12">12</option>
-                    <option value="24">24</option>
-                    <option value="48">48</option>
-                    <option value="72">72</option>
-                    <option value="96">96</option>
-                    <option value="144">144</option>
-                </SelectField>
-            </Element>
-
-            <Element leftSide={t('jumlah_core_in_tube')} required>
-=======
             <Element leftSide={t('Select Tubes')} required>
                 <TubeColorPicker
                     value={form.tube_colors}
@@ -138,7 +84,6 @@ export function CreateFoKabelOdc(props: Props) {
             </Element>
 
             <Element leftSide={t('Jumlah Maximum Core per Tube')} required>
->>>>>>> Stashed changes
                 <SelectField
                     required
                     customSelector

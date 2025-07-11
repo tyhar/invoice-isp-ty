@@ -5,12 +5,9 @@ import { useTranslation } from 'react-i18next';
 
 export function FtthStatistics() {
     const [t] = useTranslation();
-<<<<<<< Updated upstream
-    const [stats, setStats] = useState<FtthStat | null>(null);
-=======
+
     const [stats, setStats] = useState<any | null>(null);
     const API_BASE_URL = 'http://localhost:8000';
->>>>>>> Stashed changes
 
     useEffect(() => {
         const token = localStorage.getItem('X-API-TOKEN') ?? '';

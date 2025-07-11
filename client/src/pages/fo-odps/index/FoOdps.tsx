@@ -97,7 +97,7 @@ export default function FoOdps() {
     return (
         <Default title={t('FO ODP')} breadcrumbs={pages}>
             <DataTable2<FoOdp>
-                resource="fo-odps"
+                resource="FO ODP"
                 columns={columns}
                 endpoint="/api/v1/fo-odps"
                 linkToCreate="/fo-odps/create"

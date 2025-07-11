@@ -9,17 +9,63 @@ import {
     MdRestore,
     // MdDelete
 } from 'react-icons/md';
-// import { route } from '$app/common/helpers/route';
-// import { getEntityState } from '$app/common/helpers';
+import { MdLocationOn } from 'react-icons/md';
 import { getEntityState } from '$app/common/helpers2';
 import { EntityState } from '$app/common/enums/entity-state';
 import { useFoLokasiBulkAction } from '$app/common/queries/foLokasi';
+import { request } from '$app/common/helpers/request';
+import { endpoint } from '$app/common/helpers';
+import { toast } from 'react-hot-toast';
+import { useQueryClient } from 'react-query';
 
 export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
     const [t] = useTranslation();
     const bulkAction = useFoLokasiBulkAction();
+    const queryClient = useQueryClient();
+
+    const handleForceGeocode = async (id: string) => {
+        try {
+            const response = await request('POST', endpoint(`/api/v1/fo-lokasis/${id}/geocode`));
+
+            if (response.data.status === 'success') {
+                toast.success('Location geocoded successfully!');
+
+                // Invalidate queries instead of reloading the page
+                queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
+                queryClient.invalidateQueries(['fo-lokasis']);
+
+                // Dispatch custom event for DataTable2 refresh
+                window.dispatchEvent(
+                    new CustomEvent('invalidate.combobox.queries', {
+                        detail: { url: endpoint('/api/v1/fo-lokasis') },
+                    })
+                );
+            } else {
+                toast.error('Failed to geocode location');
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error);
+            toast.error('Failed to geocode location. Please try again.');
+        }
+    };
 
     return [
+        (res) => {
+            // Force Geocode action - show if coordinates exist (regardless of previous geocoding)
+            if (res.latitude && res.longitude) {
+                return (
+                    <DropdownElement
+                        onClick={() => handleForceGeocode(res.id)}
+                        icon={<Icon element={MdLocationOn} />}
+                    >
+                        {res.geocoded_at ? 'Re-geocode' : 'Force Geocode'}
+                    </DropdownElement>
+                );
+            }
+
+            return <></>;
+        },
+
         (res) => {
             // 2) Archive or Restore
             const state = getEntityState(res);
@@ -28,9 +74,9 @@ export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
             if (state === EntityState.Active) {
                 return (
                     <DropdownElement
-                        onClick={() =>
-                            bulkAction([res.id], 'archive')
-                        }
+                        onClick={async () => {
+                            await bulkAction([res.id], 'archive');
+                        }}
                         icon={<Icon element={MdArchive} />}
                     >
                         {t('archive')!}
@@ -44,9 +90,9 @@ export const useFoLokasiActions = (): Array<(res: any) => ReactElement> => {
             ) {
                 return (
                     <DropdownElement
-                        onClick={() =>
-                            bulkAction([res.id], 'restore')
-                        }
+                        onClick={async () => {
+                            await bulkAction([res.id], 'restore');
+                        }}
                         icon={<Icon element={MdRestore} />}
                     >
                         {t('restore')!}

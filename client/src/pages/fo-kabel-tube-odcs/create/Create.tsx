@@ -62,20 +62,9 @@ export default function Create() {
         setIsBusy(true);
 
         request('POST', endpoint('/api/v1/fo-kabel-tube-odcs'), form)
-<<<<<<< Updated upstream
-            .then((response: GenericSingleResourceResponse<any>) => {
-                toast.success('created_tube_odc');
-                navigate(
-                    route('/fo-kabel-tube-odcs/:id/edit', {
-                        id: response.data.data.id,
-                    }),
-                    { state: { toast: 'created_tube_odc' } }
-                );
-=======
             .then(() => {
                 toast.success('created tube odc');
                 navigate('/fo-kabel-tube-odcs');
->>>>>>> Stashed changes
                 queryClient.invalidateQueries('fo-kabel-tube-odcs');
             })
             .catch((error) => {

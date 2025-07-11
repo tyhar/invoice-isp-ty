@@ -159,12 +159,12 @@ export default function Edit() {
 
     const pages = [
         { name: t('FO ODP')!, href: '/fo-odps' },
-        { name: t('edit_odp')!, href: `/fo-odps/${id}/edit` },
+        { name: t('Edit ODP')!, href: `/fo-odps/${id}/edit` },
     ];
 
     return (
         <Default
-            title={t('edit_odp')!}
+            title={t('Edit ODP')!}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

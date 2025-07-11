@@ -61,7 +61,7 @@ export function useFoJointBoxColumns(): DataTableColumns<FoJointBox> {
         },
         {
             id: 'nama_joint_box',
-            label: t('nama_joint_box'),
+            label: t('Nama Joint Box'),
             format: (_field, rec) => (
                 <a
                     href={route('/fo-joint-boxes/:id/edit', { id: rec.id })}
@@ -108,32 +108,32 @@ export function useFoJointBoxColumns(): DataTableColumns<FoJointBox> {
         },
         {
             id: 'kabel_odc',
-            label: t('kabel_odc'),
+            label: t('kabel odc'),
             format: (_field, rec) => rec.kabel_odc?.nama_kabel ?? '-',
         },
         {
             id: 'kabel_odc_tipe',
-            label: t('tipe_kabel'),
+            label: t('tipe kabel'),
             format: (_field, rec) => rec.kabel_odc?.tipe_kabel ?? '-',
         },
         {
             id: 'kabel_odc_panjang',
-            label: t('panjang_kabel'),
+            label: t('panjang kabel'),
             format: (_field, rec) => rec.kabel_odc?.panjang_kabel ?? '-',
         },
         {
             id: 'kabel_odc_jumlah_tube',
-            label: t('jumlah_tube'),
+            label: t('jumlah tube'),
             format: (_field, rec) => rec.kabel_odc?.jumlah_tube ?? '-',
         },
         {
             id: 'kabel_odc_jumlah_core_in_tube',
-            label: t('jumlah_core_in_tube'),
+            label: t('max core in tube'),
             format: (_field, rec) => rec.kabel_odc?.jumlah_core_in_tube ?? '-',
         },
         {
             id: 'kabel_odc_jumlah_total_core',
-            label: t('jumlah_total_core'),
+            label: t('max total_core'),
             format: (_field, rec) => rec.kabel_odc?.jumlah_total_core ?? '-',
         },
     ];

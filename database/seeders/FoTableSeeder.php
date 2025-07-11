@@ -9,26 +9,13 @@ class FoTableSeeder extends Seeder
 {
     public function run()
     {
-        // Get the first company (fail if not found)
-        $company = DB::table('companies')->first();
-        if (!$company) {
-            throw new \Exception('No company found. Please seed companies table first.');
-        }
-        $companyId = $company->id;
+        $companyId = 1; // Default company ID
 
+        $this->command->info('Starting FoTableSeeder...');
         $this->disableForeignKeys();
         $this->truncateAll();
         $this->enableForeignKeys();
 
-<<<<<<< Updated upstream
-        $lokasis = $this->seedLokasis();
-        $odcs = $this->seedOdcs($lokasis);
-        $kabelOdcs = $this->seedKabelOdcs($odcs);
-        $tubeOdcs = $this->seedKabelTubeOdcs($kabelOdcs);
-        $coreOdcs = $this->seedKabelCoreOdcs($tubeOdcs);
-        $odps = $this->seedOdps($lokasis, $coreOdcs);
-        $this->seedClients($lokasis, $odps);
-=======
         // 1. Seed all lokasi (main, ODP, client, jointbox)
         $mainLokasis = $this->seedMainLokasis();
         $odpLokasis = $this->seedOdpLokasis();
@@ -55,7 +42,6 @@ class FoTableSeeder extends Seeder
 
         // 8. Seed Client FTTH
         $this->seedClients($clientLokasis, $odps, $companyId);
->>>>>>> Stashed changes
 
         $this->command->info('FoTableSeeder completed successfully.');
     }
@@ -88,26 +74,8 @@ class FoTableSeeder extends Seeder
         }
     }
 
-    protected function seedLokasis(): array
+    protected function seedMainLokasis(): array
     {
-<<<<<<< Updated upstream
-        $rows = [];
-        for ($i = 1; $i <= 3; $i++) {
-            $rows[] = [
-                'id'           => $i,
-                'nama_lokasi'  => "Lokasi {$i}",
-                'deskripsi'    => "Deskripsi lokasi {$i}",
-                'latitude'     => -6.2 + $i * 0.01,
-                'longitude'    => 106.8 + $i * 0.01,
-                'status'       => 'active',
-                'deleted_at'   => null, // soft delete default
-                'created_at'   => now(),
-                'updated_at'   => now(),
-            ];
-        }
-        DB::table('fo_lokasis')->insert($rows);
-        return $rows;
-=======
         // 3 real Indonesian locations for reference
         $lokasis = [
             [
@@ -166,7 +134,7 @@ class FoTableSeeder extends Seeder
         $lokasis = [
             [
                 'id' => 4,
-                'nama_lokasi' => 'ODP Lokasi Jakarta Timur',
+                'nama_lokasi' => 'ODP Jaktim',
                 'deskripsi' => 'ODP Area Jakarta Timur',
                 'latitude' => -6.225,
                 'longitude' => 106.900,
@@ -181,7 +149,7 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 5,
-                'nama_lokasi' => 'ODP Lokasi Cimahi',
+                'nama_lokasi' => 'ODP Cimahi',
                 'deskripsi' => 'ODP Area Cimahi',
                 'latitude' => -6.872,
                 'longitude' => 107.542,
@@ -196,7 +164,7 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 6,
-                'nama_lokasi' => 'ODP Lokasi Sidoarjo',
+                'nama_lokasi' => 'ODP Sidoarjo',
                 'deskripsi' => 'ODP Area Sidoarjo',
                 'latitude' => -7.446,
                 'longitude' => 112.718,
@@ -220,12 +188,12 @@ class FoTableSeeder extends Seeder
         $lokasis = [
             [
                 'id' => 7,
-                'nama_lokasi' => 'Client Lokasi Depok',
-                'deskripsi' => 'Client Area Depok',
-                'latitude' => -6.402,
-                'longitude' => 106.794,
-                'city' => 'Depok',
-                'province' => 'Jawa Barat',
+                'nama_lokasi' => 'Client Jaksel',
+                'deskripsi' => 'Client Area Jakarta Selatan',
+                'latitude' => -6.208,
+                'longitude' => 106.845,
+                'city' => 'Jakarta Selatan',
+                'province' => 'DKI Jakarta',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -235,11 +203,11 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 8,
-                'nama_lokasi' => 'Client Lokasi Bekasi',
-                'deskripsi' => 'Client Area Bekasi',
-                'latitude' => -6.238,
-                'longitude' => 106.975,
-                'city' => 'Bekasi',
+                'nama_lokasi' => 'Client Bandung Barat',
+                'deskripsi' => 'Client Area Bandung Barat',
+                'latitude' => -6.917,
+                'longitude' => 107.583,
+                'city' => 'Bandung Barat',
                 'province' => 'Jawa Barat',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
@@ -250,10 +218,10 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 9,
-                'nama_lokasi' => 'Client Lokasi Gresik',
+                'nama_lokasi' => 'Client Gresik',
                 'deskripsi' => 'Client Area Gresik',
-                'latitude' => -7.156,
-                'longitude' => 112.651,
+                'latitude' => -7.155,
+                'longitude' => 112.656,
                 'city' => 'Gresik',
                 'province' => 'Jawa Timur',
                 'country' => 'Indonesia',
@@ -266,20 +234,19 @@ class FoTableSeeder extends Seeder
         ];
         DB::table('fo_lokasis')->insert($lokasis);
         return $lokasis;
->>>>>>> Stashed changes
     }
 
     protected function seedJointBoxLokasis(): array
     {
-        // Add 2 joint box locations
+        // 3 unique lokasi for Joint Boxes
         $lokasis = [
             [
                 'id' => 10,
-                'nama_lokasi' => 'JointBox Lokasi 1',
-                'deskripsi' => 'JointBox Area 1',
-                'latitude' => -6.200,
-                'longitude' => 106.800,
-                'city' => 'Jakarta',
+                'nama_lokasi' => 'JointBox Jakpus',
+                'deskripsi' => 'Joint Box Area Jakarta Pusat',
+                'latitude' => -6.175,
+                'longitude' => 106.827,
+                'city' => 'Jakarta Pusat',
                 'province' => 'DKI Jakarta',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
@@ -290,12 +257,27 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 11,
-                'nama_lokasi' => 'JointBox Lokasi 2',
-                'deskripsi' => 'JointBox Area 2',
-                'latitude' => -6.900,
-                'longitude' => 107.600,
-                'city' => 'Bandung',
+                'nama_lokasi' => 'JointBox Bandung Timur',
+                'deskripsi' => 'Joint Box Area Bandung Timur',
+                'latitude' => -6.902,
+                'longitude' => 107.619,
+                'city' => 'Bandung Timur',
                 'province' => 'Jawa Barat',
+                'country' => 'Indonesia',
+                'geocoded_at' => now(),
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'id' => 12,
+                'nama_lokasi' => 'JointBox Surabaya Barat',
+                'deskripsi' => 'Joint Box Area Surabaya Barat',
+                'latitude' => -7.246,
+                'longitude' => 112.738,
+                'city' => 'Surabaya Barat',
+                'province' => 'Jawa Timur',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -308,298 +290,218 @@ class FoTableSeeder extends Seeder
         return $lokasis;
     }
 
-    protected function seedOdcs(array $lokasis, array $kabelOdcs): array
+    protected function seedKabelOdcs(array $mainLokasis, array $jointBoxLokasis, array $odpLokasis): array
     {
-        $rows = [];
-<<<<<<< Updated upstream
-        foreach ($lokasis as $lokasi) {
-            for ($i = 1; $i <= 2; $i++) {
-                $rows[] = [
-                    'id'           => (($lokasi['id'] - 1) * 2) + $i,
-                    'lokasi_id'    => $lokasi['id'],
-                    'nama_odc'     => "ODC {$lokasi['id']}-{$i}",
-                    'tipe_splitter' => collect(['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128'])->random(),
-                    'status'       => 'active',
-                    'deleted_at'   => null,
-                    'created_at'   => now(),
-                    'updated_at'   => now(),
-                ];
-            }
-=======
+        $kabelOdcs = [];
         $id = 1;
-        foreach ($lokasis as $i => $lokasi) {
-            $rows[] = [
-                'id' => $id,
+
+        // Create kabel ODCs for main lokasis
+        foreach ($mainLokasis as $lokasi) {
+            $kabelOdcs[] = [
+                'id' => $id++,
+                'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'],
+                'tipe_kabel' => 'multicore',
+                'panjang_kabel' => 1000.0,
+                'jumlah_tube' => 6,
+                'jumlah_core_in_tube' => 12,
+                'jumlah_total_core' => 72,
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // Create kabel ODCs for joint box lokasis
+        foreach ($jointBoxLokasis as $lokasi) {
+            $kabelOdcs[] = [
+                'id' => $id++,
+                'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'],
+                'tipe_kabel' => 'multicore',
+                'panjang_kabel' => 500.0,
+                'jumlah_tube' => 4,
+                'jumlah_core_in_tube' => 8,
+                'jumlah_total_core' => 32,
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // Create kabel ODCs for ODP lokasis
+        foreach ($odpLokasis as $lokasi) {
+            $kabelOdcs[] = [
+                'id' => $id++,
+                'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'],
+                'tipe_kabel' => 'multicore',
+                'panjang_kabel' => 750.0,
+                'jumlah_tube' => 5,
+                'jumlah_core_in_tube' => 10,
+                'jumlah_total_core' => 50,
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('fo_kabel_odcs')->insert($kabelOdcs);
+        return $kabelOdcs;
+    }
+
+    protected function seedOdcs(array $mainLokasis, array $kabelOdcs): array
+    {
+        $odcs = [];
+        $id = 1;
+
+        foreach ($mainLokasis as $index => $lokasi) {
+            $kabelOdcId = $kabelOdcs[$index]['id'] ?? null;
+
+            $odcs[] = [
+                'id' => $id++,
                 'lokasi_id' => $lokasi['id'],
-                'kabel_odc_id' => $kabelOdcs[$i]['id'], // assign kabel_odc_id
-                'nama_odc' => "ODC-{$lokasi['city']}",
+                'kabel_odc_id' => $kabelOdcId,
+                'nama_odc' => 'ODC ' . $lokasi['nama_lokasi'],
                 'tipe_splitter' => '1:8',
                 'status' => 'active',
                 'deleted_at' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
-            $id++;
->>>>>>> Stashed changes
         }
-        DB::table('fo_odcs')->insert($rows);
-        return $rows;
-    }
 
-    protected function seedKabelOdcs(array $mainLokasis, array $jointBoxLokasis, array $odpLokasis): array
-    {
-        // Create cables between ODC, JointBox, ODP
-        $rows = [];
-<<<<<<< Updated upstream
-        foreach ($odcs as $odc) {
-            for ($i = 1; $i <= 2; $i++) {
-                $jumlahTube       = rand(1, 6);
-                $jumlahCoreInTube = rand(2, 12);
-                $rows[] = [
-                    'id'                 => count($rows) + 1,
-                    'odc_id'             => $odc['id'],
-                    'nama_kabel'         => "KabelODC {$odc['id']}-{$i}",
-                    'tipe_kabel'         => collect(['singlecore', 'multicore'])->random(),
-                    'panjang_kabel'      => rand(100, 500),
-                    'jumlah_tube'        => $jumlahTube,
-                    'jumlah_core_in_tube' => $jumlahCoreInTube,
-                    'jumlah_total_core'  => $jumlahTube * $jumlahCoreInTube,
-                    'status'             => 'active',
-                    'deleted_at'         => null,
-                    'created_at'         => now(),
-                    'updated_at'         => now(),
-                ];
-            }
-        }
-=======
-        $id = 1;
-        // Cable 1: ODC (Monas) to JointBox 1
-        $rows[] = [
-            'id' => $id++,
-            'nama_kabel' => 'KabelODC-Monas-JointBox1',
-            'tipe_kabel' => 'multicore',
-            'panjang_kabel' => 100,
-            'jumlah_tube' => 2,
-            'jumlah_core_in_tube' => 4,
-            'jumlah_total_core' => 8,
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        // Cable 2: JointBox 1 to ODP (Jakarta Timur)
-        $rows[] = [
-            'id' => $id++,
-            'nama_kabel' => 'KabelODC-JointBox1-ODP1',
-            'tipe_kabel' => 'multicore',
-            'panjang_kabel' => 80,
-            'jumlah_tube' => 2,
-            'jumlah_core_in_tube' => 4,
-            'jumlah_total_core' => 8,
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        // Cable 3: ODP (Jakarta Timur) to Client (Depok)
-        $rows[] = [
-            'id' => $id++,
-            'nama_kabel' => 'KabelODC-ODP1-Client1',
-            'tipe_kabel' => 'multicore',
-            'panjang_kabel' => 60,
-            'jumlah_tube' => 2,
-            'jumlah_core_in_tube' => 4,
-            'jumlah_total_core' => 8,
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        // Add more cables for other ODC/ODP/JointBox as needed
->>>>>>> Stashed changes
-        DB::table('fo_kabel_odcs')->insert($rows);
-        return $rows;
+        DB::table('fo_odcs')->insert($odcs);
+        return $odcs;
     }
 
     protected function seedKabelTubeOdcs(array $kabelOdcs): array
     {
-        $colors = ['biru', 'jingga', 'hijau', 'coklat', 'abu_abu', 'putih', 'merah', 'hitam', 'kuning', 'ungu', 'merah_muda', 'aqua'];
-        $rows = [];
-        foreach ($kabelOdcs as $kabel) {
-            for ($i = 0; $i < $kabel['jumlah_tube']; $i++) {
-                $rows[] = [
-                    'id'             => count($rows) + 1,
-                    'kabel_odc_id'   => $kabel['id'],
-                    'warna_tube'     => $colors[$i % count($colors)],
-                    'status'         => 'active',
-                    'deleted_at'     => null,
-                    'created_at'     => now(),
-                    'updated_at'     => now(),
+        $tubeOdcs = [];
+        $id = 1;
+        $colors = ['biru', 'jingga', 'hijau', 'coklat', 'abu_abu', 'putih'];
+
+        foreach ($kabelOdcs as $kabelOdc) {
+            $tubeCount = $kabelOdc['jumlah_tube'];
+            for ($i = 0; $i < $tubeCount; $i++) {
+                $tubeOdcs[] = [
+                    'id' => $id++,
+                    'kabel_odc_id' => $kabelOdc['id'],
+                    'warna_tube' => $colors[$i % count($colors)],
+                    'status' => 'active',
+                    'deleted_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
         }
-        DB::table('fo_kabel_tube_odcs')->insert($rows);
-        return $rows;
+
+        DB::table('fo_kabel_tube_odcs')->insert($tubeOdcs);
+        return $tubeOdcs;
     }
 
     protected function seedKabelCoreOdcs(array $tubeOdcs, array $kabelOdcs): array
     {
-        $colors = ['biru', 'jingga', 'hijau', 'coklat', 'abu_abu', 'putih', 'merah', 'hitam', 'kuning', 'ungu', 'merah_muda', 'aqua'];
-        $rows = [];
-<<<<<<< Updated upstream
-        foreach ($tubeOdcs as $tube) {
-            // Tetap random antara 2–12 core per tube, meski migrasi tidak memaksa jumlah pasti
-            for ($i = 0; $i < rand(2, 12); $i++) {
-=======
+        $coreOdcs = [];
         $id = 1;
+        $colors = ['biru', 'jingga', 'hijau', 'coklat', 'abu_abu', 'putih', 'merah', 'hitam', 'kuning', 'ungu', 'merah_muda', 'aqua'];
 
-        // Create a map of kabel_odc_id to jumlah_core_in_tube for consistency
-        $kabelCoreMap = [];
-        foreach ($kabelOdcs as $kabel) {
-            $kabelCoreMap[$kabel['id']] = $kabel['jumlah_core_in_tube'];
-        }
+        foreach ($tubeOdcs as $tubeOdc) {
+            // Find the corresponding kabel ODC to get core count
+            $kabelOdc = collect($kabelOdcs)->firstWhere('id', $tubeOdc['kabel_odc_id']);
+            $coreCount = $kabelOdc['jumlah_core_in_tube'] ?? 12;
 
-        foreach ($tubeOdcs as $tube) {
-            // Get the correct jumlah_core_in_tube from the parent kabel_odc
-            $jumlah_core = $kabelCoreMap[$tube['kabel_odc_id']] ?? 4;
-
-            for ($i = 0; $i < $jumlah_core; $i++) {
->>>>>>> Stashed changes
-                $rows[] = [
-                    'id'               => count($rows) + 1,
-                    'kabel_tube_odc_id' => $tube['id'],
-                    'warna_core'       => $colors[$i % count($colors)],
-                    'status'           => 'active',
-                    'deleted_at'       => null,
-                    'created_at'       => now(),
-                    'updated_at'       => now(),
+            for ($i = 0; $i < $coreCount; $i++) {
+                $coreOdcs[] = [
+                    'id' => $id++,
+                    'kabel_tube_odc_id' => $tubeOdc['id'],
+                    'warna_core' => $colors[$i % count($colors)],
+                    'status' => 'active',
+                    'deleted_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ];
             }
         }
-        DB::table('fo_kabel_core_odcs')->insert($rows);
-        return $rows;
+
+        DB::table('fo_kabel_core_odcs')->insert($coreOdcs);
+        return $coreOdcs;
     }
 
-    protected function seedOdps(array $lokasis, array $coreOdcs): array
+    protected function seedOdps(array $odpLokasis, array $coreOdcs): array
     {
-        $rows = [];
-        foreach ($lokasis as $lokasi) {
-            foreach ($coreOdcs as $core) {
-                // Contoh logika relasi: kalau id core mod id lokasi == 0
-                if ($core['id'] % $lokasi['id'] === 0) {
-                    $rows[] = [
-                        'id'                 => count($rows) + 1,
-                        'kabel_core_odc_id'  => $core['id'],
-                        'lokasi_id'          => $lokasi['id'],
-                        'nama_odp'           => "ODP {$lokasi['id']}-{$core['id']}",
-                        'status'             => 'active',
-                        'deleted_at'         => null,
-                        'created_at'         => now(),
-                        'updated_at'         => now(),
-                    ];
-                }
-            }
-        }
-        DB::table('fo_odps')->insert($rows);
-        return $rows;
-    }
-
-<<<<<<< Updated upstream
-    protected function seedClients(array $lokasis, array $odps): void
-=======
-    protected function seedJointBoxes(array $jointBoxLokasis, array $kabelOdcs): array
-    {
-        // For each cable, create 1-2 joint boxes at different locations
-        $rows = [];
+        $odps = [];
         $id = 1;
-        // Defensive: fallback to first lokasi if not enough jointBoxLokasis
-        $lokasiA = $jointBoxLokasis[0]['id'] ?? 1;
-        $lokasiB = $jointBoxLokasis[1]['id'] ?? $lokasiA;
-        // Kabel 1: JointBox at LokasiA and LokasiB
-        $rows[] = [
-            'id' => $id++,
-            'lokasi_id' => $lokasiA,
-            'kabel_odc_id' => $kabelOdcs[0]['id'],
-            'nama_joint_box' => 'JointBox-1A',
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        $rows[] = [
-            'id' => $id++,
-            'lokasi_id' => $lokasiB,
-            'kabel_odc_id' => $kabelOdcs[0]['id'],
-            'nama_joint_box' => 'JointBox-1B',
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        // Kabel 2: JointBox at LokasiA
-        $rows[] = [
-            'id' => $id++,
-            'lokasi_id' => $lokasiA,
-            'kabel_odc_id' => $kabelOdcs[1]['id'],
-            'nama_joint_box' => 'JointBox-2A',
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        // Kabel 3: JointBox at LokasiB
-        $rows[] = [
-            'id' => $id++,
-            'lokasi_id' => $lokasiB,
-            'kabel_odc_id' => $kabelOdcs[2]['id'],
-            'nama_joint_box' => 'JointBox-3A',
-            'status' => 'active',
-            'deleted_at' => null,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ];
-        DB::table('fo_joint_boxes')->insert($rows);
-        return $rows;
-    }
 
-    protected function seedClients(array $clientLokasis, array $odps, int $companyId): void
->>>>>>> Stashed changes
-    {
-        $rows = [];
-<<<<<<< Updated upstream
-        foreach ($lokasis as $lokasi) {
-            foreach ($odps as $odp) {
-                if ($odp['id'] % $lokasi['id'] === 0) {
-                    $rows[] = [
-                        'id'           => count($rows) + 1,
-                        'lokasi_id'    => $lokasi['id'],
-                        'odp_id'       => $odp['id'],
-                        'nama_client'  => "Client {$lokasi['id']}-{$odp['id']}",
-                        'alamat'       => "Jl. Dummy {$lokasi['id']}-{$odp['id']}",
-                        'status'       => 'active',
-                        'deleted_at'   => null,
-                        'created_at'   => now(),
-                        'updated_at'   => now(),
-                    ];
-                }
-            }
-=======
-        for ($i = 0; $i < 3; $i++) {
-            $rows[] = [
-                'id' => $i + 1,
-                'lokasi_id' => $clientLokasis[$i]['id'],
-                'odp_id' => $odps[$i]['id'],
-                'client_id' => null,
-                'company_id' => $companyId,
-                'nama_client' => "Client-{$clientLokasis[$i]['city']}",
-                'alamat' => "Alamat {$clientLokasis[$i]['city']}",
+        foreach ($odpLokasis as $index => $lokasi) {
+            // Assign a core ODC to each ODP
+            $coreOdc = $coreOdcs[$index] ?? null;
+
+            $odps[] = [
+                'id' => $id++,
+                'lokasi_id' => $lokasi['id'],
+                'kabel_core_odc_id' => $coreOdc['id'] ?? null,
+                'nama_odp' => 'ODP ' . $lokasi['nama_lokasi'],
                 'status' => 'active',
                 'deleted_at' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
->>>>>>> Stashed changes
         }
-        DB::table('fo_client_ftths')->insert($rows);
+
+        DB::table('fo_odps')->insert($odps);
+        return $odps;
+    }
+
+    protected function seedJointBoxes(array $jointBoxLokasis, array $kabelOdcs): array
+    {
+        $jointBoxes = [];
+        $id = 1;
+
+        foreach ($jointBoxLokasis as $index => $lokasi) {
+            // Assign a kabel ODC to each joint box
+            $kabelOdc = $kabelOdcs[count($jointBoxLokasis) + $index] ?? null;
+
+            $jointBoxes[] = [
+                'id' => $id++,
+                'lokasi_id' => $lokasi['id'],
+                'kabel_odc_id' => $kabelOdc['id'] ?? null,
+                'nama_joint_box' => $lokasi['nama_lokasi'],
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('fo_joint_boxes')->insert($jointBoxes);
+        return $jointBoxes;
+    }
+
+    protected function seedClients(array $clientLokasis, array $odps, int $companyId): void
+    {
+        $clients = [];
+        $id = 1;
+
+        foreach ($clientLokasis as $index => $lokasi) {
+            // Assign an ODP to each client
+            $odp = $odps[$index] ?? null;
+
+            $clients[] = [
+                'id' => $id++,
+                'lokasi_id' => $lokasi['id'],
+                'odp_id' => $odp['id'] ?? null,
+                'client_id' => null, // No linked client for now
+                'company_id' => $companyId,
+                'nama_client' => $lokasi['nama_lokasi'],
+                'alamat' => 'Jl. ' . $lokasi['nama_lokasi'],
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        DB::table('fo_client_ftths')->insert($clients);
     }
 }

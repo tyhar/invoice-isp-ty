@@ -1,2 +1,2 @@
-export const foJointBoxResource = 'fo_joint_box';
+export const foJointBoxResource = 'FO Joint Box';
 // Add more atoms/constants here as needed for future extensibility.
