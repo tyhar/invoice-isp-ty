@@ -22,7 +22,6 @@ import { useReactSettings } from '$app/common/hooks/useReactSettings';
  * Type FoOdp (matching API response).
  */
 export interface FoOdp {
-    [x: string]: any;
     id: number;
     nama_odp: string;
     lokasi: {
@@ -34,9 +33,10 @@ export interface FoOdp {
     kabel_core_odc: {
         id: number;
         warna_core: string;
-        kabel_odc: { id: number; nama_kabel: string };
+        kabel_odc: { id: number; nama_kabel: string; odcs: Array<{ id: number; nama_odc: string }> };
         kabel_tube_odc: { id: number; warna_tube: string };
     };
+    odc?: { id: number; nama_odc: string };
     client_ftth: { id: number; nama_client: string; alamat: string } | null;
     status: 'active' | 'archived' | string;
     created_at: string;

@@ -398,22 +398,6 @@ export function Default(props: Props) {
                     },
                 },
                 {
-                    name: t('ODC'),
-                    href: '/fo-odcs',
-                    icon: Radio,
-                    current: location.pathname.startsWith('/fo-odcs'),
-                    visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
-                    rightButton: {
-                        icon: PlusCircle,
-                        to: '/fo-odcs/create',
-                        label: t('new_fo_odc'),
-                        visible: hasPermission('create_product'),
-                    },
-                },
-                {
                     name: t('KABEL'),
                     href: '', // kosong karena hanya toggle
                     icon: Radio,
@@ -482,6 +466,22 @@ export function Default(props: Props) {
                     ],
                 },
                 {
+                    name: t('ODC'),
+                    href: '/fo-odcs',
+                    icon: Radio,
+                    current: location.pathname.startsWith('/fo-odcs'),
+                    visible:
+                        hasPermission('view_product') ||
+                        hasPermission('create_product') ||
+                        hasPermission('edit_product'),
+                    rightButton: {
+                        icon: PlusCircle,
+                        to: '/fo-odcs/create',
+                        label: t('new_fo_odc'),
+                        visible: hasPermission('create_product'),
+                    },
+                },
+                {
                     name: t('ODP'),
                     href: '/fo-odps',
                     icon: Radio,
@@ -510,6 +510,22 @@ export function Default(props: Props) {
                         icon: PlusCircle,
                         to: '/fo-client-ftths/create',
                         label: t('new_product'),
+                        visible: hasPermission('create_product'),
+                    },
+                },
+                {
+                    name: t('Joint Box'),
+                    href: '/fo-joint-boxes',
+                    icon: Radio,
+                    current: location.pathname.startsWith('/fo-joint-boxes'),
+                    visible:
+                        hasPermission('view_product') ||
+                        hasPermission('create_product') ||
+                        hasPermission('edit_product'),
+                    rightButton: {
+                        icon: PlusCircle,
+                        to: '/fo-joint-boxes/create',
+                        label: t('new_joint_box'),
                         visible: hasPermission('create_product'),
                     },
                 },

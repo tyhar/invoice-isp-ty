@@ -45,7 +45,7 @@ export default function Edit() {
                 setLokasi(res.data.data)
             )
             .catch(() => {
-                toast.error('error_refresh_page');
+                toast.error('error refresh page');
                 navigate('/fo-lokasis');
             });
     }, [id, navigate, t]);
@@ -70,7 +70,7 @@ export default function Edit() {
                     setErrors(error.response.data);
                     toast.dismiss();
                 } else {
-                    toast.error('error_refresh_page');
+                    toast.error('error refresh page');
                 }
             })
             .finally(() => setIsBusy(false));

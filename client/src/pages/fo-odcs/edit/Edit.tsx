@@ -21,6 +21,11 @@ interface LokasiOption {
     nama_lokasi: string;
 }
 
+interface KabelOdcOption {
+    id: number;
+    nama_kabel: string;
+}
+
 export default function Edit() {
     useTitle('edit_odc');
     const [t] = useTranslation();
@@ -36,12 +41,14 @@ export default function Edit() {
         lokasi_deskripsi: '',
         lokasi_latitude: '',
         lokasi_longitude: '',
+        kabel_odc_id: '', // <-- add this
         nama_odc: '',
         tipe_splitter: '1:8',
     };
 
     const [values, setValues] = useState<FoOdcFormValues>(initialValues);
     const [lokasis, setLokasis] = useState<LokasiOption[]>([]);
+    const [kabelOdcs, setKabelOdcs] = useState<KabelOdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -51,12 +58,14 @@ export default function Edit() {
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-odcs/${id}`)),
             request('GET', endpoint('/api/v1/fo-lokasis')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs')),
         ])
-            .then(([odcRes, lokRes]: any) => {
+            .then(([odcRes, lokRes, kabelOdcRes]: any) => {
                 const odc = odcRes.data.data;
                 setValues({
                     ...initialValues,
                     lokasi_id: odc.lokasi.id.toString(),
+                    kabel_odc_id: odc.kabel_odc?.id?.toString() ?? '',
                     nama_odc: odc.nama_odc,
                     tipe_splitter: odc.tipe_splitter,
                 });
@@ -66,9 +75,15 @@ export default function Edit() {
                         nama_lokasi: l.nama_lokasi,
                     }))
                 );
+                setKabelOdcs(
+                    kabelOdcRes.data.data.map((k: any) => ({
+                        id: k.id,
+                        nama_kabel: k.nama_kabel,
+                    }))
+                );
             })
             .catch(() => {
-                toast.error('error_refresh_page');
+                toast.error('error refresh page');
                 navigate('/fo-odcs');
             })
             .finally(() => setLoading(false));
@@ -87,11 +102,12 @@ export default function Edit() {
         const doUpdate = (lokasi_id: number) => {
             request('PUT', endpoint(`/api/v1/fo-odcs/${id}`), {
                 lokasi_id,
+                kabel_odc_id: values.kabel_odc_id,
                 nama_odc: values.nama_odc,
                 tipe_splitter: values.tipe_splitter,
             })
                 .then(() => {
-                    toast.success('updated_odc');
+                    toast.success('updated odc');
 
                     // Invalidate related queries
                     queryClient.invalidateQueries(['/api/v1/fo-odcs']);
@@ -102,7 +118,7 @@ export default function Edit() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                 })
                 .finally(() => setIsBusy(false));
@@ -123,7 +139,7 @@ export default function Edit() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                 });
         } else {
@@ -149,6 +165,7 @@ export default function Edit() {
                         values={values}
                         setValues={setValues}
                         lokasis={lokasis}
+                        kabelOdcs={kabelOdcs}
                         errors={errors}
                     />
                 </form>

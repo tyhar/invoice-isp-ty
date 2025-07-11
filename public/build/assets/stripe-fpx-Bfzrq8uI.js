@@ -1,0 +1,9 @@
+import{i as r,w as o}from"./wait-BlTzaSj7.js";/**
+ * Invoice Ninja (https://invoiceninja.com)
+ *
+ * @link https://github.com/invoiceninja/invoiceninja source repository
+ *
+ * @copyright Copyright (c) 2021. Invoice Ninja LLC (https://invoiceninja.com)
+ *
+ * @license https://www.elastic.co/licensing/elastic-license 
+ */class i{constructor(t,e){this.key=t,this.errors=document.getElementById("errors"),this.stripeConnect=e}setupStripe=()=>{this.stripeConnect?this.stripe=Stripe(this.key,{stripeAccount:this.stripeConnect}):this.stripe=Stripe(this.key);let t=this.stripe.elements(),e={base:{padding:"10px 12px",color:"#32325d",fontSize:"16px"}};return this.fpx=t.create("fpxBank",{style:e,accountHolderType:"individual"}),this.fpx.mount("#fpx-bank-element"),this};handle=()=>{document.getElementById("pay-now").addEventListener("click",t=>{document.getElementById("pay-now").disabled=!0,document.querySelector("#pay-now > svg").classList.remove("hidden"),document.querySelector("#pay-now > span").classList.add("hidden"),this.stripe.confirmFpxPayment(document.querySelector("meta[name=pi-client-secret").content,{payment_method:{fpx:this.fpx},return_url:document.querySelector('meta[name="return-url"]').content}).then(e=>{e.error&&this.handleFailure(e.error.message)})})};handleFailure(t){let e=document.getElementById("errors");e.textContent="",e.textContent=t,e.hidden=!1,document.getElementById("pay-now").disabled=!1,document.querySelector("#pay-now > svg").classList.add("hidden"),document.querySelector("#pay-now > span").classList.remove("hidden")}}function s(){const n=document.querySelector('meta[name="stripe-publishable-key"]')?.content??"",t=document.querySelector('meta[name="stripe-account-id"]')?.content??"";new i(n,t).setupStripe().handle()}r()?s():o("#stripe-fpx-payment").then(()=>s());

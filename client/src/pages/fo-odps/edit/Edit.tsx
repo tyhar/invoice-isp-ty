@@ -59,7 +59,6 @@ export default function Edit() {
         ])
             .then(([odpRes, lokRes, coreRes]: any) => {
                 const odp = odpRes.data.data;
-                const core = odp.kabel_core_odc;
                 setValues({
                     create_new_lokasi: false,
                     lokasi_id: odp.lokasi.id?.toString() ?? '',
@@ -67,10 +66,9 @@ export default function Edit() {
                     lokasi_deskripsi: '',
                     lokasi_latitude: '',
                     lokasi_longitude: '',
-                    kabel_odc_id: core?.kabel_odc?.id.toString() ?? '',
-                    kabel_tube_odc_id:
-                        core?.kabel_tube_odc?.id.toString() ?? '',
-                    kabel_core_odc_id: core?.id.toString() ?? '',
+                    kabel_odc_id: odp.kabel_core_odc?.kabel_odc?.id?.toString() ?? '',
+                    kabel_tube_odc_id: odp.kabel_core_odc?.kabel_tube_odc?.id?.toString() ?? '',
+                    kabel_core_odc_id: odp.kabel_core_odc?.id?.toString() ?? '',
                     nama_odp: odp.nama_odp ?? '',
                 });
                 setLokasis(
@@ -91,7 +89,7 @@ export default function Edit() {
                 );
             })
             .catch(() => {
-                toast.error('error_refresh_page');
+                toast.error('error refresh page');
                 navigate('/fo-odps');
             })
             .finally(() => setLoading(false));
@@ -123,7 +121,7 @@ export default function Edit() {
                 ...payload,
                 lokasi_id,
             })
-                .then(() => toast.success('updated_odp'))
+                .then(() => toast.success('updated odp'))
                 .catch((err) => {
                     if (err.response?.status === 422) {
                         setErrors(err.response.data);
@@ -136,7 +134,7 @@ export default function Edit() {
                         } else {
                             toast.dismiss();
                         }
-                    } else toast.error('error_refresh_page');
+                    } else toast.error('error refresh page');
                 })
                 .finally(() => setIsBusy(false));
         };

@@ -16,7 +16,7 @@ interface FoOdp {
     kabel_core_odc?: {
         id: number;
         warna_core: string;
-        kabel_odc?: { id: number; nama_kabel: string };
+        kabel_odc?: { id: number; nama_kabel: string; odcs: { id: number; nama_odc: string }[] };
         kabel_tube_odc?: { id: number; warna_tube: string };
     };
     client_ftth: { id: number; nama_client: string } | null;
@@ -32,15 +32,10 @@ export default function FoOdps() {
     const pages: Page[] = [{ name: t('FO ODP'), href: '/fo-odps' }];
 
     const columns: DataTableColumns<FoOdp> = [
-        { id: 'string', label: 'ID' },
-        {
-            id: 'lokasi',
-            label: t('lokasi'),
-            format: (_v, r) => r.lokasi.nama_lokasi,
-        },
+        // { id: 'id', label: 'ID' },
         {
             id: 'nama_odp',
-            label: t('nama_odp'),
+            label: t('nama odp'),
             format: (val, r) => (
                 <a
                     href={`/fo-odps/${r.id}/edit`}
@@ -57,41 +52,46 @@ export default function FoOdps() {
         },
         {
             id: 'kabel_odc',
-            label: t('kabel_odc'),
+            label: t('kabel odc'),
             format: (_v, r) => r.kabel_core_odc?.kabel_odc?.nama_kabel ?? '-',
         },
         {
             id: 'kabel_tube_odc',
-            label: t('kabel_tube_odc'),
+            label: t('warna tube'),
             format: (_v, r) =>
                 r.kabel_core_odc?.kabel_tube_odc?.warna_tube ?? '-',
         },
         {
             id: 'kabel_core_odc',
-            label: t('kabel_core_odc'),
+            label: t('warna core'),
             format: (_v, r) => r.kabel_core_odc?.warna_core ?? '-',
         },
         {
             id: 'client_ftth',
-            label: t('client_ftth'),
+            label: t('client ftth'),
             format: (_v, r) => r.client_ftth?.nama_client ?? '-',
         },
-        { id: 'status', label: t('status') },
         {
-            id: 'created_at',
-            label: t('created_at'),
-            format: (v) => v,
+            id: 'lokasi',
+            label: t('lokasi'),
+            format: (_v, r) => r.lokasi?.nama_lokasi ?? '-',
         },
-        {
-            id: 'updated_at',
-            label: t('updated_at'),
-            format: (v) => v,
-        },
-        {
-            id: 'deleted_at',
-            label: t('deleted_at'),
-            format: (v) => v ?? '-',
-        },
+        // { id: 'status', label: t('status') },
+        // {
+        //     id: 'created_at',
+        //     label: t('created_at'),
+        //     format: (v) => v,
+        // },
+        // {
+        //     id: 'updated_at',
+        //     label: t('updated_at'),
+        //     format: (v) => v,
+        // },
+        // {
+        //     id: 'deleted_at',
+        //     label: t('deleted_at'),
+        //     format: (v) => v ?? '-',
+        // },
     ];
 
     return (

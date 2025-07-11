@@ -55,7 +55,7 @@ export default function Edit() {
                 );
             })
             .catch(() => {
-                toast.error('error_refresh_page');
+                toast.error('error refresh page');
                 navigate('/fo-kabel-tube-odcs');
             });
     }, [id, navigate]);
@@ -69,14 +69,14 @@ export default function Edit() {
 
         request('PUT', endpoint(`/api/v1/fo-kabel-tube-odcs/${id}`), form)
             .then(() => {
-                toast.success('updated_tube_odc');
+                toast.success('updated tube odc');
             })
             .catch((error) => {
                 if (error.response?.status === 422) {
                     setErrors(error.response.data);
                     toast.dismiss();
                 } else {
-                    toast.error('error_refresh_page');
+                    toast.error('error refresh page');
                 }
             })
             .finally(() => setIsBusy(false));
@@ -84,7 +84,11 @@ export default function Edit() {
 
     const pages = [
         { name: t('FO Kabel Tube ODC')!, href: '/fo-kabel-tube-odcs' },
+<<<<<<< Updated upstream
         { name: t('edit_tube_odc')!, href: `/fo-kabel-tube-odcs/${id}/edit` },
+=======
+        { name: t('Edit Tube ODC')!, href: `/fo-kabel-tube-odcs/${id}/edit` },
+>>>>>>> Stashed changes
     ];
 
     if (!form.kabel_odc_id && !form.warna_tube) {
@@ -93,7 +97,11 @@ export default function Edit() {
 
     return (
         <Default
+<<<<<<< Updated upstream
             title={t('edit_tube_odc')!}
+=======
+            title={t('Edit Tube ODC')!}
+>>>>>>> Stashed changes
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

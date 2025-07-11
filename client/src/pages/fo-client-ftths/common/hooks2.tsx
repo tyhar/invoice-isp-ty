@@ -1,7 +1,5 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { date } from '$app/common/helpers';
-import { useCurrentCompanyDateFormats } from '$app/common/hooks/useCurrentCompanyDateFormats';
 import { useReactSettings } from '$app/common/hooks/useReactSettings';
 
 export interface FoClientFtth {
@@ -171,13 +169,13 @@ export interface FoClientFtth {
 
 export const defaultColumns: string[] = [
     'nama_client',
+    'client',
+    'odp',
+    'odc',
+    'odp_core_tube',
+    'odc_location',
     'lokasi',
     'lokasi_coordinates',
-    'odp',
-    'odp_core_tube',
-    'odc',
-    'odc_location',
-    'client',
     'client_contact',
     'company',
     'alamat',
@@ -193,14 +191,13 @@ export function useAllFoClientFtthColumns(): readonly string[] {
 
 export function useFoClientFtthColumns() {
     const { t } = useTranslation();
-    const { dateFormat } = useCurrentCompanyDateFormats();
     const reactSettings = useReactSettings();
 
     const columns = [
         {
             column: 'nama_client',
             id: 'nama_client',
-            label: t('nama_client'),
+            label: t('client ftth'),
             format: (val: string | number, ftth: FoClientFtth) => (
                 <a
                     href={`/fo-client-ftths/${ftth.id}/edit`}
@@ -208,6 +205,19 @@ export function useFoClientFtthColumns() {
                 >
                     {val ?? '-'}
                 </a>
+            ),
+        },
+        {
+            column: 'client',
+            id: 'client',
+            label: t('client'),
+            format: (_val: string | number, ftth: FoClientFtth) => (
+                <div>
+                    <div className="font-medium">{ftth.client?.name ?? '-'}</div>
+                    {ftth.client?.email && (
+                        <div className="text-sm text-gray-500">{ftth.client.email}</div>
+                    )}
+                </div>
             ),
         },
         {
@@ -261,7 +271,7 @@ export function useFoClientFtthColumns() {
         {
             column: 'odp_core_tube',
             id: 'odp_core_tube',
-            label: t('core_tube'),
+            label: t('kabel'),
             format: (_val: string | number, ftth: FoClientFtth) => {
                 const core = ftth.odp?.kabel_core_odc;
                 const tube = core?.kabel_tube_odc;
@@ -304,39 +314,27 @@ export function useFoClientFtthColumns() {
                 </div>
             ),
         },
-        {
-            column: 'odc_location',
-            id: 'odc_location',
-            label: t('odc_location'),
-            format: (_val: string | number, ftth: FoClientFtth) => {
-                if (ftth.odc?.lokasi) {
-                    return (
-                        <div className="text-sm">
-                            <div className="font-medium">{ftth.odc.lokasi.nama_lokasi}</div>
-                            {ftth.odc.lokasi.latitude && ftth.odc.lokasi.longitude && (
-                                <div className="text-xs text-gray-500">
-                                    {ftth.odc.lokasi.latitude.toFixed(6)}, {ftth.odc.lokasi.longitude.toFixed(6)}
-                                </div>
-                            )}
-                        </div>
-                    );
-                }
-                return '-';
-            },
-        },
-        {
-            column: 'client',
-            id: 'client',
-            label: t('client'),
-            format: (_val: string | number, ftth: FoClientFtth) => (
-                <div>
-                    <div className="font-medium">{ftth.client?.name ?? '-'}</div>
-                    {ftth.client?.email && (
-                        <div className="text-sm text-gray-500">{ftth.client.email}</div>
-                    )}
-                </div>
-            ),
-        },
+        // {
+        //     column: 'odc_location',
+        //     id: 'odc_location',
+        //     label: t('odc_location'),
+        //     format: (_val: string | number, ftth: FoClientFtth) => {
+        //         if (ftth.odc?.lokasi) {
+        //             return (
+        //                 <div className="text-sm">
+        //                     <div className="font-medium">{ftth.odc.lokasi.nama_lokasi}</div>
+        //                     {ftth.odc.lokasi.latitude && ftth.odc.lokasi.longitude && (
+        //                         <div className="text-xs text-gray-500">
+        //                             {ftth.odc.lokasi.latitude.toFixed(6)}, {ftth.odc.lokasi.longitude.toFixed(6)}
+        //                         </div>
+        //                     )}
+        //                 </div>
+        //             );
+        //         }
+        //         return '-';
+        //     },
+        // },
+
         {
             column: 'client_contact',
             id: 'client_contact',
@@ -362,41 +360,41 @@ export function useFoClientFtthColumns() {
         {
             column: 'alamat',
             id: 'alamat',
-            label: t('alamat'),
+            label: t('alamat ftth'),
             format: (val: string | number) => val ?? '-',
         },
-        {
-            column: 'status',
-            id: 'status',
-            label: t('status'),
-            format: (val: string | number) => (
-                <span className={`px-2 py-1 rounded text-xs ${
-                    val === 'active' ? 'bg-green-100 text-green-800' :
-                    val === 'archived' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                }`}>
-                    {t(val as string)}
-                </span>
-            ),
-        },
-        {
-            column: 'created_at',
-            id: 'created_at',
-            label: t('created_at'),
-            format: (val: string | number) => date(val as string, dateFormat),
-        },
-        {
-            column: 'updated_at',
-            id: 'updated_at',
-            label: t('updated_at'),
-            format: (val: string | number) => date(val as string, dateFormat),
-        },
-        {
-            column: 'deleted_at',
-            id: 'deleted_at',
-            label: t('deleted_at'),
-            format: (val: string | number) => (val ? date(val as string, dateFormat) : '-'),
-        },
+        // {
+        //     column: 'status',
+        //     id: 'status',
+        //     label: t('status'),
+        //     format: (val: string | number) => (
+        //         <span className={`px-2 py-1 rounded text-xs ${
+        //             val === 'active' ? 'bg-green-100 text-green-800' :
+        //             val === 'archived' ? 'bg-yellow-100 text-yellow-800' :
+        //             'bg-red-100 text-red-800'
+        //         }`}>
+        //             {t(val as string)}
+        //         </span>
+        //     ),
+        // },
+        // {
+        //     column: 'created_at',
+        //     id: 'created_at',
+        //     label: t('created_at'),
+        //     format: (val: string | number) => date(val as string, dateFormat),
+        // },
+        // {
+        //     column: 'updated_at',
+        //     id: 'updated_at',
+        //     label: t('updated_at'),
+        //     format: (val: string | number) => date(val as string, dateFormat),
+        // },
+        // {
+        //     column: 'deleted_at',
+        //     id: 'deleted_at',
+        //     label: t('deleted_at'),
+        //     format: (val: string | number) => (val ? date(val as string, dateFormat) : '-'),
+        // },
     ];
 
     const list: string[] =

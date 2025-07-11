@@ -101,18 +101,18 @@ class FoLokasiController extends Controller
                 'latitude'      => $l->latitude,
                 'longitude'     => $l->longitude,
                 'status'        => $l->status,
-                'odcs'          => $l->odcs->map(fn($o) => [
+                'odcs'          => $l->odcs ? $l->odcs->map(fn($o) => [
                     'id'        => $o->id,
                     'nama_odc'  => $o->nama_odc,
-                ])->toArray(),
-                'odps'          => $l->odps->map(fn($o) => [
+                ])->toArray() : [],
+                'odps'          => $l->odps ? $l->odps->map(fn($o) => [
                     'id'       => $o->id,
                     'nama_odp' => $o->nama_odp,
-                ])->toArray(),
-                'clients'       => $l->clientFtths->map(fn($c) => [
+                ])->toArray() : [],
+                'clients'       => $l->clientFtths ? $l->clientFtths->map(fn($c) => [
                     'id'         => $c->id,
                     'nama_client' => $c->nama_client,
-                ])->toArray(),
+                ])->toArray() : [],
                 'created_at'    => $l->created_at->toDateTimeString(),
                 'updated_at'    => $l->updated_at->toDateTimeString(),
                 'deleted_at'    => $l->deleted_at?->toDateTimeString(),

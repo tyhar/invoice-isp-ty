@@ -44,6 +44,7 @@ import { foKabelCoreOdcRoutes } from '$app/pages/fo-kabel-core-odcs/routes';
 import { foOdpRoutes } from '$app/pages/fo-odps/routes';
 import { foClientFtthRoutes } from '$app/pages/fo-client-ftths/routes';
 import { foReportRoutes } from '$app/pages/fo-reports/routes';
+import { foJointBoxRoutes } from '$app/pages/fo-joint-boxes/routes';
 
 const Dashboard = lazy(() => import('$app/pages/dashboard/Dashboard'));
 const NotFound = lazy(() => import('$app/components/NotFound'));
@@ -90,6 +91,7 @@ export const routes = (
             {foOdpRoutes}
             {foClientFtthRoutes}
             {foReportRoutes}
+            {foJointBoxRoutes}
             <Route element={<TestingRoute />}>
                 <Route path="/testing" element={<TestingPage />} />
             </Route>

@@ -8,19 +8,18 @@ import { Spinner } from '$app/components/Spinner';
 import { toast } from '$app/common/helpers/toast/toast';
 import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
-import { route } from '$app/common/helpers/route';
+// import { route } from '$app/common/helpers/route';
 import { useNavigate } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
+// import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
 import { CreateFoKabelOdc } from '../common/components/CreateFoKabelOdc';
 import { useQueryClient } from 'react-query';
 
 interface FoKabelOdcCreate {
-    odc_id: number;
     nama_kabel: string;
     tipe_kabel: 'singlecore' | 'multicore';
     panjang_kabel: number;
-    jumlah_tube: number;
+    tube_colors: string[];
     jumlah_core_in_tube: number;
     // jumlah_total_core: number;
 }
@@ -42,13 +41,11 @@ export default function Create() {
     ];
 
     const [form, setForm] = useState<FoKabelOdcCreate>({
-        odc_id: 0,
         nama_kabel: '',
         tipe_kabel: 'singlecore',
         panjang_kabel: 0,
-        jumlah_tube: 1,
+        tube_colors: [],
         jumlah_core_in_tube: 1,
-        // jumlah_total_core: 1,
     });
     const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
@@ -69,6 +66,7 @@ export default function Create() {
         e.preventDefault();
         if (isBusy) return;
         setIsBusy(true);
+<<<<<<< Updated upstream
 
         request('POST', endpoint('/api/v1/fo-kabel-odcs'), form)
             .then((response: GenericSingleResourceResponse<any>) => {
@@ -80,14 +78,20 @@ export default function Create() {
                     { state: { toast: 'created_kabel_odc' } }
                 );
                 queryClient.invalidateQueries('fo-kabel-odcs');
+=======
+        request('POST', endpoint('/api/v1/fo-kabel-odcs'), {
+            ...form,
+            tube_colors: form.tube_colors,
+        })
+            .then(async () => {
+                toast.success('created kabel odc');
+                // Invalidate Kabel ODC list so index page reloads latest data
+                await queryClient.invalidateQueries('fo-kabel-odcs');
+                navigate('/fo-kabel-odcs');
+>>>>>>> Stashed changes
             })
-            .catch((error) => {
-                if (error.response?.status === 422) {
-                    setErrors(error.response.data);
-                    toast.dismiss();
-                } else {
-                    toast.error('error_refresh_page');
-                }
+            .catch((err) => {
+                setErrors(err.response?.data?.errors || {});
             })
             .finally(() => setIsBusy(false));
     };
@@ -103,9 +107,10 @@ export default function Create() {
                 <form onSubmit={handleSave}>
                     <CreateFoKabelOdc
                         form={form}
-                        setForm={setForm}
+                        setForm={setForm as any}
                         errors={errors}
                         odcs={odcs}
+                        mode="create"
                     />
                 </form>
                 {isBusy && <Spinner />}

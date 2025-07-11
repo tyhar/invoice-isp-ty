@@ -46,10 +46,10 @@ class FoClientFtthController extends Controller
         $query = FoClientFtth::withTrashed()
             ->with([
                 'lokasi',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.lokasi',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.lokasi',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
                 'client',
                 'company'
             ])
@@ -100,8 +100,7 @@ class FoClientFtthController extends Controller
             $core = $c->odp?->kabelCoreOdc;
             $tube = $core?->kabelTubeOdc;
             $kabelOdc = $tube?->kabelOdc;
-            $topOdc = $kabelOdc?->odc;
-
+            $firstOdc = $kabelOdc?->odcs?->first();
             return [
                 'id'          => $c->id,
                 'nama_client' => $c->nama_client,
@@ -161,6 +160,7 @@ class FoClientFtthController extends Controller
                         ] : null,
                     ] : null,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc'         => $topOdc ? [
                     'id'           => $topOdc->id,
                     'nama_odc'     => $topOdc->nama_odc,
@@ -268,6 +268,17 @@ class FoClientFtthController extends Controller
                     'postal_code'  => $c->client->postal_code,
                     'country_id'   => $c->client->country_id,
                     'status_id'    => $c->client->status_id,
+=======
+                'odc' => $firstOdc ? [
+                    'id' => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company'     => $c->company ? [
                     'id'           => $c->company->id,
@@ -346,7 +357,7 @@ class FoClientFtthController extends Controller
         }
 
         $c = FoClientFtth::create($data);
-        $c->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc', 'client', 'company']);
+        $c->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs', 'client', 'company']);
 
         return response()->json([
             'status' => 'success',
@@ -361,6 +372,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -372,6 +384,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -396,7 +419,7 @@ class FoClientFtthController extends Controller
     {
         $companyId = auth()->user()->getCompany()?->id;
         $c = FoClientFtth::withTrashed()->where('company_id', $companyId)->findOrFail($id);
-        $c->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc', 'client', 'company']);
+        $c->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs', 'client', 'company']);
 
         return response()->json([
             'status' => 'success',
@@ -411,6 +434,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -422,6 +446,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -475,7 +510,7 @@ class FoClientFtthController extends Controller
         }
 
         $c->update($data);
-        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc', 'client', 'company']);
+        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs', 'client', 'company']);
 
         return response()->json([
             'status' => 'success',
@@ -490,6 +525,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -501,6 +537,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -546,7 +593,7 @@ class FoClientFtthController extends Controller
         $companyId = auth()->user()->getCompany()?->id;
         $c = FoClientFtth::withTrashed()->where('company_id', $companyId)->findOrFail($id);
         $c->update(['status' => 'archived']);
-        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc', 'client', 'company']);
+        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs', 'client', 'company']);
 
         return response()->json([
             'status' => 'success',
@@ -561,6 +608,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -572,6 +620,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -597,7 +656,7 @@ class FoClientFtthController extends Controller
         $companyId = auth()->user()->getCompany()?->id;
         $c = FoClientFtth::withTrashed()->where('company_id', $companyId)->findOrFail($id);
         $c->update(['status' => 'active']);
-        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc', 'client', 'company']);
+        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs', 'client', 'company']);
 
         return response()->json([
             'status' => 'success',
@@ -612,6 +671,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -623,6 +683,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -648,7 +719,7 @@ class FoClientFtthController extends Controller
         $companyId = auth()->user()->getCompany()?->id;
         $c = FoClientFtth::onlyTrashed()->where('company_id', $companyId)->findOrFail($id);
         $c->restore();
-        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odc', 'client', 'company']);
+        $c->refresh()->load(['lokasi', 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs', 'client', 'company']);
 
         return response()->json([
             'status' => 'success',
@@ -663,6 +734,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -674,6 +746,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -754,6 +837,10 @@ class FoClientFtthController extends Controller
         }
 
         $data = $affected->map(function ($c) {
+            $core = $c->odp?->kabelCoreOdc;
+            $tube = $core?->kabelTubeOdc;
+            $kabelOdc = $tube?->kabelOdc;
+            $firstOdc = $kabelOdc?->odcs?->first();
             return [
                 'id' => $c->id,
                 'nama_client' => $c->nama_client,
@@ -765,6 +852,7 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
+<<<<<<< Updated upstream
                 'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
                     'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
                     'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
@@ -776,6 +864,17 @@ class FoClientFtthController extends Controller
                 'client'       => $c->client ? [
                     'id'           => $this->encodePrimaryKey($c->client->id),
                     'name'         => $c->client->name,
+=======
+                'odc' => $firstOdc ? [
+                    'id' => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
+                ] : null,
+                'client' => $c->client ? [
+                    'id' => $this->encodePrimaryKey($c->client->id),
+                    'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
+>>>>>>> Stashed changes
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,

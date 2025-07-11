@@ -127,7 +127,11 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                 </SelectField>
             </Element>
 
+<<<<<<< Updated upstream
             <Element leftSide={t('nama_client')}>
+=======
+            <Element leftSide={t('Nama Client FTTH')}>
+>>>>>>> Stashed changes
                 <InputField
                     value={values.nama_client}
                     onValueChange={v => onChange('nama_client', v)}
@@ -135,7 +139,11 @@ export function CreateFoClientFtth({ values, setValues, errors, lokasis, odps, c
                 />
             </Element>
 
+<<<<<<< Updated upstream
             <Element leftSide={t('alamat')}>
+=======
+            <Element leftSide={t('Alamat FTTH')}>
+>>>>>>> Stashed changes
                 <InputField
                     value={values.alamat}
                     onValueChange={v => onChange('alamat', v)}

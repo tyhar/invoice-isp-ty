@@ -6,6 +6,8 @@ import { Button } from '$app/components/forms/Button';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Default } from '$app/components/layouts/Default';
 import { Page } from '$app/components/Breadcrumbs';
+import { request } from '$app/common/helpers/request';
+import { endpoint } from '$app/common/helpers';
 
 // Dummy data for initial scaffold
 const dummySummary = {
@@ -28,9 +30,8 @@ const tabs: Tab[] = [
 
 export default function FTTHReport() {
   // State for summary data
-  const [summary] = useState(dummySummary);
-  // State for bar chart data
-  const [barData] = useState(dummyBarData);
+  const [summary, setSummary] = useState<any>(dummySummary);
+  const [barData, setBarData] = useState<any[]>(dummyBarData);
   // State for active tab
   const [activeTabIndex, setActiveTabIndex] = useState(0);
 
@@ -41,10 +42,17 @@ export default function FTTHReport() {
 
   // Fetch data on mount (replace with real API calls)
   useEffect(() => {
-    // TODO: Fetch FTTH summary, bar chart, and table data from API
-    // setSummary(...)
-    // setBarData(...)
-    // setTableData(...)
+    request('GET', endpoint('/api/v1/ftth-statistics'))
+      .then((response) => {
+        const data = response.data.data;
+        setSummary(data.summary);
+        setBarData(data.charts.odpsPerOdc);
+      })
+      .catch(() => {
+        // fallback to dummy data
+        setSummary(dummySummary);
+        setBarData(dummyBarData);
+      });
   }, []);
 
   // Export handlers (stub)

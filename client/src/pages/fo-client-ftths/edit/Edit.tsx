@@ -74,7 +74,7 @@ export default function Edit() {
             setClients(clientsData);
             setDataReady(true);
         }).catch(() => {
-            toast.error('error_refresh_page');
+            toast.error('error refresh page');
             navigate('/fo-client-ftths');
         }).finally(() => setLoading(false));
     }, [id, navigate]);
@@ -105,7 +105,7 @@ export default function Edit() {
                 lokasi_id,
             })
                 .then(() => {
-                    toast.success('updated_client_ftth');
+                    toast.success('updated client ftth');
                     queryClient.invalidateQueries('fo-client-ftths');
                     navigate(route('/fo-client-ftths'));
                 })
@@ -114,7 +114,7 @@ export default function Edit() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                 })
                 .finally(() => setIsBusy(false));
@@ -136,7 +136,7 @@ export default function Edit() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                     setIsBusy(false);
                 });

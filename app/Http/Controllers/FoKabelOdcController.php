@@ -71,7 +71,7 @@ class FoKabelOdcController extends Controller
             $query->where(function ($q) use ($term) {
                 $q->where('nama_kabel', 'LIKE', "%{$term}%")
                     ->orWhere('tipe_kabel', 'LIKE', "%{$term}%")
-                    ->orWhereHas('odc', function ($q2) use ($term) {
+                    ->orWhereHas('odcs', function ($q2) use ($term) {
                         $q2->where('nama_odc', 'LIKE', "%{$term}%");
                     });
             });
@@ -108,21 +108,21 @@ class FoKabelOdcController extends Controller
             $perPage = 15;
         }
 
-        // 7) Eager‐load 'odc' and 'kabelTubeOdcs', then paginate
+        // 7) Eager‐load 'odcs' and 'kabelTubeOdcs', then paginate
         $paginator = $query
-            ->with(['odc', 'kabelTubeOdcs'])
+            ->with(['odcs', 'kabelTubeOdcs.kabelCoreOdcs'])
             ->paginate($perPage)
             ->appends($request->only(['filter', 'sort', 'per_page', 'status']));
 
         // 8) Transform results into the desired JSON structure
         $items = array_map(function ($k) {
+            $activeTubes = $k->kabelTubeOdcs?->where('status', 'active') ?? collect();
+            $activeTubeCount = $activeTubes->count();
+            $activeCoreCount = $activeTubes->flatMap(function ($tube) {
+                return $tube->kabelCoreOdcs?->where('status', 'active') ?? collect();
+            })->count();
             return [
                 'id'                   => $k->id,
-                'odc_id'               => $k->odc_id,
-                'odc'                  => [
-                    'id'               => $k->odc->id,
-                    'nama_odc'         => $k->odc->nama_odc,
-                ],
                 'nama_kabel'           => $k->nama_kabel,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
@@ -130,16 +130,26 @@ class FoKabelOdcController extends Controller
                 'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
                 'jumlah_total_core'    => $k->jumlah_total_core,
                 'status'               => $k->status,
-                'kabel_tube_odcs'      => $k->kabelTubeOdcs->map(function ($t) {
+                'active_tube_count'    => $activeTubeCount,
+                'active_core_count'    => $activeCoreCount,
+                'odcs'                 => $k->odcs ? $k->odcs->map(function ($o) {
                     return [
-                        'id'                     => $t->id,
-                        // If FoKabelTubeOdc has a 'nama_tube' or similar, you can add it here.
-                        // For now, we only include 'id'. Adjust as needed:
-                        // 'nama_tube'            => $t->nama_tube,
+                        'id' => $o->id,
+                        'nama_odc' => $o->nama_odc,
+                        'tipe_splitter' => $o->tipe_splitter ?? null,
+                        'status' => $o->status ?? null,
+                        'created_at' => $o->created_at?->toDateTimeString(),
+                        'updated_at' => $o->updated_at?->toDateTimeString(),
+                        'deleted_at' => $o->deleted_at?->toDateTimeString(),
                     ];
-                })->toArray(),
-                'created_at'           => $k->created_at->toDateTimeString(),
-                'updated_at'           => $k->updated_at->toDateTimeString(),
+                })->toArray() : [],
+                'kabel_tube_odcs'      => $k->kabelTubeOdcs ? $k->kabelTubeOdcs->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                    ];
+                })->toArray() : [],
+                'created_at'           => $k->created_at?->toDateTimeString(),
+                'updated_at'           => $k->updated_at?->toDateTimeString(),
                 'deleted_at'           => $k->deleted_at?->toDateTimeString(),
             ];
         }, $paginator->items());
@@ -166,32 +176,29 @@ class FoKabelOdcController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'odc_id'               => 'required|exists:fo_odcs,id',
             'nama_kabel'           => 'required|string|max:255',
             'tipe_kabel'           => 'required|in:singlecore,multicore',
             'panjang_kabel'        => 'required|numeric',
-            'jumlah_tube'          => 'required|integer',
-            'jumlah_core_in_tube'  => 'required|integer',
-            // 'jumlah_total_core'    => 'required|integer',
+            'jumlah_core_in_tube'  => 'nullable|integer',
+            'tube_colors'          => 'required|array',
+            'tube_colors.*'        => 'string|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
             'status'               => 'sometimes|in:active,archived',
         ]);
-
+        $tubeColors = $data['tube_colors'];
+        unset($data['tube_colors']);
+        $data['jumlah_tube'] = count($tubeColors);
         if (!isset($data['status'])) {
             $data['status'] = 'active';
         }
-
         $k = FoKabelOdc::create($data);
-        $k->load(['odc', 'kabelTubeOdcs']);
-
+        foreach ($tubeColors as $color) {
+            $k->kabelTubeOdcs()->create(['warna_tube' => $color, 'status' => 'active']);
+        }
+        $k->load(['odcs', 'kabelTubeOdcs']);
         return response()->json([
             'status'  => 'success',
             'data'    => [
                 'id'                   => $k->id,
-                'odc_id'               => $k->odc_id,
-                'odc'                  => [
-                    'id'               => $k->odc->id,
-                    'nama_odc'         => $k->odc->nama_odc,
-                ],
                 'nama_kabel'           => $k->nama_kabel,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
@@ -199,11 +206,21 @@ class FoKabelOdcController extends Controller
                 'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
                 'jumlah_total_core'    => $k->jumlah_total_core,
                 'status'               => $k->status,
-                'kabel_tube_odcs'      => $k->kabelTubeOdcs->map(function ($t) {
+                'tube_colors'          => $k->kabelTubeOdcs->map(fn($t) => [
+                    'id' => $t->id,
+                    'warna_tube' => $t->warna_tube,
+                ])->toArray(),
+                'odcs'                 => $k->odcs ? $k->odcs->map(function ($o) {
                     return [
-                        'id' => $t->id,
+                        'id' => $o->id,
+                        'nama_odc' => $o->nama_odc,
+                        'tipe_splitter' => $o->tipe_splitter,
+                        'status' => $o->status,
+                        'created_at' => $o->created_at?->toDateTimeString(),
+                        'updated_at' => $o->updated_at?->toDateTimeString(),
+                        'deleted_at' => $o->deleted_at?->toDateTimeString(),
                     ];
-                })->toArray(),
+                })->toArray() : [],
                 'created_at'           => $k->created_at->toDateTimeString(),
                 'updated_at'           => $k->updated_at->toDateTimeString(),
             ],
@@ -219,17 +236,16 @@ class FoKabelOdcController extends Controller
     public function show($id)
     {
         $k = FoKabelOdc::withTrashed()->findOrFail($id);
-        $k->load(['odc', 'kabelTubeOdcs']);
-
+        $k->load(['odcs', 'kabelTubeOdcs.kabelCoreOdcs']);
+        $activeTubes = $k->kabelTubeOdcs->where('status', 'active');
+        $activeTubeCount = $activeTubes->count();
+        $activeCoreCount = $activeTubes->flatMap(function ($tube) {
+            return $tube->kabelCoreOdcs->where('status', 'active');
+        })->count();
         return response()->json([
             'status' => 'success',
             'data'   => [
                 'id'                   => $k->id,
-                'odc_id'               => $k->odc_id,
-                'odc'                  => [
-                    'id'               => $k->odc->id,
-                    'nama_odc'         => $k->odc->nama_odc,
-                ],
                 'nama_kabel'           => $k->nama_kabel,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
@@ -237,11 +253,23 @@ class FoKabelOdcController extends Controller
                 'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
                 'jumlah_total_core'    => $k->jumlah_total_core,
                 'status'               => $k->status,
-                'kabel_tube_odcs'      => $k->kabelTubeOdcs->map(function ($t) {
+                'active_tube_count'    => $activeTubeCount,
+                'active_core_count'    => $activeCoreCount,
+                'tube_colors'          => $k->kabelTubeOdcs->map(fn($t) => [
+                    'id' => $t->id,
+                    'warna_tube' => $t->warna_tube,
+                ])->toArray(),
+                'odcs'                 => $k->odcs ? $k->odcs->map(function ($o) {
                     return [
-                        'id' => $t->id,
+                        'id' => $o->id,
+                        'nama_odc' => $o->nama_odc,
+                        'tipe_splitter' => $o->tipe_splitter,
+                        'status' => $o->status,
+                        'created_at' => $o->created_at?->toDateTimeString(),
+                        'updated_at' => $o->updated_at?->toDateTimeString(),
+                        'deleted_at' => $o->deleted_at?->toDateTimeString(),
                     ];
-                })->toArray(),
+                })->toArray() : [],
                 'created_at'           => $k->created_at->toDateTimeString(),
                 'updated_at'           => $k->updated_at->toDateTimeString(),
                 'deleted_at'           => $k->deleted_at?->toDateTimeString(),
@@ -257,30 +285,55 @@ class FoKabelOdcController extends Controller
     public function update(Request $request, $id)
     {
         $k = FoKabelOdc::withTrashed()->findOrFail($id);
-
         $data = $request->validate([
-            'odc_id'               => 'sometimes|exists:fo_odcs,id',
             'nama_kabel'           => 'sometimes|string|max:255',
             'tipe_kabel'           => 'sometimes|in:singlecore,multicore',
             'panjang_kabel'        => 'sometimes|numeric',
-            'jumlah_tube'          => 'sometimes|integer',
-            'jumlah_core_in_tube'  => 'sometimes|integer',
-            // 'jumlah_total_core'    => 'sometimes|integer',
+            'jumlah_core_in_tube'  => 'nullable|integer',
+            'tube_colors'          => 'sometimes|array',
+            'tube_colors.*'        => 'string|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
             'status'               => 'sometimes|in:active,archived',
         ]);
-
+        $tubeColors = $data['tube_colors'] ?? null;
+        unset($data['tube_colors']);
+        if ($tubeColors !== null) {
+            $data['jumlah_tube'] = count($tubeColors);
+        }
         $k->update($data);
-        $k->refresh()->load(['odc', 'kabelTubeOdcs']);
-
+        $k->refresh()->load(['odcs', 'kabelTubeOdcs']);
+        // Sync tubes if tube_colors provided
+        if ($tubeColors !== null) {
+            $existingTubes = $k->kabelTubeOdcs()->get();
+            $existingColors = $existingTubes->pluck('warna_tube', 'id')->toArray();
+            $existingColorToId = array_flip($existingColors); // warna_tube => id
+            // Add new tubes
+            foreach ($tubeColors as $color) {
+                if (!in_array($color, $existingColors)) {
+                    $k->kabelTubeOdcs()->create(['warna_tube' => $color, 'status' => 'active']);
+                }
+            }
+            // Remove tubes not in new list (only if no related cores)
+            foreach ($existingTubes as $tube) {
+                if (!in_array($tube->warna_tube, $tubeColors)) {
+                    if ($tube->kabelCoreOdcs()->count() === 0) {
+                        $tube->delete();
+                    } else {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Cannot remove tube "' . $tube->warna_tube . '" because it has assigned cores.',
+                            'errors' => [
+                                'tube_colors' => ['Cannot remove tube "' . $tube->warna_tube . '" because it has assigned cores.'],
+                            ],
+                        ], 422);
+                    }
+                }
+            }
+        }
+        $k->refresh()->load(['odcs', 'kabelTubeOdcs']);
         return response()->json([
             'status'  => 'success',
             'data'    => [
                 'id'                   => $k->id,
-                'odc_id'               => $k->odc_id,
-                'odc'                  => [
-                    'id'               => $k->odc->id,
-                    'nama_odc'         => $k->odc->nama_odc,
-                ],
                 'nama_kabel'           => $k->nama_kabel,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
@@ -288,11 +341,21 @@ class FoKabelOdcController extends Controller
                 'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
                 'jumlah_total_core'    => $k->jumlah_total_core,
                 'status'               => $k->status,
-                'kabel_tube_odcs'      => $k->kabelTubeOdcs->map(function ($t) {
+                'tube_colors'          => $k->kabelTubeOdcs->map(fn($t) => [
+                    'id' => $t->id,
+                    'warna_tube' => $t->warna_tube,
+                ])->toArray(),
+                'odcs'                 => $k->odcs ? $k->odcs->map(function ($o) {
                     return [
-                        'id' => $t->id,
+                        'id' => $o->id,
+                        'nama_odc' => $o->nama_odc,
+                        'tipe_splitter' => $o->tipe_splitter,
+                        'status' => $o->status,
+                        'created_at' => $o->created_at?->toDateTimeString(),
+                        'updated_at' => $o->updated_at?->toDateTimeString(),
+                        'deleted_at' => $o->deleted_at?->toDateTimeString(),
                     ];
-                })->toArray(),
+                })->toArray() : [],
                 'created_at'           => $k->created_at->toDateTimeString(),
                 'updated_at'           => $k->updated_at->toDateTimeString(),
             ],
@@ -341,6 +404,7 @@ class FoKabelOdcController extends Controller
     {
         $k = FoKabelOdc::withTrashed()->findOrFail($id);
         $k->update(['status' => 'active']);
+        $k->cascadeUnarchive();
 
         return response()->json([
             'status'  => 'success',
@@ -376,7 +440,7 @@ class FoKabelOdcController extends Controller
     public function bulk(Request $request)
     {
         $data = $request->validate([
-            'action' => 'required|in:archive,delete,restore',
+            'action' => 'required|in:archive,delete,restore,unarchive',
             'ids'    => 'required|array|min:1',
             'ids.*'  => 'integer|distinct',
         ]);
@@ -386,28 +450,57 @@ class FoKabelOdcController extends Controller
 
         switch ($action) {
             case 'archive':
-                // Set status = 'archived'
-                $this->model::withTrashed()
-                    ->whereIn('id', $ids)
-                    ->update(['status' => 'archived']);
+                // Set status = 'archived' (loop to fire events)
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        $model->status = 'archived';
+                        $model->save();
+                    }
+                }
                 $message = 'Items archived.';
                 break;
 
             case 'delete':
-                // Soft‐delete all (mark deleted_at)
-                $this->model::whereIn('id', $ids)->delete();
+                // Soft‐delete all (loop to fire events)
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model && !$model->trashed()) {
+                        $model->delete();
+                    }
+                }
                 $message = 'Items soft‐deleted.';
                 break;
 
             case 'restore':
-                // First restore soft‐deleted
-                $this->model::onlyTrashed()
-                    ->whereIn('id', $ids)
-                    ->restore();
-                // Then set status back to 'active'
-                $this->model::whereIn('id', $ids)
-                    ->update(['status' => 'active']);
+                // Loop and call restore() for trashed, or cascadeUnarchive for archived
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        if ($model->trashed()) {
+                            $model->restore();
+                        } elseif ($model->status === 'archived') {
+                            $model->status = 'active';
+                            $model->save();
+                            if (method_exists($model, 'cascadeUnarchive')) {
+                                $model->cascadeUnarchive();
+                            }
+                        }
+                    }
+                }
                 $message = 'Items restored to active.';
+                break;
+
+            case 'unarchive':
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        $model->status = 'active';
+                        $model->save();
+                        $model->cascadeUnarchive();
+                    }
+                }
+                $message = 'Items unarchived.';
                 break;
 
             default:

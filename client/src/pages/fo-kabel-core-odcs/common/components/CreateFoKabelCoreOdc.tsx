@@ -15,6 +15,8 @@ interface TubeOdcOption {
     warna_tube: string;
     kabel_odc_id: number;
     nama_kabel: string;
+    jumlah_core_in_tube?: number;
+    kabel_core_odc_ids?: number[];
 }
 
 interface Props {
@@ -90,16 +92,20 @@ export function CreateFoKabelCoreOdc({
         value: FoKabelCoreOdcCreate[K]
     ) => setForm((f) => ({ ...f, [field]: value }));
 
+    // --- Max core per tube logic ---
+    const selectedTube = tubes.find((t) => t.id === form.kabel_tube_odc_id);
+    const tubeFull = selectedTube && typeof selectedTube.jumlah_core_in_tube === 'number' && selectedTube.jumlah_core_in_tube > 0 && selectedTube.kabel_core_odc_ids && selectedTube.kabel_core_odc_ids.length >= selectedTube.jumlah_core_in_tube;
+
     return (
-        <Card title={t('new_core_odc')}>
+        <Card title={t('New Core ODC')}>
             {/* Select parent cable */}
-            <Element leftSide={t('kabel_odc')} required>
+            <Element leftSide={t('Kabel ODC')} required>
                 <SelectField
                     required
                     value={selectedCable || ''}
                     onValueChange={(v) => setSelectedCable(parseInt(v))}
                 >
-                    <option value="">{t('select_kabel_odc')}</option>
+                    <option value="">{t('select kabel odc')}</option>
                     {cableOptions.map((opt) => (
                         <option key={opt.id} value={opt.id}>
                             {opt.name}
@@ -109,33 +115,37 @@ export function CreateFoKabelCoreOdc({
             </Element>
 
             {/* Select tube under chosen cable */}
-            <Element leftSide={t('warna_tube')} required>
+            <Element leftSide={t('Warna Tube')} required>
                 <SelectField
                     required
                     value={form.kabel_tube_odc_id || ''}
-                    onValueChange={(v) =>
-                        change('kabel_tube_odc_id', parseInt(v))
-                    }
+                    onValueChange={(v) => change('kabel_tube_odc_id', parseInt(v))}
                     errorMessage={errors?.errors.kabel_tube_odc_id}
                 >
-                    <option value="">{t('select_warna_tube')}</option>
+                    <option value="">{t('select warna tube')}</option>
                     {filteredTubes.map((tub) => (
                         <option key={tub.id} value={tub.id}>
                             {tub.warna_tube}
                         </option>
                     ))}
                 </SelectField>
+                {tubeFull && (
+                    <div className="text-red-600 font-semibold mb-2">
+                        Tube is full (maximum {selectedTube.jumlah_core_in_tube} cores per tube).
+                    </div>
+                )}
             </Element>
 
             {/* Select core color */}
-            <Element leftSide={t('warna_core')} required>
+            <Element leftSide={t('Warna Core')} required>
                 <SelectField
                     required
                     value={form.warna_core}
                     onValueChange={(v) => change('warna_core', v)}
                     errorMessage={errors?.errors.warna_core}
+                    disabled={tubeFull}
                 >
-                    <option value="">{t('select_warna_core')}</option>
+                    <option value="">{t('select warna core')}</option>
                     {CORE_COLORS.map((color) => (
                         <option key={color} value={color}>
                             {t(color)}

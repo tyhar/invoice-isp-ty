@@ -237,6 +237,17 @@ Route::group(['middleware' => ['throttle:api', 'api_db', 'token_auth', 'locale']
     Route::patch('/fo-client-ftths/{id}/restore', [FoClientFtthController::class, 'restore']);
     Route::post('/fo-client-ftths/bulk', [FoClientFtthController::class, 'bulk']);
 
+    Route::get('/fo-joint-boxes', [\App\Http\Controllers\FoJointBoxController::class, 'index']);
+    Route::post('/fo-joint-boxes', [\App\Http\Controllers\FoJointBoxController::class, 'store']);
+    Route::get('/fo-joint-boxes/{id}', [\App\Http\Controllers\FoJointBoxController::class, 'show']);
+    Route::put('/fo-joint-boxes/{id}', [\App\Http\Controllers\FoJointBoxController::class, 'update']);
+    Route::patch('/fo-joint-boxes/{id}', [\App\Http\Controllers\FoJointBoxController::class, 'update']);
+    Route::delete('/fo-joint-boxes/{id}', [\App\Http\Controllers\FoJointBoxController::class, 'destroy']);
+    Route::patch('/fo-joint-boxes/{id}/archive', [\App\Http\Controllers\FoJointBoxController::class, 'archive']);
+    Route::patch('/fo-joint-boxes/{id}/unarchive', [\App\Http\Controllers\FoJointBoxController::class, 'unarchive']);
+    Route::patch('/fo-joint-boxes/{id}/restore', [\App\Http\Controllers\FoJointBoxController::class, 'restore']);
+    Route::post('/fo-joint-boxes/bulk', [\App\Http\Controllers\FoJointBoxController::class, 'bulk']);
+
     Route::get('/ftth-statistics', [FtthStatisticController::class, 'index']);
 
     Route::get('/test-ftth', function () {

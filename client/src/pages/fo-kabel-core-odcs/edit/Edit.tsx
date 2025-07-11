@@ -76,7 +76,7 @@ export default function Edit() {
                 if (selected) setSelectedCable(selected.kabel_odc_id);
             })
             .catch(() => {
-                toast.error('error_refresh_page');
+                toast.error('error refresh page');
                 navigate('/fo-kabel-core-odcs');
             });
     }, [id, navigate]);
@@ -90,9 +90,9 @@ export default function Edit() {
 
         request('PUT', endpoint(`/api/v1/fo-kabel-core-odcs/${id}`), form)
             .then(() => {
-                toast.success('updated_core_odc');
+                toast.success('update core odc');
                 navigate(route('/fo-kabel-core-odcs/:id/edit', { id }), {
-                    state: { toast: 'updated_core_odc' },
+                    state: { toast: 'updated core odc' },
                 });
             })
             .catch((error) => {
@@ -100,7 +100,7 @@ export default function Edit() {
                     setErrors(error.response.data);
                     toast.dismiss();
                 } else {
-                    toast.error('error_refresh_page');
+                    toast.error('error refresh page');
                 }
             })
             .finally(() => setIsBusy(false));
@@ -108,7 +108,7 @@ export default function Edit() {
 
     const pages = [
         { name: t('FO Kabel Core ODC')!, href: '/fo-kabel-core-odcs' },
-        { name: t('edit_core_odc')!, href: `/fo-kabel-core-odcs/${id}/edit` },
+        { name: t('Edit Core ODC')!, href: `/fo-kabel-core-odcs/${id}/edit` },
     ];
 
     // show spinner until form is initialized
@@ -118,7 +118,7 @@ export default function Edit() {
 
     return (
         <Default
-            title={t('edit_core_odc')!}
+            title={t('Edit Core ODC')!}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

@@ -62,37 +62,48 @@ export default function FoKabelCoreOdcs() {
     const columns: DataTableColumns<FoKabelCoreOdc> = [
         { id: 'id', label: 'ID' },
         {
-            id: 'kabel_odc',
-            label: 'Kabel ODC',
-            format: (_val, rec) => rec.kabel_odc.nama_kabel,
+            id: 'warna_core',
+            label: 'Warna Core',
+            format: (val, rec) => (
+                <a
+                    href={`/fo-kabel-core-odcs/${rec.id}/edit`}
+                    className="text-blue-600 hover:underline"
+                >
+                    {val}
+                </a>
+            ),
         },
         {
             id: 'kabel_tube_odc',
             label: 'Warna Tube',
-            format: (_val, rec) => rec.kabel_tube_odc.warna_tube,
+            format: (_val, rec) => rec.kabel_tube_odc?.warna_tube ?? '-',
         },
-        { id: 'warna_core', label: 'Warna Core' },
-        { id: 'status', label: 'Status' },
+        {
+            id: 'kabel_odc',
+            label: 'Kabel ODC',
+            format: (_val, rec) => rec.kabel_odc?.nama_kabel ?? '-',
+        },
+        // { id: 'status', label: 'Status' },
         {
             id: 'odp_ids',
             label: 'Jumlah ODP',
-            format: (_val, rec) => `${rec.odp_ids.length}`,
+            format: (_val, rec) => `${rec.odp_ids?.length ?? 0}`,
         },
-        {
-            id: 'created_at',
-            label: 'Dibuat Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'updated_at',
-            label: 'Diubah Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'deleted_at',
-            label: 'Dihapus Pada',
-            format: (val) => val || '-',
-        },
+        // {
+        //     id: 'created_at',
+        //     label: 'Dibuat Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'updated_at',
+        //     label: 'Diubah Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'deleted_at',
+        //     label: 'Dihapus Pada',
+        //     format: (val) => val || '-',
+        // },
     ];
 
     return (

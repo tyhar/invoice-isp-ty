@@ -25,6 +25,25 @@ class FoKabelCoreOdc extends Model
         'deleted_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Cascade restore to ODPs and set status to active if archived
+        static::restoring(function (FoKabelCoreOdc $model) {
+            foreach ($model->odp()->withTrashed()->get() as $odp) {
+                if ($odp->trashed()) {
+                    $odp->restore();
+                }
+                if ($odp->status === 'archived') {
+                    $odp->status = 'active';
+                    $odp->save();
+                }
+            }
+        });
+        // DO NOT nullify foreign keys on forceDeleted or anywhere else!
+    }
+
     /**
      * Belongs to one KabelTubeOdc.
      */
@@ -39,5 +58,28 @@ class FoKabelCoreOdc extends Model
     public function odp()
     {
         return $this->hasOne(FoOdp::class, 'kabel_core_odc_id', 'id');
+    }
+
+    /**
+     * Unarchive ODPs (if any).
+     */
+    public function cascadeUnarchive()
+    {
+        // \Log::info('cascadeUnarchive called on KabelCoreOdc', ['id' => $this->id]);
+        foreach ($this->odp()->withTrashed()->get() as $odp) {
+            if ($odp->status === 'archived') {
+                $odp->status = 'active';
+                $odp->save();
+            }
+        }
+    }
+
+    /**
+     * Returns true if parent Tube is active and not deleted.
+     */
+    public function parentIsRestorable()
+    {
+        $parent = $this->kabelTubeOdc()->withTrashed()->first();
+        return $parent && !$parent->trashed() && $parent->status === 'active';
     }
 }

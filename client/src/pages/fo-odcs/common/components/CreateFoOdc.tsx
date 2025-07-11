@@ -14,6 +14,7 @@ export interface FoOdcFormValues {
     lokasi_deskripsi: string;
     lokasi_latitude: string;
     lokasi_longitude: string;
+    kabel_odc_id: string; // <-- add this
     nama_odc: string;
     tipe_splitter: string;
 }
@@ -23,19 +24,23 @@ interface LokasiOption {
     nama_lokasi: string;
 }
 
+interface KabelOdcOption {
+    id: number;
+    nama_kabel: string;
+}
+
 interface Props {
     values: FoOdcFormValues;
     setValues: React.Dispatch<React.SetStateAction<FoOdcFormValues>>;
     lokasis: LokasiOption[];
+    kabelOdcs: KabelOdcOption[];
     errors?: ValidationBag;
 }
 
-export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
+export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: Props) {
     const [t] = useTranslation();
-    const onChange = <K extends keyof FoOdcFormValues>(
-        field: K,
-        value: FoOdcFormValues[K]
-    ) => setValues((v) => ({ ...v, [field]: value }));
+    const onChange = <K extends keyof FoOdcFormValues>(field: K, value: FoOdcFormValues[K]) =>
+        setValues((v) => ({ ...v, [field]: value }));
 
     return (
         <Card
@@ -125,7 +130,25 @@ export function CreateFoOdc({ values, setValues, lokasis, errors }: Props) {
                 />
             </Element>
 
+<<<<<<< Updated upstream
             <Element leftSide={t('tipe_splitter')} required>
+=======
+            <Element leftSide={t('Kabel ODC')} required>
+                <SelectField
+                    required
+                    value={values.kabel_odc_id}
+                    onValueChange={(v) => onChange('kabel_odc_id', v)}
+                    errorMessage={errors?.errors.kabel_odc_id}
+                >
+                    <option value="">{t('Pilih Kabel ODC')}</option>
+                    {kabelOdcs.map((k) => (
+                        <option key={k.id} value={k.id}>{k.nama_kabel}</option>
+                    ))}
+                </SelectField>
+            </Element>
+
+            <Element leftSide={t('Tipe splitter')} required>
+>>>>>>> Stashed changes
                 <SelectField
                     required
                     value={values.tipe_splitter}

@@ -46,9 +46,9 @@ export default function FoLokasis() {
                 </a>
             ),
         },
+
+
         { id: 'deskripsi', label: 'Deskripsi' },
-        { id: 'latitude', label: 'Latitude' },
-        { id: 'longitude', label: 'Longitude' },
         {
             id: 'odcs',
             label: 'Jumlah ODC',
@@ -64,6 +64,25 @@ export default function FoLokasis() {
             label: 'Jumlah Client',
             format: (_f, resource) => `${resource.clients?.length ?? 0} Client`,
         },
+<<<<<<< Updated upstream
+=======
+        {
+            id: 'geocoding',
+            label: 'Geocoding Status',
+            format: (_f, resource) => {
+                if (!resource.latitude || !resource.longitude) {
+                    return <span className="text-gray-500">No coordinates</span>;
+                }
+                if (resource.geocoded_at) {
+                    return <span className="text-green-600">✓ Geocoded ({resource.city || 'No city'})</span>;
+                }
+                return <span className="text-orange-600">⚠ Needs geocoding</span>;
+            },
+        },
+        { id: 'latitude', label: 'Latitude' },
+        { id: 'longitude', label: 'Longitude' },
+
+>>>>>>> Stashed changes
     ];
 
     return (

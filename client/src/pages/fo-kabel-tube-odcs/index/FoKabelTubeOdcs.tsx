@@ -44,11 +44,6 @@ export default function FoKabelTubeOdcs() {
     const columns: DataTableColumns<FoKabelTubeOdc> = [
         { id: 'id', label: 'ID' },
         {
-            id: 'kabel_odc',
-            label: 'Kabel ODC',
-            format: (_val, record) => record.kabel_odc.nama_kabel,
-        },
-        {
             id: 'warna_tube',
             label: 'Warna Tube',
             format: (val, record) => (
@@ -60,27 +55,32 @@ export default function FoKabelTubeOdcs() {
                 </a>
             ),
         },
-        { id: 'status', label: 'Status' },
+        {
+            id: 'kabel_odc',
+            label: 'Kabel ODC',
+            format: (_val, record) => record.kabel_odc?.nama_kabel ?? '-',
+        },
+        // { id: 'status', label: 'Status' },
         {
             id: 'kabel_core_odc_ids',
             label: 'Jumlah Core ODC',
-            format: (_val, record) => `${record.kabel_core_odc_ids.length}`,
+            format: (_val, record) => `${record.kabel_core_odc_ids?.length ?? 0}`,
         },
-        {
-            id: 'created_at',
-            label: 'Dibuat Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'updated_at',
-            label: 'Diubah Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'deleted_at',
-            label: 'Dihapus Pada',
-            format: (val) => val || '-',
-        },
+        // {
+        //     id: 'created_at',
+        //     label: 'Dibuat Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'updated_at',
+        //     label: 'Diubah Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'deleted_at',
+        //     label: 'Dihapus Pada',
+        //     format: (val) => val || '-',
+        // },
     ];
 
     return (

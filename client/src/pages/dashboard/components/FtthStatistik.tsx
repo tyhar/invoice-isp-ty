@@ -3,19 +3,14 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
-interface FtthStat {
-    id: number;
-    client_count: number;
-    odc_count: number;
-    odp_count: number;
-    kabel_odc_count: number;
-    kabel_tube_odc_count: number;
-    kabel_core_odc_count: number;
-}
-
 export function FtthStatistics() {
     const [t] = useTranslation();
+<<<<<<< Updated upstream
     const [stats, setStats] = useState<FtthStat | null>(null);
+=======
+    const [stats, setStats] = useState<any | null>(null);
+    const API_BASE_URL = 'http://localhost:8000';
+>>>>>>> Stashed changes
 
     useEffect(() => {
         const token = localStorage.getItem('X-API-TOKEN') ?? '';
@@ -27,7 +22,7 @@ export function FtthStatistics() {
                 },
             })
             .then((response) => {
-                setStats(response.data.data[0]);
+                setStats(response.data.data.summary);
             })
             .catch((error) => {
                 console.error('Error fetching FTTH stats:', error);
@@ -40,23 +35,35 @@ export function FtthStatistics() {
 
             {stats ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-3">
-                    <Card className="bg-white shadow rounded p-1" title="Jumlah Client">
-                        <div className="text-center text-2xl font-bold">{stats.client_count}</div>
+                    <Card className="bg-white shadow rounded p-1" title="Jumlah Lokasi">
+                        <div className="text-center text-2xl font-bold">{stats.lokasi}</div>
                     </Card>
                     <Card className="bg-white shadow rounded p-1" title="Jumlah ODC">
-                        <div className="text-center text-2xl font-bold">{stats.odc_count}</div>
+                        <div className="text-center text-2xl font-bold">{stats.odc}</div>
                     </Card>
                     <Card className="bg-white shadow rounded p-1" title="Jumlah ODP">
-                        <div className="text-center text-2xl font-bold">{stats.odp_count}</div>
+                        <div className="text-center text-2xl font-bold">{stats.odp}</div>
                     </Card>
                     <Card className="bg-white shadow rounded p-1" title="Jumlah Kabel ODC">
-                        <div className="text-center text-2xl font-bold">{stats.kabel_odc_count}</div>
-                    </Card>
-                    <Card className="bg-white shadow rounded p-1" title="Jumlah Kabel Core ODC">
-                        <div className="text-center text-2xl font-bold">{stats.kabel_core_odc_count}</div>
+                        <div className="text-center text-2xl font-bold">{stats.kabel}</div>
                     </Card>
                     <Card className="bg-white shadow rounded p-1" title="Jumlah Kabel Tube ODC">
-                        <div className="text-center text-2xl font-bold">{stats.kabel_tube_odc_count}</div>
+                        <div className="text-center text-2xl font-bold">{stats.tubes}</div>
+                    </Card>
+                    <Card className="bg-white shadow rounded p-1" title="Jumlah Kabel Core ODC">
+                        <div className="text-center text-2xl font-bold">{stats.cores}</div>
+                    </Card>
+                    <Card className="bg-white shadow rounded p-1" title="Jumlah Client FTTH">
+                        <div className="text-center text-2xl font-bold">{stats.clientFtth}</div>
+                    </Card>
+                    <Card className="bg-white shadow rounded p-1" title="Total Kabel Length (m)">
+                        <div className="text-center text-2xl font-bold">{stats.kabelLength}</div>
+                    </Card>
+                    <Card className="bg-white shadow rounded p-1" title="ODP Utilization (%)">
+                        <div className="text-center text-2xl font-bold">{stats.odpUtilization}%</div>
+                    </Card>
+                    <Card className="bg-white shadow rounded p-1" title="Kabel Utilization (%)">
+                        <div className="text-center text-2xl font-bold">{stats.kabelUtilization}%</div>
                     </Card>
                 </div>
             ) : (

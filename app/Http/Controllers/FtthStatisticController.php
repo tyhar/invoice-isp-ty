@@ -150,14 +150,20 @@ class FtthStatisticController extends Controller
 
     private function getOdpsPerOdc()
     {
-        $odps = FoOdp::with('kabelCoreOdc.kabelTubeOdc.kabelOdc.odc')->get();
+        // Use the new KabelOdc->odcs relationship (plural)
+        $odcs = \App\Models\FoKabelOdc::with('odcs')->get();
         $odpsByOdc = [];
-
-        foreach ($odps as $odp) {
-            $odcName = $odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc ?? 'Unknown';
-            $odpsByOdc[$odcName] = ($odpsByOdc[$odcName] ?? 0) + 1;
+        foreach ($odcs as $kabelOdc) {
+            $odcName = $kabelOdc->nama_kabel ?? 'Unknown';
+            $odpCount = 0;
+            foreach ($kabelOdc->odcs as $odc) {
+                // Each ODC can have multiple ODPs via KabelCoreOdc->ODP, but for stats, count ODPs linked to this ODC's KabelOdc
+                $odpCount += \App\Models\FoOdp::whereHas('kabelCoreOdc.kabelTubeOdc.kabelOdc', function($q) use ($kabelOdc) {
+                    $q->where('id', $kabelOdc->id);
+                })->count();
+            }
+            $odpsByOdc[$odcName] = $odpCount;
         }
-
         return array_map(function($name, $count) {
             return ['name' => $name, 'ODPs' => $count];
         }, array_keys($odpsByOdc), array_values($odpsByOdc));
@@ -180,13 +186,13 @@ class FtthStatisticController extends Controller
 
     private function getDetailedData()
     {
-        // Eager load all relationships for detailed drill-down
-        $lokasis = FoLokasi::with([
-            'odcs.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth',
+        // Eager load all relationships for detailed drill-down using new structure
+        $lokasis = \App\Models\FoLokasi::with([
+            'odcs.kabelOdc',
+            'odps.kabelCoreOdc.kabelTubeOdc.kabelOdc',
             'odps.clientFtth',
             'clientFtths.odp'
         ])->get();
-
         return $lokasis->map(function($lokasi) {
             return [
                 'id' => $lokasi->id,
@@ -207,61 +213,25 @@ class FtthStatisticController extends Controller
                         'created_at' => $odc->created_at?->toDateTimeString(),
                         'updated_at' => $odc->updated_at?->toDateTimeString(),
                         'deleted_at' => $odc->deleted_at?->toDateTimeString(),
-                        'kabel_odcs' => $odc->kabelOdcs->map(function($kabel) {
-                            return [
-                                'id' => $kabel->id,
-                                'nama_kabel' => $kabel->nama_kabel,
-                                'tipe_kabel' => $kabel->tipe_kabel,
-                                'panjang_kabel' => $kabel->panjang_kabel,
-                                'jumlah_tube' => $kabel->jumlah_tube,
-                                'jumlah_core_in_tube' => $kabel->jumlah_core_in_tube,
-                                'jumlah_total_core' => $kabel->jumlah_total_core,
-                                'status' => $kabel->status,
-                                'created_at' => $kabel->created_at?->toDateTimeString(),
-                                'updated_at' => $kabel->updated_at?->toDateTimeString(),
-                                'deleted_at' => $kabel->deleted_at?->toDateTimeString(),
-                                'kabel_tube_odcs' => $kabel->kabelTubeOdcs->map(function($tube) {
-                                    return [
-                                        'id' => $tube->id,
-                                        'warna_tube' => $tube->warna_tube,
-                                        'status' => $tube->status,
-                                        'created_at' => $tube->created_at?->toDateTimeString(),
-                                        'updated_at' => $tube->updated_at?->toDateTimeString(),
-                                        'deleted_at' => $tube->deleted_at?->toDateTimeString(),
-                                        'kabel_core_odcs' => $tube->kabelCoreOdcs->map(function($core) {
-                                            return [
-                                                'id' => $core->id,
-                                                'warna_core' => $core->warna_core,
-                                                'status' => $core->status,
-                                                'created_at' => $core->created_at?->toDateTimeString(),
-                                                'updated_at' => $core->updated_at?->toDateTimeString(),
-                                                'deleted_at' => $core->deleted_at?->toDateTimeString(),
-                                                'odp' => $core->odp ? [
-                                                    'id' => $core->odp->id,
-                                                    'nama_odp' => $core->odp->nama_odp,
-                                                    'status' => $core->odp->status,
-                                                    'created_at' => $core->odp->created_at?->toDateTimeString(),
-                                                    'updated_at' => $core->odp->updated_at?->toDateTimeString(),
-                                                    'deleted_at' => $core->odp->deleted_at?->toDateTimeString(),
-                                                    'client_ftth' => $core->odp->clientFtth ? [
-                                                        'id' => $core->odp->clientFtth->id,
-                                                        'nama_client' => $core->odp->clientFtth->nama_client,
-                                                        'alamat' => $core->odp->clientFtth->alamat,
-                                                        'status' => $core->odp->clientFtth->status,
-                                                        'created_at' => $core->odp->clientFtth->created_at?->toDateTimeString(),
-                                                        'updated_at' => $core->odp->clientFtth->updated_at?->toDateTimeString(),
-                                                        'deleted_at' => $core->odp->clientFtth->deleted_at?->toDateTimeString(),
-                                                    ] : null,
+                        'kabel_odc' => $odc->kabelOdc ? [
+                            'id' => $odc->kabelOdc->id,
+                            'nama_kabel' => $odc->kabelOdc->nama_kabel,
+                            'tipe_kabel' => $odc->kabelOdc->tipe_kabel,
+                            'panjang_kabel' => $odc->kabelOdc->panjang_kabel,
+                            'jumlah_tube' => $odc->kabelOdc->jumlah_tube,
+                            'jumlah_core_in_tube' => $odc->kabelOdc->jumlah_core_in_tube,
+                            'jumlah_total_core' => $odc->kabelOdc->jumlah_total_core,
+                            'status' => $odc->kabelOdc->status,
+                            'created_at' => $odc->kabelOdc->created_at?->toDateTimeString(),
+                            'updated_at' => $odc->kabelOdc->updated_at?->toDateTimeString(),
+                            'deleted_at' => $odc->kabelOdc->deleted_at?->toDateTimeString(),
                                                 ] : null,
-                                            ];
-                                        }),
-                                    ];
-                                }),
-                            ];
-                        }),
                     ];
                 }),
                 'odps' => $lokasi->odps->map(function($odp) {
+                    $core = $odp->kabelCoreOdc;
+                    $tube = $core?->kabelTubeOdc;
+                    $kabelOdc = $tube?->kabelOdc;
                     return [
                         'id' => $odp->id,
                         'nama_odp' => $odp->nama_odp,
@@ -269,6 +239,18 @@ class FtthStatisticController extends Controller
                         'created_at' => $odp->created_at?->toDateTimeString(),
                         'updated_at' => $odp->updated_at?->toDateTimeString(),
                         'deleted_at' => $odp->deleted_at?->toDateTimeString(),
+                        'kabel_core_odc' => $core ? [
+                            'id' => $core->id,
+                            'warna_core' => $core->warna_core,
+                            'kabel_tube_odc' => $tube ? [
+                                'id' => $tube->id,
+                                'warna_tube' => $tube->warna_tube,
+                                'kabel_odc' => $kabelOdc ? [
+                                    'id' => $kabelOdc->id,
+                                    'nama_kabel' => $kabelOdc->nama_kabel,
+                                ] : null,
+                            ] : null,
+                        ] : null,
                         'client_ftth' => $odp->clientFtth ? [
                             'id' => $odp->clientFtth->id,
                             'nama_client' => $odp->clientFtth->nama_client,

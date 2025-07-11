@@ -15,6 +15,7 @@ class FoOdc extends Model
 
     protected $fillable = [
         'lokasi_id',
+        'kabel_odc_id', // now nullable
         'nama_odc',
         'tipe_splitter',
         'status',    // allow "active" or "archived"
@@ -34,10 +35,11 @@ class FoOdc extends Model
     }
 
     /**
-     * Each ODC can have many KabelOdcs.
+     * Each ODC belongs to exactly one KabelOdc.
      */
-    public function kabelOdcs()
+    public function kabelOdc()
     {
-        return $this->hasMany(FoKabelOdc::class, 'odc_id');
+        // kabel_odc_id is now nullable
+        return $this->belongsTo(FoKabelOdc::class, 'kabel_odc_id');
     }
 }

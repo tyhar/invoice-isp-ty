@@ -20,8 +20,6 @@ import { useReactSettings } from '$app/common/hooks/useReactSettings';
  */
 export interface FoKabelOdc {
     id: number;
-    odc_id: number;
-    odc: { id: number; nama_odc: string };
     nama_kabel: string;
     tipe_kabel: 'singlecore' | 'multicore';
     panjang_kabel: number;
@@ -33,6 +31,7 @@ export interface FoKabelOdc {
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
+    odcs: Array<{ id: number; nama_odc: string }>;
 }
 
 /**
@@ -78,7 +77,7 @@ export function useFoKabelOdcColumns() {
             column: 'odc',
             id: 'odc',
             label: t('odc'),
-            format: (_: any, k: FoKabelOdc) => <span>{k.odc.nama_odc}</span>,
+            format: (_: any, k: FoKabelOdc) => <span>{k.odcs.map(odc => odc.nama_odc).join(', ')}</span>,
         },
         {
             column: 'nama_kabel',

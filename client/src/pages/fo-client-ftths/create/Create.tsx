@@ -98,7 +98,7 @@ export default function Create() {
                 lokasi_id,
             })
                 .then(() => {
-                    toast.success('created_client_ftth');
+                    toast.success('created client ftth');
                     queryClient.invalidateQueries('fo-client-ftths');
                     navigate('/fo-client-ftths');
                 })
@@ -107,7 +107,7 @@ export default function Create() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                 })
                 .finally(() => setLoading(false));
@@ -130,7 +130,7 @@ export default function Create() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                     setLoading(false);
                 });

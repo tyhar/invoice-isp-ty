@@ -11,8 +11,6 @@ import { useFoKabelOdcBulkActions } from '../common/hooks/useFoKabelOdcBulkActio
 
 interface FoKabelOdc {
     id: string;
-    odc_id: number;
-    odc: { id: number; nama_odc: string };
     nama_kabel: string;
     tipe_kabel: 'singlecore' | 'multicore';
     panjang_kabel: number;
@@ -24,6 +22,8 @@ interface FoKabelOdc {
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
+    odcs: { id: number; nama_odc: string }[];
+    tube_colors?: { id: number; warna_tube: string }[];
 }
 
 export default function FoKabelOdcs() {
@@ -33,12 +33,7 @@ export default function FoKabelOdcs() {
     const pages: Page[] = [{ name: t('FO Kabel ODC'), href: '/fo-kabel-odcs' }];
 
     const columns: DataTableColumns<FoKabelOdc> = [
-        { id: 'id', label: 'ID' },
-        {
-            id: 'odc',
-            label: 'ODC',
-            format: (_val, record) => record.odc.nama_odc,
-        },
+        // { id: 'id', label: 'ID' },
         {
             id: 'nama_kabel',
             label: 'Nama Kabel',
@@ -51,36 +46,60 @@ export default function FoKabelOdcs() {
                 </a>
             ),
         },
+        {
+            id: 'odcs',
+            label: 'ODC',
+            format: (_val, record) => record.odcs?.map(odc => odc.nama_odc).join(', ') ?? '-',
+        },
         { id: 'tipe_kabel', label: 'Tipe Kabel' },
         {
             id: 'panjang_kabel',
             label: 'Panjang (m)',
             format: (val) => `${val}`,
         },
-        { id: 'jumlah_tube', label: 'Jumlah Tube' },
-        { id: 'jumlah_core_in_tube', label: 'Core per Tube' },
-        { id: 'jumlah_total_core', label: 'Total Core' },
-        { id: 'status', label: 'Status' },
         {
-            id: 'kabel_tube_odcs',
-            label: 'Tube Count',
-            format: (_val, record) => `${record.kabel_tube_odcs?.length ?? 0}`,
+            id: 'active_tube_count',
+            label: 'Active Tube',
+            format: (val) => val ?? 0,
         },
         {
-            id: 'created_at',
-            label: 'Dibuat Pada',
-            format: (val) => val,
+            id: 'active_core_count',
+            label: 'Active Core',
+            format: (val) => val ?? 0,
         },
-        {
-            id: 'updated_at',
-            label: 'Diubah Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'deleted_at',
-            label: 'Dihapus Pada',
-            format: (val) => val || '-',
-        },
+        { id: 'jumlah_tube', label: 'Total Tube' },
+        { id: 'jumlah_core_in_tube', label: 'Max Core per Tube' },
+        { id: 'jumlah_total_core', label: 'Max Total Core' },
+
+        // { id: 'status', label: 'Status' },
+        // {
+        //     id: 'kabel_tube_odcs',
+        //     label: 'Tube Count',
+        //     format: (_val, record) => `${record.kabel_tube_odcs?.length ?? 0}`,
+        // },
+        // {
+        //     id: 'tube_colors',
+        //     label: 'Tubes',
+        //     format: (_val: any, record: FoKabelOdc) =>
+        //         Array.isArray(record.tube_colors)
+        //             ? record.tube_colors.map(tc => tc.warna_tube).join(', ')
+        //             : '',
+        // },
+        // {
+        //     id: 'created_at',
+        //     label: 'Dibuat Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'updated_at',
+        //     label: 'Diubah Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'deleted_at',
+        //     label: 'Dihapus Pada',
+        //     format: (val) => val || '-',
+        // },
     ];
 
     return (

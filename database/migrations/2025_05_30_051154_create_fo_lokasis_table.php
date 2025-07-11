@@ -20,6 +20,10 @@ return new class extends Migration
             $table->string('deskripsi')->nullable();
             $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
+            $table->string('city')->nullable();
+            $table->string('province')->nullable();
+            $table->string('country')->nullable();
+            $table->timestamp('geocoded_at')->nullable();
 
             // status: active or archived (default: active)
             $table->enum('status', ['active', 'archived'])->default('active');

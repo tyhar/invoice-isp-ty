@@ -102,10 +102,10 @@ class FoOdpController extends Controller
         $paginator = $query
             ->with([
                 'lokasi',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.lokasi',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.lokasi',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
                 'clientFtth.lokasi',
                 'clientFtth.client',
                 'clientFtth.company'
@@ -118,8 +118,8 @@ class FoOdpController extends Controller
             $core = $o->kabelCoreOdc;
             $tube = $core?->kabelTubeOdc;
             $kabelOdc = $tube?->kabelOdc;
-            $topOdc = $kabelOdc?->odc;
-
+            $odcs = $kabelOdc?->odcs ?? collect();
+            $firstOdc = $odcs->first();
             return [
                 'id'         => $o->id,
                 'nama_odp'   => $o->nama_odp,
@@ -134,7 +134,6 @@ class FoOdpController extends Controller
                     'updated_at'  => $o->lokasi->updated_at?->toDateTimeString(),
                     'deleted_at'  => $o->lokasi->deleted_at?->toDateTimeString(),
                 ] : null,
-
                 'kabel_core_odc' => $core ? [
                     'id'         => $core->id,
                     'warna_core' => $core->warna_core,
@@ -164,102 +163,37 @@ class FoOdpController extends Controller
                         'deleted_at'  => $kabelOdc->deleted_at?->toDateTimeString(),
                     ] : null,
                 ] : null,
-
-                'odc' => $topOdc ? [
-                    'id'       => $topOdc->id,
-                    'nama_odc' => $topOdc->nama_odc,
-                    'tipe_splitter' => $topOdc->tipe_splitter,
-                    'status'   => $topOdc->status,
-                    'created_at' => $topOdc->created_at?->toDateTimeString(),
-                    'updated_at' => $topOdc->updated_at?->toDateTimeString(),
-                    'deleted_at' => $topOdc->deleted_at?->toDateTimeString(),
-                    'lokasi'   => $topOdc->lokasi ? [
-                        'id'          => $topOdc->lokasi->id,
-                        'nama_lokasi' => $topOdc->lokasi->nama_lokasi,
-                        'deskripsi'   => $topOdc->lokasi->deskripsi,
-                        'latitude'    => $topOdc->lokasi->latitude,
-                        'longitude'   => $topOdc->lokasi->longitude,
-                        'status'      => $topOdc->lokasi->status,
+                // Show the first ODC for this KabelOdc (if any)
+                'odc' => $firstOdc ? [
+                    'id'       => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
+                    'tipe_splitter' => $firstOdc->tipe_splitter ?? null,
+                    'status'   => $firstOdc->status ?? null,
+                    'created_at' => $firstOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $firstOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $firstOdc->deleted_at?->toDateTimeString(),
+                    'lokasi'   => $firstOdc->lokasi ? [
+                        'id'          => $firstOdc->lokasi->id,
+                        'nama_lokasi' => $firstOdc->lokasi->nama_lokasi,
+                        'deskripsi'   => $firstOdc->lokasi->deskripsi,
+                        'latitude'    => $firstOdc->lokasi->latitude,
+                        'longitude'   => $firstOdc->lokasi->longitude,
+                        'status'      => $firstOdc->lokasi->status,
                     ] : null,
-                    'kabel_odcs' => $topOdc->kabelOdcs->map(function ($k) {
-                        return [
-                            'id'                   => $k->id,
-                            'nama_kabel'           => $k->nama_kabel,
-                            'tipe_kabel'           => $k->tipe_kabel,
-                            'panjang_kabel'        => $k->panjang_kabel,
-                            'jumlah_tube'          => $k->jumlah_tube,
-                            'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
-                            'jumlah_total_core'    => $k->jumlah_total_core,
-                            'status'               => $k->status,
-                            'created_at'           => $k->created_at?->toDateTimeString(),
-                            'updated_at'           => $k->updated_at?->toDateTimeString(),
-                            'deleted_at'           => $k->deleted_at?->toDateTimeString(),
-                            'kabel_tube_odcs'      => $k->kabelTubeOdcs->map(function ($t) {
-                                return [
-                                    'id'                 => $t->id,
-                                    'warna_tube'         => $t->warna_tube,
-                                    'status'             => $t->status,
-                                    'created_at'         => $t->created_at?->toDateTimeString(),
-                                    'updated_at'         => $t->updated_at?->toDateTimeString(),
-                                    'deleted_at'         => $t->deleted_at?->toDateTimeString(),
-                                    'kabel_core_odcs'    => $t->kabelCoreOdcs->map(function ($c) {
-                                        return [
-                                            'id'                => $c->id,
-                                            'warna_core'        => $c->warna_core,
-                                            'status'            => $c->status,
-                                            'created_at'        => $c->created_at?->toDateTimeString(),
-                                            'updated_at'        => $c->updated_at?->toDateTimeString(),
-                                            'deleted_at'        => $c->deleted_at?->toDateTimeString(),
-                                            'odp'               => $c->odp ? [
-                                                'id'             => $c->odp->id,
-                                                'nama_odp'       => $c->odp->nama_odp,
-                                                'status'         => $c->odp->status,
-                                                'created_at'     => $c->odp->created_at?->toDateTimeString(),
-                                                'updated_at'     => $c->odp->updated_at?->toDateTimeString(),
-                                                'deleted_at'     => $c->odp->deleted_at?->toDateTimeString(),
-                                                'client_ftth'    => $c->odp->clientFtth ? [
-                                                    'id'           => $c->odp->clientFtth->id,
-                                                    'nama_client'  => $c->odp->clientFtth->nama_client,
-                                                    'alamat'       => $c->odp->clientFtth->alamat,
-                                                    'status'       => $c->odp->clientFtth->status,
-                                                    'created_at'   => $c->odp->clientFtth->created_at?->toDateTimeString(),
-                                                    'updated_at'   => $c->odp->clientFtth->updated_at?->toDateTimeString(),
-                                                    'deleted_at'   => $c->odp->clientFtth->deleted_at?->toDateTimeString(),
-                                                    'lokasi'       => $c->odp->clientFtth->lokasi ? [
-                                                        'id'           => $c->odp->clientFtth->lokasi->id,
-                                                        'nama_lokasi'  => $c->odp->clientFtth->lokasi->nama_lokasi,
-                                                        'deskripsi'    => $c->odp->clientFtth->lokasi->deskripsi,
-                                                        'latitude'     => $c->odp->clientFtth->lokasi->latitude,
-                                                        'longitude'    => $c->odp->clientFtth->lokasi->longitude,
-                                                        'status'       => $c->odp->clientFtth->lokasi->status,
-                                                    ] : null,
-                                                    'client'       => $c->odp->clientFtth->client ? [
-                                                        'id'           => $c->odp->clientFtth->client->id,
-                                                        'name'         => $c->odp->clientFtth->client->name,
-                                                        'phone'        => $c->odp->clientFtth->client->phone,
-                                                        'email'        => $c->odp->clientFtth->client->email,
-                                                        'address1'     => $c->odp->clientFtth->client->address1,
-                                                        'address2'     => $c->odp->clientFtth->client->address2,
-                                                        'city'         => $c->odp->clientFtth->client->city,
-                                                        'state'        => $c->odp->clientFtth->client->state,
-                                                        'postal_code'  => $c->odp->clientFtth->client->postal_code,
-                                                        'country_id'   => $c->odp->clientFtth->client->country_id,
-                                                        'status_id'    => $c->odp->clientFtth->client->status_id,
-                                                    ] : null,
-                                                    'company'      => $c->odp->clientFtth->company ? [
-                                                        'id'           => $c->odp->clientFtth->company->id,
-                                                        'name'         => $c->odp->clientFtth->company->name,
-                                                    ] : null,
-                                                ] : null,
+                    'kabel_odc' => $firstOdc->kabelOdc ? [
+                        'id' => $firstOdc->kabelOdc->id,
+                        'nama_kabel' => $firstOdc->kabelOdc->nama_kabel,
+                        'tipe_kabel' => $firstOdc->kabelOdc->tipe_kabel,
+                        'panjang_kabel' => $firstOdc->kabelOdc->panjang_kabel,
+                        'jumlah_tube' => $firstOdc->kabelOdc->jumlah_tube,
+                        'jumlah_core_in_tube' => $firstOdc->kabelOdc->jumlah_core_in_tube,
+                        'jumlah_total_core' => $firstOdc->kabelOdc->jumlah_total_core,
+                        'status' => $firstOdc->kabelOdc->status,
+                        'created_at' => $firstOdc->kabelOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $firstOdc->kabelOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $firstOdc->kabelOdc->deleted_at?->toDateTimeString(),
                                             ] : null,
-                                        ];
-                                    })->toArray(),
-                                ];
-                            })->toArray(),
-                        ];
-                    })->toArray(),
                 ] : null,
-
                 'client_ftth' => $o->clientFtth ? [
                     'id'          => $o->clientFtth->id,
                     'nama_client' => $o->clientFtth->nama_client,
@@ -294,10 +228,9 @@ class FoOdpController extends Controller
                         'name'         => $o->clientFtth->company->name,
                     ] : null,
                 ] : null,
-
                 'status'     => $o->status,
-                'created_at' => $o->created_at->toDateTimeString(),
-                'updated_at' => $o->updated_at->toDateTimeString(),
+                'created_at' => $o->created_at?->toDateTimeString(),
+                'updated_at' => $o->updated_at?->toDateTimeString(),
                 'deleted_at' => $o->deleted_at?->toDateTimeString(),
             ];
         }, $paginator->items());
@@ -352,10 +285,10 @@ class FoOdpController extends Controller
         // 2) Eager‑load the full chain: Lokasi, Core→Tube→ODC, and clientFtth
         $o->load([
             'lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc.kabelOdcs.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.lokasi',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
             'clientFtth.lokasi',
             'clientFtth.client',
             'clientFtth.company'
@@ -366,7 +299,8 @@ class FoOdpController extends Controller
         $core = $o->kabelCoreOdc;
         $tube = $core?->kabelTubeOdc;
         $kabelOdc = $tube?->kabelOdc;
-        $topOdc = $kabelOdc?->odc;
+        $odcs = $kabelOdc?->odcs ?? collect();
+        $firstOdc = $odcs->first();
 
         $responseData = [
             'id'           => $o->id,
@@ -413,99 +347,36 @@ class FoOdpController extends Controller
                 ] : null,
             ] : null,
 
-            'odc' => $topOdc ? [
-                'id'       => $topOdc->id,
-                'nama_odc' => $topOdc->nama_odc,
-                'tipe_splitter' => $topOdc->tipe_splitter,
-                'status'   => $topOdc->status,
-                'created_at' => $topOdc->created_at?->toDateTimeString(),
-                'updated_at' => $topOdc->updated_at?->toDateTimeString(),
-                'deleted_at' => $topOdc->deleted_at?->toDateTimeString(),
-                'lokasi'   => $topOdc->lokasi ? [
-                    'id'          => $topOdc->lokasi->id,
-                    'nama_lokasi' => $topOdc->lokasi->nama_lokasi,
-                    'deskripsi'   => $topOdc->lokasi->deskripsi,
-                    'latitude'    => $topOdc->lokasi->latitude,
-                    'longitude'   => $topOdc->lokasi->longitude,
-                    'status'      => $topOdc->lokasi->status,
+            // Show the first ODC for this KabelOdc (if any)
+            'odc' => $firstOdc ? [
+                'id'       => $firstOdc->id,
+                'nama_odc' => $firstOdc->nama_odc,
+                'tipe_splitter' => $firstOdc->tipe_splitter,
+                'status'   => $firstOdc->status,
+                'created_at' => $firstOdc->created_at?->toDateTimeString(),
+                'updated_at' => $firstOdc->updated_at?->toDateTimeString(),
+                'deleted_at' => $firstOdc->deleted_at?->toDateTimeString(),
+                'lokasi'   => $firstOdc->lokasi ? [
+                    'id'          => $firstOdc->lokasi->id,
+                    'nama_lokasi' => $firstOdc->lokasi->nama_lokasi,
+                    'deskripsi'   => $firstOdc->lokasi->deskripsi,
+                    'latitude'    => $firstOdc->lokasi->latitude,
+                    'longitude'   => $firstOdc->lokasi->longitude,
+                    'status'      => $firstOdc->lokasi->status,
                 ] : null,
-                'kabel_odcs' => $topOdc->kabelOdcs->map(function ($k) {
-                    return [
-                        'id'                   => $k->id,
-                        'nama_kabel'           => $k->nama_kabel,
-                        'tipe_kabel'           => $k->tipe_kabel,
-                        'panjang_kabel'        => $k->panjang_kabel,
-                        'jumlah_tube'          => $k->jumlah_tube,
-                        'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
-                        'jumlah_total_core'    => $k->jumlah_total_core,
-                        'status'               => $k->status,
-                        'created_at'           => $k->created_at?->toDateTimeString(),
-                        'updated_at'           => $k->updated_at?->toDateTimeString(),
-                        'deleted_at'           => $k->deleted_at?->toDateTimeString(),
-                        'kabel_tube_odcs'      => $k->kabelTubeOdcs->map(function ($t) {
-                            return [
-                                'id'                 => $t->id,
-                                'warna_tube'         => $t->warna_tube,
-                                'status'             => $t->status,
-                                'created_at'         => $t->created_at?->toDateTimeString(),
-                                'updated_at'         => $t->updated_at?->toDateTimeString(),
-                                'deleted_at'         => $t->deleted_at?->toDateTimeString(),
-                                'kabel_core_odcs'    => $t->kabelCoreOdcs->map(function ($c) {
-                                    return [
-                                        'id'                => $c->id,
-                                        'warna_core'        => $c->warna_core,
-                                        'status'            => $c->status,
-                                        'created_at'        => $c->created_at?->toDateTimeString(),
-                                        'updated_at'        => $c->updated_at?->toDateTimeString(),
-                                        'deleted_at'        => $c->deleted_at?->toDateTimeString(),
-                                        'odp'               => $c->odp ? [
-                                            'id'             => $c->odp->id,
-                                            'nama_odp'       => $c->odp->nama_odp,
-                                            'status'         => $c->odp->status,
-                                            'created_at'     => $c->odp->created_at?->toDateTimeString(),
-                                            'updated_at'     => $c->odp->updated_at?->toDateTimeString(),
-                                            'deleted_at'     => $c->odp->deleted_at?->toDateTimeString(),
-                                            'client_ftth'    => $c->odp->clientFtth ? [
-                                                'id'           => $c->odp->clientFtth->id,
-                                                'nama_client'  => $c->odp->clientFtth->nama_client,
-                                                'alamat'       => $c->odp->clientFtth->alamat,
-                                                'status'       => $c->odp->clientFtth->status,
-                                                'created_at'   => $c->odp->clientFtth->created_at?->toDateTimeString(),
-                                                'updated_at'   => $c->odp->clientFtth->updated_at?->toDateTimeString(),
-                                                'deleted_at'   => $c->odp->clientFtth->deleted_at?->toDateTimeString(),
-                                                'lokasi'       => $c->odp->clientFtth->lokasi ? [
-                                                    'id'           => $c->odp->clientFtth->lokasi->id,
-                                                    'nama_lokasi'  => $c->odp->clientFtth->lokasi->nama_lokasi,
-                                                    'deskripsi'    => $c->odp->clientFtth->lokasi->deskripsi,
-                                                    'latitude'     => $c->odp->clientFtth->lokasi->latitude,
-                                                    'longitude'    => $c->odp->clientFtth->lokasi->longitude,
-                                                    'status'       => $c->odp->clientFtth->lokasi->status,
-                                                ] : null,
-                                                'client'       => $c->odp->clientFtth->client ? [
-                                                    'id'           => $c->odp->clientFtth->client->id,
-                                                    'name'         => $c->odp->clientFtth->client->name,
-                                                    'phone'        => $c->odp->clientFtth->client->phone,
-                                                    'email'        => $c->odp->clientFtth->client->email,
-                                                    'address1'     => $c->odp->clientFtth->client->address1,
-                                                    'address2'     => $c->odp->clientFtth->client->address2,
-                                                    'city'         => $c->odp->clientFtth->client->city,
-                                                    'state'        => $c->odp->clientFtth->client->state,
-                                                    'postal_code'  => $c->odp->clientFtth->client->postal_code,
-                                                    'country_id'   => $c->odp->clientFtth->client->country_id,
-                                                    'status_id'    => $c->odp->clientFtth->client->status_id,
-                                                ] : null,
-                                                'company'      => $c->odp->clientFtth->company ? [
-                                                    'id'           => $c->odp->clientFtth->company->id,
-                                                    'name'         => $c->odp->clientFtth->company->name,
-                                                ] : null,
-                                            ] : null,
+                'kabel_odc' => $firstOdc->kabelOdc ? [
+                    'id' => $firstOdc->kabelOdc->id,
+                    'nama_kabel' => $firstOdc->kabelOdc->nama_kabel,
+                    'tipe_kabel' => $firstOdc->kabelOdc->tipe_kabel,
+                    'panjang_kabel' => $firstOdc->kabelOdc->panjang_kabel,
+                    'jumlah_tube' => $firstOdc->kabelOdc->jumlah_tube,
+                    'jumlah_core_in_tube' => $firstOdc->kabelOdc->jumlah_core_in_tube,
+                    'jumlah_total_core' => $firstOdc->kabelOdc->jumlah_total_core,
+                    'status' => $firstOdc->kabelOdc->status,
+                    'created_at' => $firstOdc->kabelOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $firstOdc->kabelOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $firstOdc->kabelOdc->deleted_at?->toDateTimeString(),
                                         ] : null,
-                                    ];
-                                })->toArray(),
-                            ];
-                        })->toArray(),
-                    ];
-                })->toArray(),
             ] : null,
 
             'client_ftth' => $o->clientFtth ? [
@@ -544,8 +415,8 @@ class FoOdpController extends Controller
             ] : null,
 
             'status'     => $o->status,
-            'created_at' => $o->created_at->toDateTimeString(),
-            'updated_at' => $o->updated_at->toDateTimeString(),
+            'created_at' => $o->created_at?->toDateTimeString(),
+            'updated_at' => $o->updated_at?->toDateTimeString(),
         ];
 
         return response()->json([
@@ -565,7 +436,7 @@ class FoOdpController extends Controller
         $o = FoOdp::withTrashed()->findOrFail($id);
         $o->load([
             'lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs',
             'clientFtth',
         ]);
 
@@ -573,7 +444,8 @@ class FoOdpController extends Controller
         $core     = $o->kabelCoreOdc;
         $tube     = $core?->kabelTubeOdc;
         $kabelOdc = $tube?->kabelOdc;
-        $topOdc   = $kabelOdc?->odc;
+        $odcs = $kabelOdc?->odcs ?? collect();
+        $firstOdc = $odcs->first();
 
         return response()->json([
             'status' => 'success',
@@ -599,9 +471,10 @@ class FoOdpController extends Controller
                     ] : null,
                 ] : null,
 
-                'odc' => $topOdc ? [
-                    'id'      => $topOdc->id,
-                    'nama_odc' => $topOdc->nama_odc,
+                // Show the first ODC for this KabelOdc (if any)
+                'odc' => $firstOdc ? [
+                    'id'      => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
                 ] : null,
 
                 'client_ftth' => $o->clientFtth ? [
@@ -611,8 +484,8 @@ class FoOdpController extends Controller
                 ] : null,
 
                 'status'     => $o->status,
-                'created_at' => $o->created_at->toDateTimeString(),
-                'updated_at' => $o->updated_at->toDateTimeString(),
+                'created_at' => $o->created_at?->toDateTimeString(),
+                'updated_at' => $o->updated_at?->toDateTimeString(),
                 'deleted_at' => $o->deleted_at?->toDateTimeString(),
             ],
         ], 200);
@@ -657,7 +530,7 @@ class FoOdpController extends Controller
         // Reload nested relations
         $odp->refresh()->load([
             'lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odc',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs',
             'clientFtth',
         ]);
 
@@ -665,7 +538,8 @@ class FoOdpController extends Controller
         $core = $odp->kabelCoreOdc;
         $tube = $core?->kabelTubeOdc;
         $kabelOdc = $tube?->kabelOdc;
-        $topOdc = $kabelOdc?->odc;
+        $odcs = $kabelOdc?->odcs ?? collect();
+        $firstOdc = $odcs->first();
 
         return response()->json([
             'status'  => 'success',
@@ -692,9 +566,9 @@ class FoOdpController extends Controller
                 ] : null,
 
                 // top-level ODC via tube -> kabelOdc -> odc
-                'odc'                => $topOdc ? [
-                    'id'      => $topOdc->id,
-                    'nama_odc' => $topOdc->nama_odc,
+                'odc'                => $firstOdc ? [
+                    'id'      => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
                 ] : null,
 
                 'client_ftth'        => $odp->clientFtth ? [
@@ -704,8 +578,8 @@ class FoOdpController extends Controller
                 ] : null,
 
                 'status'             => $odp->status,
-                'created_at'         => $odp->created_at->toDateTimeString(),
-                'updated_at'         => $odp->updated_at->toDateTimeString(),
+                'created_at'         => $odp->created_at?->toDateTimeString(),
+                'updated_at'         => $odp->updated_at?->toDateTimeString(),
             ],
             'message' => 'ODP updated successfully.',
         ], 200);
@@ -811,13 +685,21 @@ class FoOdpController extends Controller
                 break;
 
             case 'restore':
-                // First restore soft‐deleted
-                $this->model::onlyTrashed()
-                    ->whereIn('id', $ids)
-                    ->restore();
-                // Then set status back to 'active'
-                $this->model::whereIn('id', $ids)
-                    ->update(['status' => 'active']);
+                // Loop and call restore() for trashed, or cascadeUnarchive for archived
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        if ($model->trashed()) {
+                            $model->restore();
+                        } elseif ($model->status === 'archived') {
+                            $model->status = 'active';
+                            $model->save();
+                            if (method_exists($model, 'cascadeUnarchive')) {
+                                $model->cascadeUnarchive();
+                            }
+                        }
+                    }
+                }
                 $message = 'Items restored to active.';
                 break;
 

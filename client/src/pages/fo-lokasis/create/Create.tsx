@@ -9,10 +9,8 @@ import { Spinner } from '$app/components/Spinner';
 import { toast } from '$app/common/helpers/toast/toast';
 import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
-import { route } from '$app/common/helpers/route';
 import { useNavigate } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
 import { CreateFoLokasi } from '../common/components/CreateFoLokasi';
 import { useQueryClient } from 'react-query';
 
@@ -48,11 +46,12 @@ export default function Create() {
 
         setIsBusy(true);
         request('POST', endpoint('/api/v1/fo-lokasis'), foLokasi)
-            .then((response: GenericSingleResourceResponse<any>) => {
-                toast.success('created_fo_lokasi');
+            .then(() => {
+                toast.success('created fo lokasi');
 
                 // Invalidate related queries
                 queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
+                queryClient.invalidateQueries(['fo-lokasis']);
 
                 navigate(
                     route('/fo-lokasis/:id/edit', {
@@ -67,7 +66,7 @@ export default function Create() {
                     setErrors(error.response.data);
                     toast.dismiss();
                 } else {
-                    toast.error('error_refresh_page');
+                    toast.error('error refresh page');
                 }
             })
             .finally(() => setIsBusy(false));

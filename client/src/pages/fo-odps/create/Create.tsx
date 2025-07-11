@@ -8,10 +8,8 @@ import { Spinner } from '$app/components/Spinner';
 import { toast } from '$app/common/helpers/toast/toast';
 import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
-import { route } from '$app/common/helpers/route';
 import { useNavigate } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
 import { CreateFoOdp, FoOdpFormValues } from '../common/components/CreateFoOdp';
 import { useQueryClient } from 'react-query';
 
@@ -98,13 +96,13 @@ export default function Create() {
                     : parseInt(values.kabel_core_odc_id, 10);
         }
 
-        const postOdp = (lokasi_id: number) => {
+        const postOdp = (lokasi_id?: number) => {
             request('POST', endpoint('/api/v1/fo-odps'), {
                 ...payload,
-                lokasi_id,
+                lokasi_id: lokasi_id ?? parseInt(values.lokasi_id, 10),
             })
-                .then((resp: GenericSingleResourceResponse<any>) => {
-                    toast.success('created_odp');
+                .then(() => {
+                    toast.success('created odp');
                     queryClient.invalidateQueries('fo-odps');
                     navigate(
                         route('/fo-odps/:id/edit', { id: resp.data.data.id }),
@@ -124,7 +122,7 @@ export default function Create() {
                         } else {
                             toast.dismiss();
                         }
-                    } else toast.error('error_refresh_page');
+                    } else toast.error('error refresh page');
                 })
                 .finally(() => setIsBusy(false));
         };
@@ -136,10 +134,11 @@ export default function Create() {
                 latitude: parseFloat(values.lokasi_latitude),
                 longitude: parseFloat(values.lokasi_longitude),
             })
-                .then((res: any) => {
+                .then(() => {
                     // Invalidate lokasi queries as well
                     queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
-                    postOdp(res.data.data.id);
+                    // Continue without setting new lokasi_id
+                    postOdp();
                 })
                 .catch((err) => {
                     if (err.response?.status === 422) {

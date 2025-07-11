@@ -50,11 +50,7 @@ export default function Overview() {
     request('GET', endpoint('/api/v1/ftth-statistics'))
       .then((response) => {
         const data = response.data.data;
-
-        // Set summary data
         setSummary(data.summary);
-
-        // Set chart data
         setOdpsPerOdc(data.charts.odpsPerOdc);
         setClientsPerOdp(data.charts.clientsPerOdp);
         setOdpStatusPie(data.charts.odpStatusPie);

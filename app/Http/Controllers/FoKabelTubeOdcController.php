@@ -107,16 +107,18 @@ class FoKabelTubeOdcController extends Controller
 
         // 8) Transform each entry into JSON structure
         $data = array_map(function ($t) {
+            $kabelOdc = $t->kabelOdc;
             return [
                 'id'                 => $t->id,
                 'kabel_odc_id'       => $t->kabel_odc_id,
-                'kabel_odc'          => [
-                    'id'           => $t->kabelOdc->id,
-                    'nama_kabel'   => $t->kabelOdc->nama_kabel,
-                ],
+                'kabel_odc'          => $kabelOdc ? [
+                    'id'           => $kabelOdc->id,
+                    'nama_kabel'   => $kabelOdc->nama_kabel,
+                ] : null,
                 'warna_tube'         => $t->warna_tube,
                 'status'             => $t->status,
-                'kabel_core_odc_ids' => $t->kabelCoreOdcs->pluck('id')->toArray(),
+                'jumlah_core_in_tube'=> $kabelOdc?->jumlah_core_in_tube ?? null,
+                'kabel_core_odc_ids' => $t->kabelCoreOdcs ? $t->kabelCoreOdcs->pluck('id')->toArray() : [],
                 'created_at'         => $t->created_at->toDateTimeString(),
                 'updated_at'         => $t->updated_at->toDateTimeString(),
                 'deleted_at'         => $t->deleted_at?->toDateTimeString(),
@@ -197,6 +199,7 @@ class FoKabelTubeOdcController extends Controller
                 ],
                 'warna_tube'         => $t->warna_tube,
                 'status'             => $t->status,
+                'jumlah_core_in_tube'=> $t->kabelOdc->jumlah_core_in_tube ?? null,
                 'kabel_core_odc_ids' => $t->kabelCoreOdcs->pluck('id')->toArray(),
                 'created_at'         => $t->created_at->toDateTimeString(),
                 'updated_at'         => $t->updated_at->toDateTimeString(),
@@ -283,6 +286,7 @@ class FoKabelTubeOdcController extends Controller
     {
         $t = FoKabelTubeOdc::withTrashed()->findOrFail($id);
         $t->update(['status' => 'active']);
+        $t->cascadeUnarchive();
 
         return response()->json([
             'status'  => 'success',
@@ -318,7 +322,7 @@ class FoKabelTubeOdcController extends Controller
     public function bulk(Request $request)
     {
         $data = $request->validate([
-            'action' => 'required|in:archive,delete,restore',
+            'action' => 'required|in:archive,delete,restore,unarchive',
             'ids'    => 'required|array|min:1',
             'ids.*'  => 'integer|distinct',
         ]);
@@ -328,29 +332,67 @@ class FoKabelTubeOdcController extends Controller
 
         switch ($action) {
             case 'archive':
-                // Set status = 'archived'
-                $this->model::withTrashed()
-                    ->whereIn('id', $ids)
-                    ->update(['status' => 'archived']);
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        $model->status = 'archived';
+                        $model->save();
+                    }
+                }
                 $message = 'Items archived.';
                 break;
-
+            case 'unarchive':
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        $model->status = 'active';
+                        $model->save();
+                        $model->cascadeUnarchive();
+                    }
+                }
+                $message = 'Items unarchived.';
+                break;
             case 'delete':
-                // Soft‐delete all (mark deleted_at)
-                $this->model::whereIn('id', $ids)->delete();
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model && !$model->trashed()) {
+                        $model->delete();
+                    }
+                }
                 $message = 'Items soft‐deleted.';
                 break;
-
             case 'restore':
-                // First restore soft‐deleted
-                $this->model::onlyTrashed()
-                    ->whereIn('id', $ids)
-                    ->restore();
-                // Then set status back to 'active'
-                $this->model::whereIn('id', $ids)
-                    ->update(['status' => 'active']);
+                $skipped = [];
+                foreach ($ids as $id) {
+                    $model = $this->model::withTrashed()->find($id);
+                    if ($model) {
+                        $parent = $model->kabelOdc()->withTrashed()->first();
+                        if (!$parent || $parent->trashed() || $parent->status === 'archived') {
+                            $skipped[] = $model->id;
+                            continue;
+                        }
+                        if ($model->trashed()) {
+                            $model->restore();
+                        } elseif ($model->status === 'archived') {
+                            $model->status = 'active';
+                            $model->save();
+                            if (method_exists($model, 'cascadeUnarchive')) {
+                                $model->cascadeUnarchive();
+                            }
+                        }
+                    }
+                }
                 $message = 'Items restored to active.';
-                break;
+                $extra = [];
+                if (!empty($skipped)) {
+                    $extra['skipped'] = $skipped;
+                    $message .= ' Some items were skipped because their parent is archived or deleted.';
+                }
+                return response()->json([
+                    'status'  => 'success',
+                    'message' => $message,
+                    ...$extra,
+                ], 200);
 
             default:
                 // Should never happen due to validation

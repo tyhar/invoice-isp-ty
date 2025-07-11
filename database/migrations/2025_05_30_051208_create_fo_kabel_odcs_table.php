@@ -14,18 +14,12 @@ return new class extends Migration
         Schema::create('fo_kabel_odcs', function (Blueprint $table) {
             $table->id();
 
-            // Foreign key to fo_odcs.id
-            $table->foreignId('odc_id')
-                ->constrained('fo_odcs')
-                ->cascadeOnDelete()
-                ->cascadeOnUpdate();
-
             $table->string('nama_kabel');
             $table->enum('tipe_kabel', ['singlecore', 'multicore']);
             $table->decimal('panjang_kabel', 8, 2);
-            $table->integer('jumlah_tube');
-            $table->integer('jumlah_core_in_tube');
-            $table->integer('jumlah_total_core');
+            $table->integer('jumlah_tube')->nullable();
+            $table->integer('jumlah_core_in_tube')->nullable();
+            $table->integer('jumlah_total_core')->nullable();
 
             // NEW: add "status" column (active or archived)
             $table->enum('status', ['active', 'archived'])->default('active');

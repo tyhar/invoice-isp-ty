@@ -9,7 +9,6 @@ import { Spinner } from '$app/components/Spinner';
 import { toast } from '$app/common/helpers/toast/toast';
 import { endpoint } from '$app/common/helpers';
 import { request } from '$app/common/helpers/request';
-import { route } from '$app/common/helpers/route';
 import { useNavigate } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
@@ -19,6 +18,11 @@ import { useQueryClient } from 'react-query';
 interface LokasiOption {
     id: number;
     nama_lokasi: string;
+}
+
+interface KabelOdcOption {
+    id: number;
+    nama_kabel: string;
 }
 
 export default function Create() {
@@ -39,12 +43,14 @@ export default function Create() {
         lokasi_deskripsi: '',
         lokasi_latitude: '',
         lokasi_longitude: '',
+        kabel_odc_id: '', // <-- add this
         nama_odc: '',
         tipe_splitter: '1:8',
     };
 
     const [values, setValues] = useState<FoOdcFormValues>(initialValues);
     const [lokasis, setLokasis] = useState<LokasiOption[]>([]);
+    const [kabelOdcs, setKabelOdcs] = useState<KabelOdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
 
@@ -60,21 +66,35 @@ export default function Create() {
                 );
             })
             .catch(() => {
-                toast.error('error_refresh_page');
+                toast.error('error refresh page');
+            });
+        request('GET', endpoint('/api/v1/fo-kabel-odcs'))
+            .then((res: any) => {
+                setKabelOdcs(
+                    res.data.data.map((k: any) => ({
+                        id: k.id,
+                        nama_kabel: k.nama_kabel,
+                    }))
+                );
+            })
+            .catch(() => {
+                toast.error('error refresh page');
             });
     }, []);
 
     const postOdc = (lokasi_id: number) => {
         request('POST', endpoint('/api/v1/fo-odcs'), {
             lokasi_id,
+            kabel_odc_id: values.kabel_odc_id,
             nama_odc: values.nama_odc,
             tipe_splitter: values.tipe_splitter,
         })
-            .then((response: GenericSingleResourceResponse<any>) => {
-                toast.success('created_odc');
+            .then(() => {
+                toast.success('created odc');
 
                 // Invalidate related queries
                 queryClient.invalidateQueries(['/api/v1/fo-odcs']);
+                queryClient.invalidateQueries(['fo-odcs']);
                 queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
 
                 navigate(
@@ -88,7 +108,7 @@ export default function Create() {
                     setErrors(err.response.data);
                     toast.dismiss();
                 } else {
-                    toast.error('error_refresh_page');
+                    toast.error('error refresh page');
                 }
             })
             .finally(() => setIsBusy(false));
@@ -115,7 +135,7 @@ export default function Create() {
                         setErrors(err.response.data);
                         toast.dismiss();
                     } else {
-                        toast.error('error_refresh_page');
+                        toast.error('error refresh page');
                     }
                 });
         } else {
@@ -136,6 +156,7 @@ export default function Create() {
                         values={values}
                         setValues={setValues}
                         lokasis={lokasis}
+                        kabelOdcs={kabelOdcs}
                         errors={errors}
                     />
                 </form>

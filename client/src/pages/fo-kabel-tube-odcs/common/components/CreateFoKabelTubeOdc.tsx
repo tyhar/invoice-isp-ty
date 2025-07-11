@@ -51,15 +51,20 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
     };
 
     return (
+<<<<<<< Updated upstream
         <Card title={t('new_tube_odc')}>
             <Element leftSide={t('kabel_odc')} required>
+=======
+        <Card title={t('New Tube ODC')}>
+            <Element leftSide={t('Kabel ODC')} required>
+>>>>>>> Stashed changes
                 <SelectField
                     required
                     value={form.kabel_odc_id || ''}
                     onValueChange={(v) => change('kabel_odc_id', parseInt(v))}
                     errorMessage={errors?.errors.kabel_odc_id}
                 >
-                    <option value="">{t('select_kabel_odc')}</option>
+                    <option value="">{t('select kabel odc')}</option>
                     {odcs.map((o) => (
                         <option key={o.id} value={o.id}>
                             {o.nama_kabel}
@@ -68,14 +73,14 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('warna_tube')} required>
+            <Element leftSide={t('Warna Tube')} required>
                 <SelectField
                     required
                     value={form.warna_tube}
                     onValueChange={(v) => change('warna_tube', v)}
                     errorMessage={errors?.errors.warna_tube}
                 >
-                    <option value="">{t('select_warna_tube')}</option>
+                    <option value="">{t('select warna tube')}</option>
                     {TUBE_COLORS.map((color) => (
                         <option key={color} value={color}>
                             {t(color)}

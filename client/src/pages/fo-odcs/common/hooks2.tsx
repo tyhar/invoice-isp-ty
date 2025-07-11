@@ -29,7 +29,7 @@ export interface FoOdc {
     nama_odc: string;
     tipe_splitter: string;
     status: 'active' | 'archived' | string;
-    kabel_odcs: Array<{ id: number; nama_kabel_odc: string }>;
+    kabel_odc?: { id: number; nama_kabel: string };
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
@@ -54,7 +54,7 @@ export function useAllFoOdcColumns(): readonly string[] {
         'nama_odc',
         'tipe_splitter',
         'status',
-        'kabel_odcs',
+        'kabel_odc',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -115,11 +115,11 @@ export function useFoOdcColumns() {
             ),
         },
         {
-            column: 'kabel_odcs',
-            id: 'kabel_odcs',
+            column: 'kabel_odc',
+            id: 'kabel_odc',
             label: t('jumlah_kabel_odc'),
             format: (_: any, odc: FoOdc) => (
-                <span>{odc.kabel_odcs.length} Kabel</span>
+                <span>{odc.kabel_odc?.nama_kabel}</span>
             ),
         },
         {

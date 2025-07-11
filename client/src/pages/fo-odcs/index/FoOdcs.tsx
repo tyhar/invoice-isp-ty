@@ -16,7 +16,7 @@ interface FoOdc {
     nama_odc: string;
     tipe_splitter: string;
     status: 'active' | 'archived';
-    kabel_odcs?: { id: number; nama_kabel_odc: string }[];
+    kabel_odc?: { id: number; nama_kabel: string };
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
@@ -29,12 +29,7 @@ export default function FoOdcs() {
     const pages: Page[] = [{ name: t('FO ODC'), href: '/fo-odcs' }];
 
     const columns: DataTableColumns<FoOdc> = [
-        { id: 'id', label: 'ID' },
-        {
-            id: 'lokasi',
-            label: 'Lokasi',
-            format: (_val, record) => record.lokasi.nama_lokasi,
-        },
+        // { id: 'id', label: 'ID' },
         {
             id: 'nama_odc',
             label: 'Nama ODC',
@@ -47,28 +42,34 @@ export default function FoOdcs() {
                 </a>
             ),
         },
+        {
+            id: 'lokasi',
+            label: 'Lokasi',
+            format: (_val, record) => record.lokasi?.nama_lokasi ?? '-',
+        },
+
         { id: 'tipe_splitter', label: 'Tipe Splitter' },
-        { id: 'status', label: 'Status' },
+        // { id: 'status', label: 'Status' },
         {
             id: 'kabel_odcs',
-            label: 'Jumlah Kabel ODC',
-            format: (_f, record) => `${record.kabel_odcs?.length ?? 0} Kabel`,
+            label: 'Kabel ODC',
+            format: (_f, record) => `${record.kabel_odc?.nama_kabel ?? '-'}`,
         },
-        {
-            id: 'created_at',
-            label: 'Dibuat Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'updated_at',
-            label: 'Diubah Pada',
-            format: (val) => val,
-        },
-        {
-            id: 'deleted_at',
-            label: 'Dihapus Pada',
-            format: (val) => val || '-',
-        },
+        // {
+        //     id: 'created_at',
+        //     label: 'Dibuat Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'updated_at',
+        //     label: 'Diubah Pada',
+        //     format: (val) => val,
+        // },
+        // {
+        //     id: 'deleted_at',
+        //     label: 'Dihapus Pada',
+        //     format: (val) => val || '-',
+        // },
     ];
 
     return (
