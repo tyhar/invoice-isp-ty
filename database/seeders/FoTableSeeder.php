@@ -312,15 +312,52 @@ class FoTableSeeder extends Seeder
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
-            } else {
+            } elseif ($index === 1) {
+                // Second Kabel ODC: 12 core (3 tubes x 4 core)
                 $kabelOdcs[] = [
                     'id' => $id++,
-                    'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'],
+                    'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'] . ' (12 core)',
                     'tipe_kabel' => 'multicore',
-                    'panjang_kabel' => 1000.0,
-                    'jumlah_tube' => 6,
-                    'jumlah_core_in_tube' => 12,
-                    'jumlah_total_core' => 72,
+                    'panjang_kabel' => 1200.0,
+                    'jumlah_tube' => 3,
+                    'jumlah_core_in_tube' => 4,
+                    'jumlah_total_core' => 12,
+                    'status' => 'active',
+                    'deleted_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            } elseif ($index === 2) {
+                // Third Kabel ODC: 16 core (4 tubes x 4 core)
+                $kabelOdcs[] = [
+                    'id' => $id++,
+                    'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'] . ' (16 core)',
+                    'tipe_kabel' => 'multicore',
+                    'panjang_kabel' => 1500.0,
+                    'jumlah_tube' => 4,
+                    'jumlah_core_in_tube' => 4,
+                    'jumlah_total_core' => 16,
+                    'status' => 'active',
+                    'deleted_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            } else {
+                // For any additional, alternate between 8, 12, and 16 core
+                $coreOptions = [
+                    ['tube' => 2, 'core' => 4, 'total' => 8],
+                    ['tube' => 3, 'core' => 4, 'total' => 12],
+                    ['tube' => 4, 'core' => 4, 'total' => 16],
+                ];
+                $opt = $coreOptions[($index - 3) % 3];
+                $kabelOdcs[] = [
+                    'id' => $id++,
+                    'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'] . ' (' . $opt['total'] . ' core)',
+                    'tipe_kabel' => 'multicore',
+                    'panjang_kabel' => 1000.0 + $index * 100,
+                    'jumlah_tube' => $opt['tube'],
+                    'jumlah_core_in_tube' => $opt['core'],
+                    'jumlah_total_core' => $opt['total'],
                     'status' => 'active',
                     'deleted_at' => null,
                     'created_at' => now(),
