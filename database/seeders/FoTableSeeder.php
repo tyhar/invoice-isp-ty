@@ -296,20 +296,37 @@ class FoTableSeeder extends Seeder
         $id = 1;
 
         // Create kabel ODCs for main lokasis
-        foreach ($mainLokasis as $lokasi) {
-            $kabelOdcs[] = [
-                'id' => $id++,
-                'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'],
-                'tipe_kabel' => 'multicore',
-                'panjang_kabel' => 1000.0,
-                'jumlah_tube' => 6,
-                'jumlah_core_in_tube' => 12,
-                'jumlah_total_core' => 72,
-                'status' => 'active',
-                'deleted_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
+        foreach ($mainLokasis as $index => $lokasi) {
+            // For the first Kabel ODC, set total core to 8 (2 tubes x 4 core)
+            if ($index === 0) {
+                $kabelOdcs[] = [
+                    'id' => $id++,
+                    'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'] . ' (8 core)',
+                    'tipe_kabel' => 'multicore',
+                    'panjang_kabel' => 1000.0,
+                    'jumlah_tube' => 2,
+                    'jumlah_core_in_tube' => 4,
+                    'jumlah_total_core' => 8,
+                    'status' => 'active',
+                    'deleted_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            } else {
+                $kabelOdcs[] = [
+                    'id' => $id++,
+                    'nama_kabel' => 'Kabel ' . $lokasi['nama_lokasi'],
+                    'tipe_kabel' => 'multicore',
+                    'panjang_kabel' => 1000.0,
+                    'jumlah_tube' => 6,
+                    'jumlah_core_in_tube' => 12,
+                    'jumlah_total_core' => 72,
+                    'status' => 'active',
+                    'deleted_at' => null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
         }
 
         // Create kabel ODCs for joint box lokasis
