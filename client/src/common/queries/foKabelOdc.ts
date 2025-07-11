@@ -28,6 +28,14 @@ export function useFoKabelOdcBulkAction() {
 
             // Invalidate all fo-kabel-odcs related queries
             queryClient.invalidateQueries(['/api/v1/fo-kabel-odcs']);
+            queryClient.invalidateQueries(['fo-kabel-odcs']);
+
+            // Dispatch custom event for DataTable2 refresh
+            window.dispatchEvent(
+                new CustomEvent('invalidate.combobox.queries', {
+                    detail: { url: endpoint('/api/v1/fo-kabel-odcs') },
+                })
+            );
         });
     };
 }

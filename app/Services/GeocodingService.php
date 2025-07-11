@@ -13,6 +13,7 @@ class GeocodingService
     // private const RATE_LIMIT_DELAY = 2; // 2 seconds between requests (Nominatim policy)
     private const RATE_LIMIT_DELAY = 1;
 
+
     /**
      * Reverse geocode coordinates to get address components
      */
@@ -68,7 +69,6 @@ class GeocodingService
             ]);
 
             return null;
-
         } catch (\Exception $e) {
             Log::error('Geocoding service error', [
                 'latitude' => $latitude,

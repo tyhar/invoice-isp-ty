@@ -85,6 +85,7 @@ export default function FoOdcs() {
                 customBulkActions={useFoOdcBulkActions()}
                 customActions={useFoOdcActions()}
                 withoutDefaultBulkActions={true}
+                queryIdentificator="fo-odcs"
             />
         </Default>
     );

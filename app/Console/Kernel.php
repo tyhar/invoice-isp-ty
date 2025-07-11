@@ -38,7 +38,9 @@ use App\Utils\Ninja;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use App\Models\ScheduledMessage;
+use App\Models\Invoice;
 use App\Jobs\SendScheduledMessageJob;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -60,6 +62,21 @@ class Kernel extends ConsoleKernel
                 dispatch(new SendScheduledMessageJob($scheduleItem));
             }
         })->everyMinute()->name('wa-schedule-job')->withoutOverlapping();
+
+        $schedule->call(function () {
+            $invoices = Invoice::where('status_id', -1)
+                ->where('due_date', '<', now()->startOfDay())
+                ->get();
+
+            foreach ($invoices as $invoice) {
+                try {
+                    app(\App\Http\Controllers\InvoiceController::class)->sendLateInvoice($invoice);
+                    Log::info("Peringatan Telat terkirim untuk invoice {$invoice->number}");
+                } catch (\Exception $e) {
+                    Log::error("Gagal kirim Peringatan Telat untuk invoice {$invoice->number}: " . $e->getMessage());
+                }
+            }
+        })->everyMinute();
 
         // /* Check for the latest version of Invoice Ninja */
         // $schedule->job(new VersionCheck())->daily();

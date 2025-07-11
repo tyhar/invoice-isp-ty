@@ -107,6 +107,7 @@ export default function FoOdps() {
                 customBulkActions={useFoOdpBulkActions()}
                 customActions={useFoOdpActions()}
                 withoutDefaultBulkActions={true}
+                queryIdentificator="fo-odps"
             />
         </Default>
     );

@@ -27,6 +27,14 @@ export function useFoOdpBulkAction() {
 
             // Invalidate all fo-odps related queries
             queryClient.invalidateQueries(['/api/v1/fo-odps']);
+            queryClient.invalidateQueries(['fo-odps']);
+
+            // Dispatch custom event for DataTable2 refresh
+            window.dispatchEvent(
+                new CustomEvent('invalidate.combobox.queries', {
+                    detail: { url: endpoint('/api/v1/fo-odps') },
+                })
+            );
         });
     };
 }

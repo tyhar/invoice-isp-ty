@@ -26,6 +26,14 @@ export function useFoClientFtthBulkAction() {
 
             // Invalidate all fo-client-ftths related queries
             queryClient.invalidateQueries(['/api/v1/fo-client-ftths']);
+            queryClient.invalidateQueries(['fo-client-ftths']);
+
+            // Dispatch custom event for DataTable2 refresh
+            window.dispatchEvent(
+                new CustomEvent('invalidate.combobox.queries', {
+                    detail: { url: endpoint('/api/v1/fo-client-ftths') },
+                })
+            );
         });
     };
 }

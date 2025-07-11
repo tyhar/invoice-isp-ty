@@ -51,7 +51,6 @@ export default function FoLokasis() {
             ),
         },
 
-
         { id: 'deskripsi', label: 'Deskripsi' },
         {
             id: 'odcs',
@@ -73,12 +72,20 @@ export default function FoLokasis() {
             label: 'Geocoding Status',
             format: (_f, resource) => {
                 if (!resource.latitude || !resource.longitude) {
-                    return <span className="text-gray-500">No coordinates</span>;
+                    return (
+                        <span className="text-gray-500">No coordinates</span>
+                    );
                 }
                 if (resource.geocoded_at) {
-                    return <span className="text-green-600">✓ Geocoded ({resource.city || 'No city'})</span>;
+                    return (
+                        <span className="text-green-600">
+                            ✓ Geocoded ({resource.city || 'No city'})
+                        </span>
+                    );
                 }
-                return <span className="text-orange-600">⚠ Needs geocoding</span>;
+                return (
+                    <span className="text-orange-600">⚠ Needs geocoding</span>
+                );
             },
         },
         { id: 'latitude', label: 'Latitude' },

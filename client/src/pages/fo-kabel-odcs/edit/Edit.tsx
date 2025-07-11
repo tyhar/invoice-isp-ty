@@ -63,7 +63,9 @@ export default function Edit() {
                     nama_kabel: kabel.nama_kabel,
                     tipe_kabel: kabel.tipe_kabel,
                     panjang_kabel: kabel.panjang_kabel,
-                    tube_colors: (kabel.tube_colors || []).map((t: any) => t.warna_tube),
+                    tube_colors: (kabel.tube_colors || []).map(
+                        (t: any) => t.warna_tube
+                    ),
                     jumlah_core_in_tube: kabel.jumlah_core_in_tube,
                 });
                 setOdcs(
@@ -85,9 +87,9 @@ export default function Edit() {
     if (loadError) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
-                <div className="text-lg font-semibold mb-2">{loadError}</div>
+                <div className="mb-2 text-lg font-semibold">{loadError}</div>
                 <button
-                    className="px-4 py-2 bg-blue-600 text-white rounded shadow mt-2"
+                    className="px-4 py-2 mt-2 text-white bg-blue-600 rounded shadow"
                     onClick={() => navigate('/fo-kabel-odcs')}
                 >
                     {t('Back to Kabel ODC List')}
@@ -116,6 +118,7 @@ export default function Edit() {
 
     const pages = [
         { name: t('FO Kabel ODC')!, href: '/fo-kabel-odcs' },
+
         { name: t('Edit Kabel ODC')!, href: `/fo-kabel-odcs/${id}/edit` },
     ];
 

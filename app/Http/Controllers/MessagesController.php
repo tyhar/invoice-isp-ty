@@ -271,7 +271,7 @@ class MessagesController extends Controller
         $client = Client::findOrFail($clientId);
         $invoice = Invoice::findOrFail($invoiceId);
 
-        $device = Device::where('status', 'connected')->latest()->first();
+        $device = Device::where('is_default', true)->first();
 
         if (!$client || !$invoice || !$device) {
             return response()->json([
@@ -319,8 +319,114 @@ class MessagesController extends Controller
             'whatsapp_response' => $response,
         ]);
     }
-    public function sendInvoice(Invoice $invoice)
+    public function sendInvoice(Request $request)
     {
+        $request->validate([
+            'invoice_ids' => 'required|array',
+            'invoice_ids.*' => 'string',
+        ]);
+
+        $invoiceIds = array_map(fn($id) => $this->decodePrimaryKey($id), $request->input('invoice_ids'));
+
+        $device = Device::where('is_default', true)->first();
+        if (!$device) {
+            return response()->json(['error' => 'No default device found'], 400);
+        }
+
+        $template = MessageTemplate::where('title', 'Tagihan')->first();
+        if (!$template) {
+            return response()->json(['error' => 'Template "Tagihan" tidak ditemukan'], 404);
+        }
+
+        $results = [];
+
+        foreach ($invoiceIds as $invoiceId) {
+            $invoice = Invoice::with(['client', 'invitations', 'invitations.contact'])->find($invoiceId);
+
+            if (!$invoice) {
+                $results[] = [
+                    'invoice_id' => $invoiceId,
+                    'status' => 'failed',
+                    'reason' => 'Invoice not found',
+                ];
+                continue;
+            }
+
+            $invitation = $invoice->invitations->first();
+
+            if (!$invitation || !$invoice->client || !$invoice->client->phone) {
+                $results[] = [
+                    'invoice_id' => $invoiceId,
+                    'status' => 'failed',
+                    'reason' => 'Invitation or client phone not found',
+                ];
+                continue;
+            }
+
+            try {
+                App::setLocale($invitation->contact->preferredLocale());
+
+                $pdfContent = (new CreateRawPdf($invitation))->handle();
+                $fileName = "invoice_{$invoice->number}.pdf";
+                $storagePath = "public/invoices/{$fileName}";
+                Storage::put($storagePath, $pdfContent);
+                $pdfUrl = url(Storage::url($storagePath));
+
+                Carbon::setLocale('id');
+                $amount = number_format($invoice->amount, 0, ',', '.');
+                $bulan = $invoice->due_date ? Carbon::parse($invoice->due_date)->translatedFormat('F Y') : '-';
+                $dueDate = $invoice->due_date ? Carbon::parse($invoice->due_date)->translatedFormat('d F Y') : '-';
+
+                $messageText = str_replace(
+                    ['{{name}}', '{{amount}}', '{{bulan}}', '{{due_date}}'],
+                    [$invoice->client->name, $amount, $bulan, $dueDate],
+                    $template->content
+                );
+
+                $this->wa->sendMessage([
+                    'session' => $device->name,
+                    'to' => $invoice->client->phone,
+                    'text' => $messageText,
+                    'document_url' => $pdfUrl,
+                    'document_name' => 'invoice.pdf',
+                ]);
+
+                Message::create([
+                    'device_id' => $device->id,
+                    'client_id' => $invoice->client->id,
+                    'invoice_id' => $invoice->id,
+                    'message_template_id' => $template->id,
+                    'message' => $messageText,
+                    'file' => 'invoice.pdf',
+                    'url' => $pdfUrl,
+                    'status' => 'sent',
+                ]);
+
+                $results[] = [
+                    'invoice_id' => $invoice->hashed_id ?? $invoice->id,
+                    'status' => 'success',
+                ];
+            } catch (\Throwable $e) {
+                $results[] = [
+                    'invoice_id' => $invoice->hashed_id ?? $invoice->id,
+                    'status' => 'failed',
+                    'reason' => $e->getMessage(),
+                ];
+            }
+        }
+
+        return response()->json([
+            'message' => 'Pengiriman selesai.',
+            'results' => $results,
+        ]);
+    }
+
+    public function sendLateInvoice(Invoice $invoice)
+    {
+        if (!$invoice->due_date || Carbon::parse($invoice->due_date)->gte(now()->startOfDay())) {
+            return response()->json(['message' => 'Invoice belum jatuh tempo, tidak dikirim.'], 200);
+        }
+
         $invitation = $invoice->invitations()->first();
         if (!$invitation) {
             return response()->json(['error' => 'Invitation not found'], 404);
@@ -328,17 +434,17 @@ class MessagesController extends Controller
 
         $client = $invoice->client;
         if (!$client || !$client->phone) {
-            return response()->json(['error' => 'Client or phone number not found'], 400);
+            return response()->json(['error' => 'Client atau nomor telepon tidak ditemukan'], 400);
         }
 
-        $device = Device::where('status', 'connected')->first();
+        $device = Device::where('is_default', true)->first();
         if (!$device) {
-            return response()->json(['error' => 'No connected device found'], 400);
+            return response()->json(['error' => 'Tidak ada device default'], 400);
         }
 
-        $template = MessageTemplate::where('title', 'Tagihan')->first();
+        $template = MessageTemplate::where('title', 'Peringatan Telat')->first();
         if (!$template) {
-            return response()->json(['error' => 'Template "Tagihan" tidak ditemukan'], 404);
+            return response()->json(['error' => 'Template "Peringatan Telat" tidak ditemukan'], 404);
         }
 
         App::setLocale($invitation->contact->preferredLocale());
@@ -352,8 +458,8 @@ class MessagesController extends Controller
 
         Carbon::setLocale('id');
         $amount = number_format($invoice->amount, 0, ',', '.');
-        $bulan = $invoice->due_date ? Carbon::parse($invoice->due_date)->translatedFormat('F Y') : '-';
-        $dueDate = $invoice->due_date ? Carbon::parse($invoice->due_date)->translatedFormat('d F Y') : '-';
+        $bulan = Carbon::parse($invoice->due_date)->translatedFormat('F Y');
+        $dueDate = Carbon::parse($invoice->due_date)->translatedFormat('d F Y');
 
         $messageText = str_replace(
             ['{{name}}', '{{amount}}', '{{bulan}}', '{{due_date}}'],
@@ -380,7 +486,7 @@ class MessagesController extends Controller
             'status' => 'sent',
         ]);
 
-        return response()->json(['message' => 'Pesan berhasil dikirim dan disimpan.']);
+        return response()->json(['message' => 'Peringatan telat berhasil dikirim.']);
     }
 
 }

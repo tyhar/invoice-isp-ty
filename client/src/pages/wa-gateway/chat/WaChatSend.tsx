@@ -64,7 +64,7 @@ export default function WaChatSend() {
     useEffect(() => {
     }, [clients]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
         const val = type === "checkbox" ? (e.target as HTMLInputElement).checked : value;
         setForm(prev => ({ ...prev, [name]: val }));
@@ -124,7 +124,7 @@ export default function WaChatSend() {
                                 const client = clients.find(c => c.id.toString() === id);
                                 return (
                                     <li key={id}>
-                                        {client? `${client.name} (${client.phone})` : `Client ID ${id} tidak ditemukan`}
+                                        {client ? `${client.name} (${client.phone})` : `Client ID ${id} tidak ditemukan`}
                                     </li>
                                 );
                             })}
@@ -171,15 +171,15 @@ export default function WaChatSend() {
                     ) : (
                         <div>
                             <label className="block text-sm font-medium mb-1">Pesan Text</label>
-                            <input
-                                type="text"
+                            <textarea
                                 name="text"
                                 placeholder="Isi Pesan"
                                 value={form.text}
                                 onChange={handleChange}
-                                className="w-full border rounded p-2"
+                                className="w-full border rounded p-2 h-32 resize-y"
                                 required
                             />
+
                         </div>
                     )}
 

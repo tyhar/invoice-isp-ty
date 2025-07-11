@@ -13,11 +13,9 @@ import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import Select from 'react-select';
 import { useTranslation } from 'react-i18next';
-import { Daerah, daerahJawa } from './utils/daerah';
 import { MapCenterUpdater } from './utils/MapZoomer';
 import { Polyline } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
-import React from 'react';
 
 type FormMode = 'client' | 'odp' | 'odc' | null;
 
@@ -50,11 +48,21 @@ interface AddMarkerFormProps {
 }
 
 const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, initialData, editingId }) => {
-  const [position, setPosition] = useState<LatLng | null>(
-    initialData && initialData.latitude && initialData.longitude
-      ? new L.LatLng(parseFloat(initialData.latitude), parseFloat(initialData.longitude))
-      : null
-  );
+  const parseCoordinate = (value: any): number | null => {
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? null : parsed;
+  };
+
+  const [position, setPosition] = useState<LatLng | null>(() => {
+    const lat = parseCoordinate(initialData?.latitude);
+    const lng = parseCoordinate(initialData?.longitude);
+    if (lat !== null && lng !== null) {
+      return new L.LatLng(lat, lng);
+    }
+    return null;
+  });
+
+  const api = "http://localhost:8000";
 
   const [form, setForm] = useState({
     nama_lokasi: initialData?.nama_lokasi || '',
@@ -83,17 +91,17 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
       try {
         if (mode === 'client') {
           const [odpRes, clientRes] = await Promise.all([
-            axios.get('http://localhost:8000/api/v1/fo-odps', headers),
-            axios.get('http://localhost:8000/api/v1/clients', headers),
+            axios.get(`${api}/api/v1/fo-odps`, headers),
+            axios.get(`${api}/api/v1/clients`, headers),
           ]);
           setOdpList(odpRes.data.data);
           setClientList(clientRes.data.data);
         } else if (mode === 'odp') {
-          const res = await axios.get('http://localhost:8000/api/v1/fo-kabel-core-odcs/no-odp', headers);
+          const res = await axios.get(`${api}/api/v1/fo-kabel-core-odcs/no-odp`, headers);
           setOdcCoreList(res.data.data);
         }
-      } catch {
-        console.error();
+      } catch (error) {
+        console.error(error);
       }
     };
 
@@ -142,7 +150,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
 
       if (editingId) {
         await axios.put(
-          `http://localhost:8000/api/v1/fo-lokasis/${initialData?.lokasi_id}`,
+          `${api}/api/v1/fo-lokasis/${initialData?.lokasi_id}`,
           {
             nama_lokasi: form.nama_lokasi,
             deskripsi: form.deskripsi,
@@ -154,7 +162,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
 
         if (mode === 'client') {
           await axios.put(
-            `http://localhost:8000/api/v1/fo-client-ftths/${editingId}`,
+            `${api}/api/v1/fo-client-ftths/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
               odp_id: form.odp_id,
@@ -165,7 +173,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odp') {
           await axios.put(
-            `http://localhost:8000/api/v1/fo-odps/${editingId}`,
+            `${api}/api/v1/fo-odps/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
@@ -176,7 +184,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odc') {
           await axios.put(
-            `http://localhost:8000/api/v1/fo-odcs/${editingId}`,
+            `${api}/api/v1/fo-odcs/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
               nama_odc: form.nama,
@@ -189,7 +197,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
         window.alert('Data berhasil diperbarui.');
       } else {
         const lokasiRes = await axios.post(
-          'http://localhost:8000/api/v1/fo-lokasis',
+          `${api}/api/v1/fo-lokasis`,
           {
             nama_lokasi: form.nama_lokasi,
             deskripsi: form.deskripsi,
@@ -203,7 +211,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
 
         if (mode === 'client') {
           await axios.post(
-            'http://localhost:8000/api/v1/fo-client-ftths',
+            `${api}/api/v1/fo-client-ftths`,
             {
               lokasi_id,
               odp_id: form.odp_id || null,
@@ -215,7 +223,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odp') {
           await axios.post(
-            'http://localhost:8000/api/v1/fo-odps',
+            `${api}/api/v1/fo-odps`,
             {
               lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
@@ -226,7 +234,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         } else if (mode === 'odc') {
           await axios.post(
-            'http://localhost:8000/api/v1/fo-odcs',
+            `${api}/api/v1/fo-odcs`,
             {
               lokasi_id,
               nama_odc: form.nama,
@@ -246,176 +254,228 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
     }
   };
 
+  const clientIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
+  const odpIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
+  const odcIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
   return (
     <>
       {position && (
-        <Marker position={position} draggable eventHandlers={{ dragend: onMarkerDragEnd }} />
+        <Marker
+          position={position}
+          draggable
+          icon={
+            mode === 'client'
+              ? clientIcon
+              : mode === 'odp'
+                ? odpIcon
+                : odcIcon
+          }
+          eventHandlers={{ dragend: onMarkerDragEnd }}
+        />
       )}
-      <div className="absolute top-16 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
+
+      <div className="absolute top-10 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
         <h3 className="font-semibold mb-2">
           {editingId ? mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : 'Edit ODC' : mode === 'client' ? 'Tambah Client' : mode === 'odp' ? 'Tambah ODP' : 'Tambah ODC'}</h3>
         <p className="mb-2 text-xs text-gray-600">Klik peta untuk memilih lokasi atau edit latitude dan longitude di bawah</p>
-        <form onSubmit={handleSubmit} className="space-y-2 text-sm">
-          <input
-            type="text"
-            className="w-full border p-1"
-            placeholder="Nama Lokasi"
-            value={form.nama_lokasi}
-            onChange={(e) => setForm({ ...form, nama_lokasi: e.target.value })}
-            required
-          />
-          <input
-            type="text"
-            className="w-full border p-1"
-            placeholder="Deskripsi Lokasi"
-            value={form.deskripsi}
-            onChange={(e) => setForm({ ...form, deskripsi: e.target.value })}
-          />
-          <input
-            type="text"
-            className="w-full border p-1"
-            placeholder={
-              mode === 'client' ? 'Nama Client' : mode === 'odp' ? 'Nama ODP' : 'Nama ODC'
-            }
-            value={form.nama}
-            onChange={(e) => setForm({ ...form, nama: e.target.value })}
-            required
-          />
-
-          {mode === 'client' && (
-            <>
+        <div className="max-h-[55vh] overflow-y-auto px-4">
+          <form onSubmit={handleSubmit} className="space-y-3 text-sm">
+            <div>
+              <label className="block mb-1">Nama Lokasi</label>
               <input
                 type="text"
                 className="w-full border p-1"
-                placeholder="Alamat"
-                value={form.alamat}
-                onChange={(e) => setForm({ ...form, alamat: e.target.value })}
+                placeholder="Nama Lokasi"
+                value={form.nama_lokasi}
+                onChange={(e) => setForm({ ...form, nama_lokasi: e.target.value })}
+                required
               />
-              <select
+            </div>
+
+            <div>
+              <label className="block mb-1">Deskripsi Lokasi</label>
+              <input
+                type="text"
                 className="w-full border p-1"
-                value={form.odp_id}
-                onChange={(e) => setForm({ ...form, odp_id: e.target.value })}
+                placeholder="Deskripsi Lokasi"
+                value={form.deskripsi}
+                onChange={(e) => setForm({ ...form, deskripsi: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1">
+                {mode === 'client' ? 'Nama Client' : mode === 'odp' ? 'Nama ODP' : 'Nama ODC'}
+              </label>
+              <input
+                type="text"
+                className="w-full border p-1"
+                placeholder="Nama"
+                value={form.nama}
+                onChange={(e) => setForm({ ...form, nama: e.target.value })}
                 required
-              >
-                <option value="">Pilih ODP</option>
-                {odpList.map((odp) => (
-                  <option key={odp.id} value={odp.id}>
-                    {odp.nama_odp}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="w-full border p-1"
-                value={form.client_id}
-                onChange={(e) => setForm({ ...form, client_id: e.target.value })}
-              >
-                <option value="">Pilih Client ID</option>
-                {clientList.map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name || client.nama_client || `Client #${client.id}`}
-                  </option>
-                ))}
-              </select>
-            </>
-          )}
+              />
+            </div>
 
+            {mode === 'client' && (
+              <>
+                <div>
+                  <label className="block mb-1">Alamat</label>
+                  <input
+                    type="text"
+                    className="w-full border p-1"
+                    placeholder="Alamat"
+                    value={form.alamat}
+                    onChange={(e) => setForm({ ...form, alamat: e.target.value })}
+                  />
+                </div>
 
-          {mode === 'odp' && (
-            <>
-              <select
-                className="w-full border p-1"
-                value={form.kabel_core_odc_id}
-                onChange={(e) => setForm({ ...form, kabel_core_odc_id: e.target.value })}
-                required
-              >
-                <option value="">Pilih Kabel Core ODC</option>
-                {odcCoreList.map((core) => (
-                  <option key={core.id} value={core.id}>
-                    {core.warna_core}
-                  </option>
-                ))}
-              </select>
-              <select
-                className="w-full border p-1"
-                value={form.tipe_splitter}
-                onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
-              >
-                <option value="1:8">1:8</option>
-                <option value="1:16">1:16</option>
-                <option value="1:32">1:32</option>
-              </select>
-            </>
-          )}
+                <div>
+                  <label className="block mb-1">ODP</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.odp_id}
+                    onChange={(e) => setForm({ ...form, odp_id: e.target.value })}
+                    required
+                  >
+                    <option value="">Pilih ODP</option>
+                    {odpList.map((odp) => (
+                      <option key={odp.id} value={odp.id}>
+                        {odp.nama_odp}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          {mode === 'odc' && (
-            <>
-              <select
-                className="w-full border p-1"
-                value={form.tipe_splitter}
-                onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
-              >
-                <option value="1:8">1:8</option>
-                <option value="1:16">1:16</option>
-                <option value="1:32">1:32</option>
-              </select>
-            </>
-          )}
+                <div>
+                  <label className="block mb-1">Client ID</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.client_id}
+                    onChange={(e) => setForm({ ...form, client_id: e.target.value })}
+                  >
+                    <option value="">Pilih Client ID</option>
+                    {clientList.map((client) => (
+                      <option key={client.id} value={client.id}>
+                        {client.name || client.nama_client || `Client #${client.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </>
+            )}
 
-          <div className="flex gap-2">
-            <input
-              type="number"
-              step="any"
-              className="w-1/2 border p-1"
-              placeholder="Latitude"
-              value={form.latitude}
-              onChange={(e) => handleLatLongChange('latitude', e.target.value)}
-              required
-            />
-            <input
-              type="number"
-              step="any"
-              className="w-1/2 border p-1"
-              placeholder="Longitude"
-              value={form.longitude}
-              onChange={(e) => handleLatLongChange('longitude', e.target.value)}
-              required
-            />
-          </div>
+            {mode === 'odp' && (
+              <>
+                <div>
+                  <label className="block mb-1">Kabel Core ODC</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.kabel_core_odc_id}
+                    onChange={(e) => setForm({ ...form, kabel_core_odc_id: e.target.value })}
+                    required
+                  >
+                    <option value="">Pilih Kabel Core ODC</option>
+                    {odcCoreList.map((core) => (
+                      <option key={core.id} value={core.id}>
+                        {core.warna_core}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-          <div className="flex gap-2 justify-end pt-2">
-            <button type="button" className="bg-gray-300 px-2 py-1 rounded" onClick={onCancel}>
-              Batal
-            </button>
-            <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded">
-              Simpan
-            </button>
-          </div>
-        </form>
+                <div>
+                  <label className="block mb-1">Tipe Splitter</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.tipe_splitter}
+                    onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
+                  >
+                    <option value="1:8">1:8</option>
+                    <option value="1:16">1:16</option>
+                    <option value="1:32">1:32</option>
+                  </select>
+                </div>
+              </>
+            )}
+
+            {mode === 'odc' && (
+              <div>
+                <label className="block mb-1">Tipe Splitter</label>
+                <select
+                  className="w-full border p-1"
+                  value={form.tipe_splitter}
+                  onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
+                >
+                  <option value="1:8">1:8</option>
+                  <option value="1:16">1:16</option>
+                  <option value="1:32">1:32</option>
+                </select>
+              </div>
+            )}
+
+            <div>
+              <label className="block mb-1">Koordinat</label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  step="any"
+                  className="w-1/2 border p-1"
+                  placeholder="Latitude"
+                  value={form.latitude}
+                  onChange={(e) => handleLatLongChange('latitude', e.target.value)}
+                  required
+                />
+                <input
+                  type="number"
+                  step="any"
+                  className="w-1/2 border p-1"
+                  placeholder="Longitude"
+                  value={form.longitude}
+                  onChange={(e) => handleLatLongChange('longitude', e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-2">
+              <button type="button" className="bg-gray-300 px-2 py-1 rounded" onClick={onCancel}>
+                Batal
+              </button>
+              <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded">
+                Simpan
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </>
   );
 };
-
-// Error Boundary for Map
-class MapErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
-  constructor(props: {children: React.ReactNode}) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(_error: any, errorInfo: any) {
-    // Only log errorInfo
-    console.error('Map rendering error:', errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return <div style={{color: 'red', padding: 16}}>Map rendering error. Please check the console for details.</div>;
-    }
-    return this.props.children;
-  }
-}
 
 const MappingPage: React.FC = () => {
   const [formMode, setFormMode] = useState<FormMode>(null);
@@ -424,40 +484,169 @@ const MappingPage: React.FC = () => {
   const [odcs, setOdcs] = useState<any[]>([]);
   const [editData, setEditData] = useState<{ mode: 'client' | 'odp' | 'odc'; data: MarkerData; } | null>(null);
   const [t] = useTranslation();
-  const [selectedDaerah, setSelectedDaerah] = useState<Daerah | null>(null);
-  const [mapCenter, setMapCenter] = useState<[number, number]>([-7.56526, 110.81653]);
+  const [selectedProvinsi, setSelectedProvinsi] = useState('');
+  const [selectedKota, setSelectedKota] = useState('');
+  const [selectedCenter, setSelectedCenter] = useState<[number, number] | null>(null);
   const [showKabelModal, setShowKabelModal] = useState(false);
   const navigate = useNavigate();
   const [filterLokasi, setFilterLokasi] = useState<any[]>([]);
   const [statistikData, setStatistikData] = useState<any[]>([]);
   const [jumlahData, setJumlahData] = useState<{ client: number; odp: number; odc: number } | null>(null);
+  const [coordinateWarning, setCoordinateWarning] = useState(false);
+  const [validClients, setValidClients] = useState<any[]>([]);
+  const [validOdps, setValidOdps] = useState<any[]>([]);
+  const api = "http://localhost:8000";
 
-  const API_BASE_URL = 'http://localhost:8000';
+  // Default CENTER MAP
+  const mapDefaultCenter: [number, number] = [-7.56526, 110.81653];
 
   const pages: Page[] = [{ name: t('Mapping'), href: '/map' }];
 
+  // GET DATA CLIENT,ODP,ODC DARI API
   const fetchData = async () => {
+    const token = localStorage.getItem('X-API-TOKEN');
+    const headers = { headers: { 'X-API-TOKEN': token || '' } };
+
+    const [clientRes, odpRes, odcRes] = await Promise.all([
+      axios.get(`${api}/api/v1/fo-client-ftths`, headers),
+      axios.get(`${api}/api/v1/fo-odps`, headers),
+      axios.get(`${api}/api/v1/fo-odcs`, headers),
+    ]);
+
+    setClients(clientRes.data.data);
+    setOdps(odpRes.data.data);
+    setOdcs(odcRes.data.data);
+  };
+
+
+  // GET DATA FILTER DARI API
+  const fetchFilterLokasi = async () => {
     try {
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
-      const [clientsRes, odpsRes, odcsRes] = await Promise.all([
-        axios.get('http://localhost:8000/api/v1/fo-client-ftths', headers),
-        axios.get('http://localhost:8000/api/v1/fo-odps', headers),
-        axios.get('http://localhost:8000/api/v1/fo-odcs', headers),
-      ]);
-
-      setClients(clientsRes.data.data ?? []);
-      setOdps(odpsRes.data.data ?? []);
-      setOdcs(odcsRes.data.data ?? []);
-    } catch (error) {
-      console.error('Gagal mengambil data client/odp:', error);
+      const res = await axios.get(`${api}/api/v1/filter-lokasi`, headers);
+      setFilterLokasi(res.data.data);
+    } catch (err) {
+      console.error('Gagal fetch filter lokasi:', err);
     }
   };
 
+  const fetchStatistikData = async () => {
+    try {
+      const token = localStorage.getItem('X-API-TOKEN');
+      const headers = { headers: { 'X-API-TOKEN': token || '' } };
+
+      const res = await axios.get(`${api}/api/v1/filter-lokasi/statistik`, headers);
+      setStatistikData(res.data.data);
+    } catch (err) {
+      console.error('Gagal fetch statistik lokasi:', err);
+    }
+  };
+
+
   useEffect(() => {
     fetchData();
+    fetchFilterLokasi();
+    fetchStatistikData();
   }, []);
+
+  useEffect(() => {
+    let hasInvalid = false;
+
+    const filteredClients = clients.filter((client) => {
+      const clientPos = getLatLng(client);
+      const odpPos = getLatLng(client.odp);
+      const odcPos = getLatLng(client.odc);
+
+      const isValid = clientPos && odpPos && odcPos;
+
+      if (!isValid) hasInvalid = true;
+
+      return isValid;
+    });
+
+    const filteredOdps = odps.filter((odp) => {
+      const odpPos = getLatLng(odp);
+      const odcPos = getLatLng(odp.odc);
+
+      const isValid = odpPos && odcPos;
+
+      if (!isValid) hasInvalid = true;
+
+      return isValid;
+    });
+
+    setValidClients(filteredClients);
+    setValidOdps(filteredOdps);
+    setCoordinateWarning(hasInvalid);
+  }, [clients, odps]);
+
+  const provinsiOptionsFormatted = Array.from(
+    new Set(filterLokasi.map(l => l.provinsi).filter(Boolean))
+  ).map(p => ({ value: p, label: p }));
+
+  const kotaOptionsFormatted = Array.from(
+    new Set(filterLokasi
+      .filter(l => !selectedProvinsi || l.provinsi === selectedProvinsi)
+      .map(l => l.kota)
+      .filter(Boolean))
+  ).map(k => ({ value: k, label: k }));
+
+  const updateJumlahByFilter = (prov: string, kota?: string) => {
+    const match = statistikData.find(s =>
+      s.provinsi === prov && (!kota || s.kota === kota)
+    );
+
+    if (match) {
+      setJumlahData({
+        client: match.total_client || 0,
+        odp: match.total_odp || 0,
+        odc: match.total_odc || 0,
+      });
+    } else {
+      setJumlahData(null);
+    }
+  };
+
+  const getTotalByProvinsi = (provinsi: string) => {
+    const filtered = statistikData.filter(s => s.provinsi === provinsi);
+
+    return {
+      client: filtered.reduce((sum, item) => sum + (item.total_client || 0), 0),
+      odp: filtered.reduce((sum, item) => sum + (item.total_odp || 0), 0),
+      odc: filtered.reduce((sum, item) => sum + (item.total_odc || 0), 0),
+    };
+  };
+
+  const handleProvinsiChange = (prov: string) => {
+    setSelectedProvinsi(prov);
+    setSelectedKota('');
+
+    const total = getTotalByProvinsi(prov);
+    setJumlahData(total);
+
+    const target = filterLokasi.find(l => l.provinsi === prov);
+    if (target?.latitude && target?.longitude) {
+      setSelectedCenter([parseFloat(target.latitude), parseFloat(target.longitude)]);
+    } else {
+      setSelectedCenter(mapDefaultCenter);
+    }
+  };
+
+  const handleKotaChange = (kota: string) => {
+    setSelectedKota(kota);
+    updateJumlahByFilter(selectedProvinsi || '', kota);
+
+    const target = filterLokasi.find(
+      l => l.kota === kota && (!selectedProvinsi || l.provinsi === selectedProvinsi)
+    );
+    if (target?.latitude && target?.longitude) {
+      setSelectedCenter([parseFloat(target.latitude), parseFloat(target.longitude)]);
+    } else {
+      setSelectedCenter(mapDefaultCenter);
+    }
+  };
 
   const handleDelete = async (mode: 'client' | 'odp' | 'odc', id: number, lokasi_id: number) => {
     if (!window.confirm('Yakin ingin menghapus data ini?')) return;
@@ -468,20 +657,20 @@ const MappingPage: React.FC = () => {
 
       // Hapus data client/odp
       if (mode === 'client') {
-        await axios.delete(`http://localhost:8000/api/v1/fo-client-ftths/${id}`, headers);
+        await axios.delete(`${api}/api/v1/fo-client-ftths/${id}`, headers);
       } else if (mode === 'odp') {
-        await axios.delete(`http://localhost:8000/api/v1/fo-odps/${id}`, headers);
+        await axios.delete(`${api}/api/v1/fo-odps/${id}`, headers);
       } else if (mode === 'odc') {
-        await axios.delete(`http://localhost:8000/api/v1/fo-odcs/${id}`, headers);
+        await axios.delete(`${api}/api/v1/fo-odcs/${id}`, headers);
       }
 
       // Hapus lokasi terkait
-      await axios.delete(`http://localhost:8000/api/v1/fo-lokasis/${lokasi_id}`, headers);
+      await axios.delete(`${api}/api/v1/fo-lokasis/${lokasi_id}`, headers);
 
       alert('Data berhasil dihapus.');
       fetchData();
-    } catch {
-      console.error('Gagal menghapus data.');
+    } catch (error) {
+      console.error(error);
       alert('Gagal menghapus data.');
     }
   };
@@ -514,30 +703,43 @@ const MappingPage: React.FC = () => {
     shadowSize: [41, 41],
   });
 
-  const options = daerahJawa.map((d) => ({
-    value: d.nama,
-    label: d.nama
-  }));
-
   const getLatLng = (item: any): [number, number] | null => {
-    if (!item) return null;
-    // Try direct lat/lng
-    let lat = item.latitude ?? item.lat;
-    let lng = item.longitude ?? item.lng;
-    // Try nested lokasi
-    if ((lat === undefined || lng === undefined) && item.lokasi) {
-      lat = item.lokasi.latitude;
-      lng = item.lokasi.longitude;
-    }
-    lat = parseFloat(lat);
-    lng = parseFloat(lng);
-    if (isNaN(lat) || isNaN(lng)) {
-      console.warn('Invalid LatLng for item:', item);
+    const lokasi = item?.lokasi ?? item;
+
+    const latRaw = lokasi?.latitude;
+    const lngRaw = lokasi?.longitude;
+
+    if (
+      latRaw === null || lngRaw === null ||
+      latRaw === undefined || lngRaw === undefined ||
+      latRaw === '' || lngRaw === ''
+    ) {
+      console.warn('Koordinat kosong atau tidak valid:', lokasi);
       return null;
     }
+
+    const lat = typeof latRaw === 'number' ? latRaw : parseFloat(latRaw);
+    const lng = typeof lngRaw === 'number' ? lngRaw : parseFloat(lngRaw);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn('Koordinat tidak bisa diubah ke angka:', lokasi);
+      return null;
+    }
+
     return [lat, lng];
   };
 
+  const safeParseLatLng = (lat: any, lng: any): [number, number] | null => {
+    const parsedLat = typeof lat === 'number' ? lat : parseFloat(lat);
+    const parsedLng = typeof lng === 'number' ? lng : parseFloat(lng);
+
+    if (isNaN(parsedLat) || isNaN(parsedLng)) {
+      console.warn('Invalid LatLng:', { lat, lng });
+      return null;
+    }
+
+    return [parsedLat, parsedLng];
+  };
 
   // Menghitung Jarak
   const haversineDistance = (
@@ -562,12 +764,13 @@ const MappingPage: React.FC = () => {
 
   // Membuat Garis Melengkung
   const createSmoothArc = (start: [number, number], end: [number, number], segments = 10): [number, number][] => {
-    if (!start || !end || start.some(isNaN) || end.some(isNaN)) {
-      console.warn('Invalid input to createSmoothArc:', { start, end });
-      return [];
-    }
     const [lat1, lng1] = start;
     const [lat2, lng2] = end;
+
+    if ([lat1, lng1, lat2, lng2].some(coord => isNaN(coord))) {
+      console.warn('createSmoothArc menerima nilai NaN:', { start, end });
+      return [];
+    }
 
     const midLat = (lat1 + lat2) / 2;
     const midLng = (lng1 + lng2) / 2;
@@ -576,7 +779,7 @@ const MappingPage: React.FC = () => {
     const dy = lat2 - lat1;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Vektor ortogonal untuk membuat elevasi ke atas
+    // untuk membuat lengkungan ke atas
     const offsetFactor = 0.4;
     const normX = -dy / distance;
     const normY = dx / distance;
@@ -623,24 +826,26 @@ const MappingPage: React.FC = () => {
             Add Kabel
           </button>
         </div>
+        <div className="flex gap-4 w-full max-w-2xl">
+          <div className="w-1/2">
+            <Select
+              placeholder="Pilih Provinsi"
+              options={provinsiOptionsFormatted}
+              value={provinsiOptionsFormatted.find(opt => opt.value === selectedProvinsi) || null}
+              onChange={(e) => handleProvinsiChange(e?.value || '')}
+              isClearable
+            />
+          </div>
 
-        <div className="w-48">
-          <Select
-            options={options}
-            value={selectedDaerah ? { value: selectedDaerah.nama, label: selectedDaerah.nama } : null}
-            onChange={(selectedOption) => {
-              const daerah = daerahJawa.find(d => d.nama === selectedOption?.value) || null;
-              setSelectedDaerah(daerah);
-
-              if (daerah) {
-                const centerLat = (daerah.zona_latitude[0] + daerah.zona_latitude[1]) / 2;
-                const centerLng = (daerah.zona_longitude[0] + daerah.zona_longitude[1]) / 2;
-                setMapCenter([centerLat, centerLng]);
-              }
-            }}
-            placeholder="Pilih Daerah..."
-            isClearable
-          />
+          <div className="w-1/2">
+            <Select
+              placeholder="Pilih Kota/Kab"
+              options={kotaOptionsFormatted}
+              value={kotaOptionsFormatted.find(opt => opt.value === selectedKota) || null}
+              onChange={(e) => handleKotaChange(e?.value || '')}
+              isClearable
+            />
+          </div>
         </div>
       </div>
 
@@ -653,328 +858,316 @@ const MappingPage: React.FC = () => {
             <p><b>Jumlah ODC:</b> {jumlahData.odc}</p>
           </div>
         )}
-        <MapErrorBoundary>
-          <MapContainer center={mapDefaultCenter} zoom={13} className="h-full w-full">
-            <MapCenterUpdater center={selectedCenter || mapDefaultCenter} />
-            <TileLayer
-              attribution="&copy; OpenStreetMap contributors"
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+        <MapContainer center={mapDefaultCenter} zoom={13} className="h-full w-full">
+          <MapCenterUpdater center={selectedCenter || mapDefaultCenter} />
+          <TileLayer
+            attribution="&copy; OpenStreetMap contributors"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-            {clients
-              .filter(c => c.lokasi && !isNaN(parseFloat(c.lokasi.latitude)) && !isNaN(parseFloat(c.lokasi.longitude)))
-              .map(client => {
-                const pos = getLatLng(client);
-                if (!pos || pos.some(isNaN)) {
-                  console.warn('Skipping client marker due to invalid position:', pos, client);
-                  return null;
-                }
-                console.log('Rendering client marker at', pos, client);
-                return (
-                  <Marker key={`client-${client.id}`} position={pos} icon={clientIcon}>
-                    <Popup>
-                      <div>
-                        <b>Client:</b> {client.nama_client}<br />
-                        <b>Alamat:</b> {client.alamat}<br />
-                        <b>ODC:</b> {client.odc?.nama_odc}<br />
-                        <b>ODP:</b> {client.odp?.nama_odp}<br />
-                        <b>Total Tagihan:</b>{' '}
-                        {client.client?.invoices
-                          ? client.client.invoices.reduce((total: number, inv: { amount: string; }) => total + parseFloat(inv.amount), 0).toLocaleString('id-ID', {
-                            style: 'currency',
-                            currency: 'IDR',
-                          })
-                          : 'Rp0'}
-                        <br />
-                        <b>Nama Paket:</b>{' '}
-                        {client.client?.invoices?.length > 0 && client.client.invoices[0].line_items?.length > 0
-                          ? client.client.invoices[0].line_items[0].product_key
-                          : '-'}
-                        <br />
-                        <b>Status Invoice:</b>{' '}
-                        {client.client?.invoices?.length > 0
-                          ? client.client.invoices[0].status_id === 4
-                            ? 'Lunas'
-                            : 'Belum Lunas'
-                          : '-'}
-                        <br />
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            className="bg-yellow-400 px-2 py-1 rounded text-xs"
-                            onClick={() => setEditData({
-                              mode: 'client',
-                              data: {
-                                id: client.id,
-                                lokasi_id: client.lokasi.id,
-                                nama_lokasi: client.lokasi.nama_lokasi,
-                                deskripsi: client.lokasi.deskripsi,
-                                latitude: client.lokasi.latitude,
-                                longitude: client.lokasi.longitude,
-                                nama_client: client.nama_client,
-                                alamat: client.alamat,
-                                odp_id: client.odp_id,
-                                client_id: client.client_id
-                              }
-                            })}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                            onClick={() => handleDelete('client', client.id, client.lokasi.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-
-            {odps
-              .filter(odp => odp.lokasi)
-              .filter(odp => {
-                const pos = getLatLng(odp);
-                return pos !== null && !pos.some(isNaN);
-              })
-              .map(odp => {
-                const pos = getLatLng(odp);
-                if (!pos || pos.some(isNaN)) {
-                  console.warn('Skipping odp marker due to invalid position:', pos, odp);
-                  return null;
-                }
-                return (
-                  <Marker key={`odp-${odp.id}`} position={pos} icon={odpIcon}>
-                    <Popup>
-                      <div className="text-sm">
-                        <strong>ODP:</strong> {odp.nama_odp}<br />
-                        <strong>Lokasi:</strong> {odp.lokasi.nama_lokasi}<br />
-                        <strong>Deskripsi:</strong> {odp.lokasi.deskripsi}<br />
-                        <strong>Terhubung ke ODC:</strong> {odp.odc?.nama_odc}<br />
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            className="bg-yellow-400 px-2 py-1 rounded text-xs"
-                            onClick={() => setEditData({
-                              mode: 'odp', data: {
-                                id: odp.id,
-                                lokasi_id: odp.lokasi.id,
-                                nama_lokasi: odp.lokasi.nama_lokasi,
-                                deskripsi: odp.lokasi.deskripsi,
-                                latitude: odp.lokasi.latitude,
-                                longitude: odp.lokasi.longitude,
-                                nama_odp: odp.nama_odp,
-                                tipe_splitter: odp.tipe_splitter,
-                                kabel_core_odc_id: odp.kabel_core_odc_id,
-                                client_id: 0
-                              }
-                            })}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                            onClick={() => handleDelete('odp', odp.id, odp.lokasi.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-
-            {odcs
-              .filter(odc => odc.lokasi && !isNaN(parseFloat(odc.lokasi.latitude)) && !isNaN(parseFloat(odc.lokasi.longitude)))
-              .map(odc => {
-                const pos = getLatLng(odc);
-                if (!pos || pos.some(isNaN)) {
-                  console.warn('Skipping odc marker due to invalid position:', pos, odc);
-                  return null;
-                }
-                return (
-                  <Marker key={`odc-${odc.id}`} position={pos} icon={odcIcon}>
-                    <Popup>
-                      <div className="text-sm">
-                        <strong>ODC:</strong> {odc.nama_odc}<br />
-                        <strong>Lokasi:</strong> {odc.lokasi.nama_lokasi}<br />
-                        <strong>Deskripsi:</strong> {odc.lokasi.deskripsi}<br />
-                        <div className="mt-2 flex gap-2">
-                          <button
-                            className="bg-yellow-400 px-2 py-1 rounded text-xs"
-                            onClick={() => setEditData({
-                              mode: 'odc',
-                              data: {
-                                id: odc.id,
-                                lokasi_id: odc.lokasi.id,
-                                nama_lokasi: odc.lokasi.nama_lokasi,
-                                deskripsi: odc.lokasi.deskripsi,
-                                latitude: odc.lokasi.latitude,
-                                longitude: odc.lokasi.longitude,
-                                nama_odc: odc.nama_odc,
-                                client_id: 0
-                              }
-                            })}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                            onClick={() => handleDelete('odc' as any, odc.id, odc.lokasi.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    </Popup>
-                  </Marker>
-                );
-              })}
-
-            {clients.map((client) => {
-              const clientPos = getLatLng(client);
-              const odpPos = getLatLng(client.odp);
-              const odcPos = getLatLng(client.odc);
-              if (!clientPos || !odpPos || !odcPos || clientPos.some(isNaN) || odpPos.some(isNaN) || odcPos.some(isNaN)) {
-                console.warn('Skipping ODP-Client polyline due to invalid positions', { client, odpPos, clientPos, odcPos });
-                return null;
-              }
-              const arc = createSmoothArc(odpPos, clientPos);
-              if (!arc.length || arc.some(([lat, lng]) => isNaN(lat) || isNaN(lng))) {
-                console.warn('Skipping ODP-Client polyline due to invalid arc', { client, odpPos, clientPos, arc });
-                return null;
-              }
-              const distance = haversineDistance(clientPos, odpPos);
-              console.log('Rendering polyline ODP-Client', odpPos, clientPos, client);
+          {clients
+            .map((client) => {
+              const pos = safeParseLatLng(client?.lokasi?.latitude, client?.lokasi?.longitude);
+              if (!pos) return null;
               return (
-                <Polyline
-                  key={`line-odp-client-${client.id}`}
-                  positions={arc}
-                  pathOptions={{
-                    color: 'rgba(0, 0, 230, 0.6)',
-                    weight: 3,
-                  }}
+                <Marker key={`client-${client.id}`} position={pos} icon={clientIcon}
                 >
                   <Popup>
                     <div>
-                      <strong>ODP ➝ Client</strong><br />
-                      Dari: {client.odp?.nama_odp}<br />
-                      Ke: {client.nama_client}<br />
-                      <span>Jarak: {distance.toFixed(2)} km</span>
+                      <b>Client:</b> {client.nama_client}<br />
+                      <b>Alamat:</b> {client.alamat}<br />
+                      <b>ODC:</b> {client.odc?.nama_odc}<br />
+                      <b>ODP:</b> {client.odp?.nama_odp}<br />
+                      <b>Total Tagihan:</b>{' '}
+                      {client.client?.invoices
+                        ? client.client.invoices.reduce((total: number, inv: { amount: string; }) => total + parseFloat(inv.amount), 0).toLocaleString('id-ID', {
+                          style: 'currency',
+                          currency: 'IDR',
+                        })
+                        : 'Rp0'}
+                      <br />
+                      <b>Nama Paket:</b>{' '}
+                      {client.client?.invoices?.length > 0 && client.client.invoices[0].line_items?.length > 0
+                        ? client.client.invoices[0].line_items[0].product_key
+                        : '-'}
+                      <br />
+                      <b>Status Invoice:</b>{' '}
+                      {client.client?.invoices?.length > 0
+                        ? client.client.invoices[0].status_id === 4
+                          ? 'Lunas'
+                          : 'Belum Lunas'
+                        : '-'}
+                      <br />
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          className="bg-yellow-400 px-2 py-1 rounded text-xs"
+                          onClick={() => setEditData({
+                            mode: 'client',
+                            data: {
+                              id: client.id,
+                              lokasi_id: client.lokasi.id,
+                              nama_lokasi: client.lokasi.nama_lokasi,
+                              deskripsi: client.lokasi.deskripsi,
+                              latitude: client.lokasi.latitude,
+                              longitude: client.lokasi.longitude,
+                              nama_client: client.nama_client,
+                              alamat: client.alamat,
+                              odp_id: client.odp_id,
+                              client_id: client.client_id
+                            }
+                          })}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                          onClick={() => handleDelete('client', client.id, client.lokasi.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </Popup>
-                </Polyline>
+                </Marker>
               );
             })}
 
-
-            {odps.map((odp) => {
-              const odpPos = getLatLng(odp);
-              const odc = odp.odc;
-              const odcPos = getLatLng(odc);
-              if (!odpPos || !odcPos || odpPos.some(isNaN) || odcPos.some(isNaN)) {
-                console.warn('Skipping ODC-ODP polyline due to invalid positions', { odp, odc, odpPos, odcPos });
-                return null;
-              }
-              const arc = createSmoothArc(odcPos, odpPos);
-              if (!arc.length || arc.some(([lat, lng]) => isNaN(lat) || isNaN(lng))) {
-                console.warn('Skipping ODC-ODP polyline due to invalid arc', { odp, odc, odpPos, odcPos, arc });
-                return null;
-              }
-              const distance = haversineDistance(odcPos, odpPos);
+          {odps
+            .map((odp) => {
+              const pos = safeParseLatLng(odp?.lokasi?.latitude, odp?.lokasi?.longitude);
+              if (!pos) return null;
               return (
-                <Polyline
-                  key={`line-odc-odp-${odp.id}`}
-                  positions={arc}
-                  pathOptions={{
-                    color: 'rgba(0, 0, 230, 0.6)',
-                    weight: 2,
-                  }}
-                >
+                <Marker key={`odp-${odp.id}`} position={pos} icon={odpIcon}>
                   <Popup>
-                    <div>
-                      <strong>ODC ➝ ODP</strong><br />
-                      Dari: {odc?.nama_odc || 'ODC'}<br />
-                      Ke: {odp?.nama_odp}<br />
-                      <span>Jarak: {distance.toFixed(2)} km</span>
+                    <div className="text-sm">
+                      <strong>ODP:</strong> {odp.nama_odp}<br />
+                      <strong>Lokasi:</strong> {odp.lokasi.nama_lokasi}<br />
+                      <strong>Deskripsi:</strong> {odp.lokasi.deskripsi}<br />
+                      <strong>Terhubung ke ODC:</strong> {odp.odc?.nama_odc}<br />
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          className="bg-yellow-400 px-2 py-1 rounded text-xs"
+                          onClick={() => setEditData({
+                            mode: 'odp', data: {
+                              id: odp.id,
+                              lokasi_id: odp.lokasi.id,
+                              nama_lokasi: odp.lokasi.nama_lokasi,
+                              deskripsi: odp.lokasi.deskripsi,
+                              latitude: odp.lokasi.latitude,
+                              longitude: odp.lokasi.longitude,
+                              nama_odp: odp.nama_odp,
+                              tipe_splitter: odp.tipe_splitter,
+                              kabel_core_odc_id: odp.kabel_core_odc_id,
+                              client_id: 0
+                            }
+                          })}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                          onClick={() => handleDelete('odp', odp.id, odp.lokasi.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </Popup>
-                </Polyline>
+                </Marker>
               );
             })}
 
-            {/* Modal Kabel */}
-            {showKabelModal && (
-              <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg p-6 w-80 shadow-lg z-[1001]">
-                  <h2 className="text-lg font-semibold mb-4 text-center">Pilih Jenis Kabel</h2>
-                  <div className="flex flex-col gap-2">
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded"
-                      onClick={() => {
-                        navigate('/fo-kabel-odcs/create');
-                        setShowKabelModal(false);
-                      }}
-                    >
-                      Kabel ODC
-                    </button>
-                    <button
-                      className="bg-purple-600 text-white px-4 py-2 rounded"
-                      onClick={() => {
-                        navigate('/fo-kabel-tube-odcs/create');
-                        setShowKabelModal(false);
-                      }}
-                    >
-                      Kabel Tube ODC
-                    </button>
-                    <button
-                      className="bg-green-500 text-white px-4 py-2 rounded"
-                      onClick={() => {
-                        navigate('/fo-kabel-core-odcs/create');
-                        setShowKabelModal(false);
-                      }}
-                    >
-                      Kabel Core ODC
-                    </button>
-                    <button
-                      className="mt-2 text-gray-600 hover:underline"
-                      onClick={() => setShowKabelModal(false)}
-                    >
-                      Batal
-                    </button>
+          {odcs
+            .map((odc) => {
+              const pos = safeParseLatLng(odc?.lokasi?.latitude, odc?.lokasi?.longitude);
+              if (!pos) return null;
+              return (
+                <Marker key={`odc-${odc.id}`} position={pos} icon={odcIcon}>
+                  <Popup>
+                    <div className="text-sm">
+                      <strong>ODC:</strong> {odc.nama_odc}<br />
+                      <strong>Lokasi:</strong> {odc.lokasi.nama_lokasi}<br />
+                      <strong>Deskripsi:</strong> {odc.lokasi.deskripsi}<br />
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          className="bg-yellow-400 px-2 py-1 rounded text-xs"
+                          onClick={() => setEditData({
+                            mode: 'odc',
+                            data: {
+                              id: odc.id,
+                              lokasi_id: odc.lokasi.id,
+                              nama_lokasi: odc.lokasi.nama_lokasi,
+                              deskripsi: odc.lokasi.deskripsi,
+                              latitude: odc.lokasi.latitude,
+                              longitude: odc.lokasi.longitude,
+                              nama_odc: odc.nama_odc,
+                              client_id: 0
+                            }
+                          })}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                          onClick={() => handleDelete('odc' as any, odc.id, odc.lokasi.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+
+          {validClients.map((client) => {
+            const clientPos = getLatLng(client);
+            const odpPos = getLatLng(client.odp);
+
+            if (!clientPos || !odpPos) return null;
+
+            if (isNaN(clientPos[0]) || isNaN(clientPos[1]) || isNaN(odpPos[0]) || isNaN(odpPos[1])) return null;
+
+            const distance = haversineDistance(clientPos, odpPos);
+            const arc = createSmoothArc(odpPos, clientPos);
+
+            if (!arc || arc.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
+
+            return (
+              <Polyline
+                key={`line-odp-client-${client.id}`}
+                positions={createSmoothArc(odpPos, clientPos)}
+                pathOptions={{
+                  color: 'rgba(0, 0, 230, 0.6)',
+                  weight: 2,
+                }}
+              >
+                <Popup>
+                  <div>
+                    <strong>ODP ➝ Client</strong><br />
+                    Dari: {client.odp?.nama_odp}<br />
+                    Ke: {client.nama_client}<br />
+                    <span>Jarak: {distance.toFixed(2)} km</span>
                   </div>
+                </Popup>
+              </Polyline>
+            );
+          })}
+
+
+
+          {validOdps.map((odp) => {
+            const odpPos = getLatLng(odp);
+            const odcPos = getLatLng(odp.odc);
+
+            if (!odpPos || !odcPos) return null;
+
+            if (isNaN(odpPos[0]) || isNaN(odpPos[1]) || isNaN(odcPos[0]) || isNaN(odcPos[1])) return null;
+
+            const distance = haversineDistance(odpPos, odcPos);
+            const arc = createSmoothArc(odcPos, odpPos);
+
+            if (!arc || arc.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
+
+            return (
+              <Polyline
+                key={`line-odc-odp-${odp.id}`}
+                positions={createSmoothArc(odcPos, odpPos)}
+                pathOptions={{
+                  color: 'rgba(0, 0, 230, 0.6)',
+                  weight: 2,
+                }}
+              >
+                <Popup>
+                  <div>
+                    <strong>ODC ➝ ODP</strong><br />
+                    Dari: {odp.odc?.nama_odc || 'ODC'}<br />
+                    Ke: {odp.nama_odp}<br />
+                    <span>Jarak: {distance.toFixed(2)} km</span>
+                  </div>
+                </Popup>
+              </Polyline>
+            );
+          })}
+
+
+          {coordinateWarning && (
+            <div style={{ color: 'red', marginTop: '10px' }}>
+              ⚠️ Ada koordinat yang tidak terdeteksi. Beberapa garis mungkin tidak ditampilkan.
+            </div>
+          )}
+
+
+          {/* Modal Kabel */}
+          {showKabelModal && (
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg p-6 w-80 shadow-lg z-[1001]">
+                <h2 className="text-lg font-semibold mb-4 text-center">Pilih Jenis Kabel</h2>
+                <div className="flex flex-col gap-2">
+                  <button
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                      navigate('/fo-kabel-odcs/create');
+                      setShowKabelModal(false);
+                    }}
+                  >
+                    Kabel ODC
+                  </button>
+                  <button
+                    className="bg-purple-600 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                      navigate('/fo-kabel-tube-odcs/create');
+                      setShowKabelModal(false);
+                    }}
+                  >
+                    Kabel Tube ODC
+                  </button>
+                  <button
+                    className="bg-green-500 text-white px-4 py-2 rounded"
+                    onClick={() => {
+                      navigate('/fo-kabel-core-odcs/create');
+                      setShowKabelModal(false);
+                    }}
+                  >
+                    Kabel Core ODC
+                  </button>
+                  <button
+                    className="mt-2 text-gray-600 hover:underline"
+                    onClick={() => setShowKabelModal(false)}
+                  >
+                    Batal
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Form Add */}
-            {formMode && !editData && (
-              <AddMarkerForm
-                mode={formMode}
-                onCancel={() => setFormMode(null)}
-                onSave={() => {
-                  setFormMode(null);
-                  fetchData();
-                }}
-              />
-            )}
+          {/* Form Add */}
+          {formMode && !editData && (
+            <AddMarkerForm
+              mode={formMode}
+              onCancel={() => setFormMode(null)}
+              onSave={() => {
+                setFormMode(null);
+                fetchData();
+              }}
+            />
+          )}
 
-            {/* Form Edit */}
-            {editData && (
-              <AddMarkerForm
-                mode={editData.mode}
-                initialData={editData.data}
-                editingId={editData.data.id}
-                onCancel={() => setEditData(null)}
-                onSave={() => {
-                  setEditData(null);
-                  fetchData();
-                }}
-              />
-            )}
-          </MapContainer>
-        </MapErrorBoundary>
+          {/* Form Edit */}
+          {editData && (
+            <AddMarkerForm
+              mode={editData.mode}
+              initialData={editData.data}
+              editingId={editData.data.id}
+              onCancel={() => setEditData(null)}
+              onSave={() => {
+                setEditData(null);
+                fetchData();
+              }}
+            />
+          )}
+        </MapContainer>
       </div>
     </Default>
   );

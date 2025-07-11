@@ -201,6 +201,10 @@ class FoLokasiController extends Controller
                 'deskripsi'     => $lokasi->deskripsi,
                 'latitude'      => $lokasi->latitude,
                 'longitude'     => $lokasi->longitude,
+                'city'          => $lokasi->city,
+                'province'      => $lokasi->province,
+                'country'       => $lokasi->country,
+                'geocoded_at'   => $lokasi->geocoded_at?->toDateTimeString(),
                 'status'        => $lokasi->status,
                 'odcs'          => $lokasi->odcs->map(fn($o) => [
                     'id'        => $o->id,

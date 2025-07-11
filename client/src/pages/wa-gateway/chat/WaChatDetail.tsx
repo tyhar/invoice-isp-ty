@@ -3,7 +3,7 @@ import axios from "axios";
 import { Default } from "$app/components/layouts/Default";
 import { Page } from "$app/components/Breadcrumbs";
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 interface ChatDetail {
     id: number;
@@ -13,6 +13,7 @@ interface ChatDetail {
         phone: string;
     } | null;
     client: {
+        hashed_id: string;
         id: number;
         name: string;
         phone: string;
@@ -99,7 +100,7 @@ export default function WaChatDetail() {
                             </div>
                             <div>
                                 <h3 className="text-lg font-semibold mb-2">{t('Client')}</h3>
-                                <p className="text-gray-700">{chat.client?.phone ?? '-'} <span className="text-gray-500">({chat.client?.name ?? '-' })</span></p>
+                                <p className="text-gray-700">{chat.client?.phone ?? '-'} <span className="text-gray-500">({chat.client?.name ?? '-'})</span></p>
                             </div>
                         </div>
                         <div className="mb-6">
@@ -129,7 +130,16 @@ export default function WaChatDetail() {
                             <h3 className="text-lg font-semibold mt-4 mb-1">{t('Waktu')}</h3>
                             <p className="text-sm">{formatDate(chat.created_at)}</p>
                         </div>
-
+                        <div className="flex items-center justify-end mt-2">
+                            {chat.client?.id && chat.status === 'received' && (
+                                <Link
+                                    to={`/wa-gateway/chat?clients=${chat.client.hashed_id}`}
+                                    className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700 transition"
+                                >
+                                    ✉️ {t('Reply')}
+                                </Link>
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center text-gray-500 py-10">{t('Tidak ada data chat.')}</div>

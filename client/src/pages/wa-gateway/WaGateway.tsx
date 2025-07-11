@@ -12,6 +12,7 @@ interface Device {
   phone: string;
   url?: string;
   status: string;
+  is_default?: boolean;
 }
 
 export default function WAGateway() {
@@ -83,6 +84,20 @@ export default function WAGateway() {
     } catch (error) {
       console.error("Error saving device:", error);
       alert("Failed to save device");
+    }
+  };
+
+  const setAsDefault = async (id: number) => {
+    try {
+      const token = localStorage.getItem('X-API-TOKEN') ?? '';
+      await axios.post(`http://localhost:8000/api/v1/devices/${id}/default`, {}, {
+        headers: { 'X-API-TOKEN': token },
+      });
+      alert("Default device updated");
+      fetchDevices();
+    } catch (error) {
+      console.error("Failed to set default device:", error);
+      alert("Failed to set default device");
     }
   };
 
@@ -220,6 +235,13 @@ export default function WAGateway() {
                       <button className="action-btn delete"
                         onClick={() => deleteDevice(device.id)}
                       > Delete </button>
+                      <button
+                        className="action-btn default"
+                        onClick={() => setAsDefault(device.id)}
+                        disabled={device.is_default}
+                      >
+                        {device.is_default ? '✅ Default' : 'Set Default'}
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -374,6 +396,15 @@ export default function WAGateway() {
   
             .action-btn.show:hover {
               background-color: #e0a800;
+            }
+
+            .action-btn.default {
+              background-color: #007bff;
+              color: white;
+            }
+  
+            .action-btn.default:hover {
+              background-color: #0056b3;
             }
   
             .action-btn.delete {

@@ -37,6 +37,8 @@ import { useDocumentsBulk } from '$app/common/queries/documents';
 import { Dispatch, SetStateAction } from 'react';
 import { useHasPermission } from '$app/common/hooks/permissions/useHasPermission';
 import { useChangeTemplate } from '$app/pages/settings/invoice-design/pages/custom-designs/components/ChangeTemplate';
+import { MdOutlineWhatsapp } from 'react-icons/md';
+import { handleSendInvoice } from '../../edit/hooks/SendInvoiceAction';
 
 export const useCustomBulkActions = () => {
   const [t] = useTranslation();
@@ -139,6 +141,19 @@ export const useCustomBulkActions = () => {
         setSelected={setSelected}
       />
     ),
+    ({ selectedResources, setSelected }) =>
+      selectedResources.length >= 1 &&
+      selectedResources.every((res) => res.client_id) && (
+        <DropdownElement
+          icon={<Icon element={MdOutlineWhatsapp} />}
+          onClick={async () => {
+            await handleSendInvoice(selectedResources);
+            setSelected([]);
+          }}
+        >
+          Kirim Invoice lewat WA
+        </DropdownElement>
+      ),
     ({ selectedIds, setSelected }) => (
       <DropdownElement
         onClick={() => {

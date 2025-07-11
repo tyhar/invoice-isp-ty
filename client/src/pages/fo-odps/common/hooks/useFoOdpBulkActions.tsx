@@ -13,8 +13,8 @@ export const useFoOdpBulkActions = () => {
         ({ selectedIds, setSelected }: any): ReactElement => (
             <>
                 <DropdownElement
-                    onClick={() => {
-                        bulkAction(selectedIds, 'archive');
+                    onClick={async () => {
+                        await bulkAction(selectedIds, 'archive');
                         setSelected([]);
                     }}
                     icon={<Icon element={MdArchive} />}
@@ -23,8 +23,8 @@ export const useFoOdpBulkActions = () => {
                 </DropdownElement>
 
                 <DropdownElement
-                    onClick={() => {
-                        bulkAction(selectedIds, 'delete');
+                    onClick={async () => {
+                        await bulkAction(selectedIds, 'delete');
                         setSelected([]);
                     }}
                     icon={<Icon element={MdDelete} />}
@@ -33,8 +33,8 @@ export const useFoOdpBulkActions = () => {
                 </DropdownElement>
 
                 <DropdownElement
-                    onClick={() => {
-                        bulkAction(selectedIds, 'restore');
+                    onClick={async () => {
+                        await bulkAction(selectedIds, 'restore');
                         setSelected([]);
                     }}
                     icon={<Icon element={MdRestore} />}

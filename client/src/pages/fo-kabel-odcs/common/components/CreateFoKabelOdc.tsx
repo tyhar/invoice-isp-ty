@@ -65,7 +65,11 @@ export function CreateFoKabelOdc(props: Props) {
                 <InputField
                     type="number"
                     required
-                    value={form.panjang_kabel != null ? form.panjang_kabel.toString() : ''}
+                    value={
+                        form.panjang_kabel != null
+                            ? form.panjang_kabel.toString()
+                            : ''
+                    }
                     onValueChange={(v) =>
                         change('panjang_kabel', v ? parseFloat(v) : 0)
                     }
@@ -79,7 +83,9 @@ export function CreateFoKabelOdc(props: Props) {
                     onChange={(colors) => change('tube_colors', colors)}
                 />
                 {errors?.errors.tube_colors && (
-                    <div className="text-red-600 text-xs mt-1">{errors.errors.tube_colors}</div>
+                    <div className="mt-1 text-xs text-red-600">
+                        {errors.errors.tube_colors}
+                    </div>
                 )}
             </Element>
 
@@ -87,9 +93,15 @@ export function CreateFoKabelOdc(props: Props) {
                 <SelectField
                     required
                     customSelector
-                    menuPlacement='bottom'
-                    value={form.jumlah_core_in_tube != null ? form.jumlah_core_in_tube.toString() : ''}
-                    onValueChange={(v) => change('jumlah_core_in_tube', v ? parseInt(v) : 1)}
+                    menuPlacement="bottom"
+                    value={
+                        form.jumlah_core_in_tube != null
+                            ? form.jumlah_core_in_tube.toString()
+                            : ''
+                    }
+                    onValueChange={(v) =>
+                        change('jumlah_core_in_tube', v ? parseInt(v) : 1)
+                    }
                     errorMessage={errors?.errors.jumlah_core_in_tube}
                 >
                     <option value="2">2</option>

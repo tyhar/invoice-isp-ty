@@ -52,6 +52,7 @@ class ScheduledMessageController extends Controller
             'text' => 'nullable|string',
             'frequency' => 'required|in:every_minute,daily,weekly,monthly,yearly',
             'next_run_date' => 'required|date|after_or_equal:today',
+            'include_invoice' => 'sometimes|boolean',
         ]);
 
         $decodedClientIds = array_map(fn($hashedId) => $this->decodePrimaryKey($hashedId), $validated['client_ids']);
@@ -71,6 +72,7 @@ class ScheduledMessageController extends Controller
             'text' => $validated['text'] ?? null,
             'frequency' => $validated['frequency'],
             'next_run_date' => $validated['next_run_date'],
+            'include_invoice' => $validated['include_invoice'] ?? false,
         ]);
 
         $schedule->clients()->attach($decodedClientIds);
@@ -92,6 +94,7 @@ class ScheduledMessageController extends Controller
             'text' => 'nullable|string',
             'frequency' => 'sometimes|in:every_minute,daily,weekly,monthly,yearly',
             'next_run_date' => 'sometimes|date|after_or_equal:today',
+            'include_invoice' => 'sometimes|boolean',
         ]);
 
         if (isset($validated['client_ids'])) {

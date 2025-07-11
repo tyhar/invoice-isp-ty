@@ -20,6 +20,7 @@ interface ScheduleDetail {
     message_template_id: number | null;
     frequency: string;
     next_run_date: string;
+    include_invoice: boolean;
     clients: { id: number; name: string }[];
 }
 
@@ -43,6 +44,7 @@ export default function WaChatRecurringEdit() {
         message_template_id: "",
         frequency: "",
         next_run_date: "",
+        include_invoice: false,
     });
 
     const pages: Page[] = [
@@ -67,6 +69,7 @@ export default function WaChatRecurringEdit() {
                     message_template_id: data.message_template_id?.toString() || "",
                     frequency: data.frequency,
                     next_run_date: data.next_run_date.slice(0, 10),
+                    include_invoice: !!data.include_invoice,
                 });
                 setIsGroup(data.clients.length > 1);
                 setUseTemplate(!!data.message_template_id);
@@ -109,6 +112,7 @@ export default function WaChatRecurringEdit() {
                 message_template_id: form.message_template_id || null,
                 frequency: form.frequency,
                 next_run_date: form.next_run_date,
+                include_invoice: form.include_invoice,
             };
 
             await axios.put(`http://localhost:8000/api/v1/wa/schedules/${scheduleId}`, payload, {
@@ -214,6 +218,19 @@ export default function WaChatRecurringEdit() {
                             />
                             <label className="text-sm">Gunakan Template Pesan?</label>
                         </div>
+
+                        <div className="flex items-center space-x-2">
+                            <input
+                                type="checkbox"
+                                name="include_invoice"
+                                checked={form.include_invoice}
+                                onChange={(e) =>
+                                    setForm((prev) => ({ ...prev, include_invoice: e.target.checked }))
+                                }
+                            />
+                            <label className="text-sm">Include Invoice?</label>
+                        </div>
+
 
                         <div>
                             <label className="block text-sm font-medium mb-1">Tanggal Mulai (Next Run)</label>

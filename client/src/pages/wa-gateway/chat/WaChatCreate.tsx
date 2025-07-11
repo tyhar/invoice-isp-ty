@@ -19,6 +19,8 @@ export default function WaChatCreate() {
     const { deviceId } = useParams<{ deviceId: string }>();
 
     const { data: clients = [], isLoading: loadingClients } = useClientsQuery({ enabled: true });
+    const [clientStatusFilter, setClientStatusFilter] = useState<'active' | 'archive'>('active');
+
 
     const [templates, setTemplates] = useState<Template[]>([]);
     const [useTemplate, setUseTemplate] = useState(false);
@@ -59,7 +61,7 @@ export default function WaChatCreate() {
             });
     }, [deviceId]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value, type } = e.target;
 
         if (type === "checkbox") {
@@ -145,14 +147,34 @@ export default function WaChatCreate() {
                 <div className="bg-white shadow rounded-lg p-6 max-w-xl mx-auto space-y-4">
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
+                            <label className="block text-sm font-medium mb-1">Status Client</label>
+                            <select
+                                value={clientStatusFilter}
+                                onChange={(e) => setClientStatusFilter(e.target.value as 'active' | 'archive')}
+                                className="w-full border rounded p-2 mb-1"
+                            >
+                                <option value="active">Aktif</option>
+                                <option value="archive">Tidak Aktif</option>
+                            </select>
+                        </div>
+                        <div>
                             <label className="block text-sm font-medium mb-1">Client</label>
                             <Select
                                 isMulti={isGroup}
                                 name="client_id"
-                                options={clients.map(client => ({
-                                    value: client.id,
-                                    label: client.name,
-                                }))}
+                                options={
+                                    clients
+                                        .filter(client => {
+                                            if (clientStatusFilter === 'active') return !client.archived_at || client.archived_at === 0;
+                                            if (clientStatusFilter === 'archive') return !!client.archived_at && client.archived_at !== 0;
+                                            return true;
+                                        })
+
+                                        .map(client => ({
+                                            value: client.id,
+                                            label: client.name,
+                                        }))
+                                }
                                 onChange={(selected) => {
                                     if (isGroup) {
                                         const selectedOptions = selected as { value: string; label: string }[];
@@ -222,13 +244,12 @@ export default function WaChatCreate() {
                         ) : (
                             <div>
                                 <label className="block text-sm font-medium mb-1">Pesan Text</label>
-                                <input
-                                    type="text"
+                                <textarea
                                     name="text"
                                     placeholder="Isi Pesan yang mau dikirim"
                                     value={form.text}
                                     onChange={handleChange}
-                                    className="w-full border rounded p-2"
+                                    className="w-full border rounded p-2 h-32 resize-y"
                                     required
                                 />
                             </div>

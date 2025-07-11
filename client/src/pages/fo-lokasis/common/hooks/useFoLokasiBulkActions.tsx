@@ -20,7 +20,10 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
     const [t] = useTranslation();
     const bulkAction = useFoLokasiBulkAction();
 
-    const handleBulkGeocode = async (selectedIds: string[], setSelected: (ids: string[]) => void) => {
+    const handleBulkGeocode = async (
+        selectedIds: string[],
+        setSelected: (ids: string[]) => void
+    ) => {
         if (selectedIds.length === 0) {
             toast.error('No locations selected for geocoding.');
             return;
@@ -28,9 +31,13 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
 
         try {
             // Fetch the full resource data for selected IDs to check coordinates
-            const response = await request('GET', endpoint('/api/v1/fo-lokasis'), {
-                ids: selectedIds.join(','),
-            });
+            const response = await request(
+                'GET',
+                endpoint('/api/v1/fo-lokasis'),
+                {
+                    ids: selectedIds.join(','),
+                }
+            );
 
             const resources = response.data.data;
             const resourcesToGeocode = resources.filter(
@@ -38,20 +45,28 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
             );
 
             if (resourcesToGeocode.length === 0) {
-                toast.error('No locations selected for geocoding. Make sure locations have coordinates.');
+                toast.error(
+                    'No locations selected for geocoding. Make sure locations have coordinates.'
+                );
                 return;
             }
 
             const idsToGeocode = resourcesToGeocode.map((res: any) => res.id);
-            const geocodeResponse = await request('POST', endpoint('/api/v1/fo-lokasis/bulk-geocode'), {
-                ids: idsToGeocode
-            });
+            const geocodeResponse = await request(
+                'POST',
+                endpoint('/api/v1/fo-lokasis/bulk-geocode'),
+                {
+                    ids: idsToGeocode,
+                }
+            );
 
             if (geocodeResponse.data.status === 'success') {
                 const { success, failed } = geocodeResponse.data.data;
 
                 if (success > 0) {
-                    toast.success(`Successfully geocoded ${success} location(s)`);
+                    toast.success(
+                        `Successfully geocoded ${success} location(s)`
+                    );
                 }
                 if (failed > 0) {
                     toast.error(`Failed to geocode ${failed} location(s)`);

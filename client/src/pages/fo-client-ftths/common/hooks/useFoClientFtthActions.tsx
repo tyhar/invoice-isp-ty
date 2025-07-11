@@ -18,7 +18,9 @@ export const useFoClientFtthActions = (): Array<(res: any) => ReactElement> => {
             if (state === EntityState.Active) {
                 return (
                     <DropdownElement
-                        onClick={() => bulkAction([res.id], 'archive')}
+                        onClick={async () => {
+                            await bulkAction([res.id], 'archive');
+                        }}
                         icon={<Icon element={MdArchive} />}
                     >
                         {t('archive')}
@@ -32,7 +34,9 @@ export const useFoClientFtthActions = (): Array<(res: any) => ReactElement> => {
             ) {
                 return (
                     <DropdownElement
-                        onClick={() => bulkAction([res.id], 'restore')}
+                        onClick={async () => {
+                            await bulkAction([res.id], 'restore');
+                        }}
                         icon={<Icon element={MdRestore} />}
                     >
                         {t('restore')}
