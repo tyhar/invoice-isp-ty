@@ -306,6 +306,13 @@ export function DataTable2<T extends { id: string }>(props: Props<T>) {
             );
         }
 
+        // PATCH: Always reflect customFilter in the URL as used_by_status
+        if (customFilter && customFilter.length > 0) {
+            apiEndpoint.searchParams.set('used_by_status', customFilter.join(','));
+        } else {
+            apiEndpoint.searchParams.delete('used_by_status');
+        }
+
         setApiEndpoint(new URL(apiEndpoint.toString()));
         if (isInitialConfiguration) {
             setIsInitialConfiguration(false);

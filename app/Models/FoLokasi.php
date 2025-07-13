@@ -51,6 +51,16 @@ class FoLokasi extends Model
         return $this->hasMany(FoClientFtth::class, 'lokasi_id');
     }
 
+    // public function kabelOdcs()
+    // {
+    //     return $this->hasMany(\App\Models\FoKabelOdc::class, 'lokasi_id');
+    // }
+
+    public function jointBoxes()
+    {
+        return $this->hasMany(\App\Models\FoJointBox::class, 'lokasi_id');
+    }
+
     /**
      * Automatically geocode the location (synchronous version for manual use)
      */

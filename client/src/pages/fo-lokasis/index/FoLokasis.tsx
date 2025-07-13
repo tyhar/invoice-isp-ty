@@ -1,6 +1,6 @@
 // client/src/pages/fo-lokasis/index/FoLokasis.tsx
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useTitle } from '$app/common/hooks/useTitle';
 import { Page } from '$app/components/Breadcrumbs';
@@ -22,12 +22,11 @@ interface FoLokasi {
     odcs?: { id: string; nama_odc: string }[];
     odps?: { id: string; nama_odp: string }[];
     clients?: { id: string; nama_client: string }[];
-    //this
+    jointboxes?: { id: string; nama_joint_box: string }[];
+    used_for?: string[];
     status: 'active' | 'archived';
     created_at: string;
     updated_at: string;
-    // archived_at?: number;
-    // is_deleted?: boolean;
     deleted_at?: string | null;
 }
 
@@ -50,8 +49,20 @@ export default function FoLokasis() {
                 </a>
             ),
         },
-
         { id: 'deskripsi', label: 'Deskripsi' },
+        {
+            id: 'used_for',
+            label: 'Used For',
+            format: (_f, resource) => (
+                <div className="flex flex-wrap gap-1">
+                    {(resource.used_for || []).map((type: string) => (
+                        <span key={type} className="px-2 py-0.5 rounded text-xs font-semibold bg-gray-200 text-gray-800">
+                            {type.replace('_', ' ').toUpperCase()}
+                        </span>
+                    ))}
+                </div>
+            ),
+        },
         {
             id: 'odcs',
             label: 'Jumlah ODC',
@@ -66,6 +77,11 @@ export default function FoLokasis() {
             id: 'clients',
             label: 'Jumlah Client',
             format: (_f, resource) => `${resource.clients?.length ?? 0} Client`,
+        },
+        {
+            id: 'jointboxes',
+            label: 'Jumlah JointBox',
+            format: (_f, resource) => `${resource.jointboxes?.length ?? 0} JointBox`,
         },
         {
             id: 'geocoding',
@@ -92,13 +108,46 @@ export default function FoLokasis() {
         { id: 'longitude', label: 'Longitude' },
     ];
 
+    // Used For filter options
+    const usedForOptions = [
+        { value: 'odc', label: 'ODC', backgroundColor: '#e0e7ff', color: '#3730a3', queryKey: 'used_by_status' },
+        { value: 'odp', label: 'ODP', backgroundColor: '#fef9c3', color: '#92400e', queryKey: 'used_by_status' },
+        { value: 'joint_box', label: 'JointBox', backgroundColor: '#d1fae5', color: '#065f46', queryKey: 'used_by_status' },
+        { value: 'client', label: 'Client', backgroundColor: '#f3e8ff', color: '#6d28d9', queryKey: 'used_by_status' },
+    ];
+    const customFilters = [
+        {
+            value: '',
+            label: t('Used For'),
+            backgroundColor: '#f3f4f6',
+            color: '#111827',
+            options: usedForOptions,
+            dropdownKey: '0' as const,
+            placeHolder: t('Used For'),
+            queryKey: 'used_by_status',
+        },
+    ];
+
+    // State for custom filter (used_by_status)
+    const [customFilter, setCustomFilter] = useState<string[]>([]);
+
+    // Build endpoint string based on current filter state
+    const endpoint = useMemo(() => {
+        const search = new URLSearchParams();
+        search.set('per_page', '10');
+        search.set('page', '1');
+        search.set('status', 'active');
+        if (customFilter && customFilter.length > 0) {
+            search.set('used_by_status', customFilter.join(','));
+        }
+        return `/api/v1/fo-lokasis?${search.toString()}`;
+    }, [customFilter]);
+
     return (
         <Default title={t('FO Lokasi')} breadcrumbs={pages}>
             <DataTable2<FoLokasi>
-                // resource="fo_lokasi"
                 resource="FO Lokasi"
                 columns={columns}
-                endpoint="/api/v1/fo-lokasis"
                 linkToCreate="/fo-lokasis/create"
                 linkToEdit="/fo-lokasis/:id/edit"
                 withResourcefulActions
@@ -107,6 +156,9 @@ export default function FoLokasis() {
                 customActions={useFoLokasiActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-lokasis"
+                customFilters={customFilters}
+                customFilterPlaceholder={t('Used For') || 'Used For'}
+                endpoint={endpoint}
             />
         </Default>
     );

@@ -33,6 +33,8 @@ export interface FoLokasi {
     odcs: Array<{ id: string; nama_odc: string }>;
     odps: Array<{ id: string; nama_odp: string }>;
     clients: Array<{ id: string; nama_client: string }>;
+    jointboxes?: Array<{ id: string; nama_joint_box: string }>;
+    used_for?: string[];
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;

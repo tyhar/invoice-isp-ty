@@ -89,12 +89,17 @@ class FoLokasiController extends Controller
 
         // 7) Eager‐load relationships, paginate, and append query params
         $paginator = $query
-            ->with(['odcs', 'odps', 'clientFtths'])
+            ->with(['odcs', 'odps', 'clientFtths', 'jointBoxes'])
             ->paginate($perPage)
-            ->appends($request->only(['filter', 'sort', 'per_page', 'status']));
+            ->appends($request->only(['filter', 'sort', 'per_page', 'status', 'used_for']));
 
         // 8) Transform results into the desired JSON structure
         $data = array_map(function ($l) {
+            $used_for = [];
+            if ($l->odcs && $l->odcs->count() > 0) $used_for[] = 'odc';
+            if ($l->odps && $l->odps->count() > 0) $used_for[] = 'odp';
+            if ($l->jointBoxes && $l->jointBoxes->count() > 0) $used_for[] = 'joint_box';
+            if ($l->clientFtths && $l->clientFtths->where('status', 'active')->whereNull('deleted_at')->count() > 0) $used_for[] = 'client';
             return [
                 'id'            => $l->id,
                 'nama_lokasi'   => $l->nama_lokasi,
@@ -118,11 +123,37 @@ class FoLokasiController extends Controller
                     'id'         => $c->id,
                     'nama_client' => $c->nama_client,
                 ])->toArray() : [],
+                'jointboxes'    => $l->jointBoxes ? $l->jointBoxes->map(fn($j) => [
+                    'id' => $j->id,
+                    'nama_joint_box' => $j->nama_joint_box,
+                ])->toArray() : [],
+                'used_for'      => $used_for,
                 'created_at'    => $l->created_at->toDateTimeString(),
                 'updated_at'    => $l->updated_at->toDateTimeString(),
                 'deleted_at'    => $l->deleted_at?->toDateTimeString(),
             ];
         }, $paginator->items());
+
+        // 9) Filter by used_for/used_by_status if present
+        $usedForParam = null;
+        if ($request->filled('used_by_status')) {
+            $usedForParam = $request->query('used_by_status');
+        } elseif ($request->filled('used_for')) {
+            $usedForParam = $request->query('used_for');
+        }
+        if ($usedForParam) {
+            $usedFor = collect(explode(',', $usedForParam))
+                ->map(fn($s) => trim(strtolower($s)))
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
+            $data = array_filter($data, function ($l) use ($usedFor) {
+                // OR logic: show lokasi if ANY of the selected used_for are present
+                return count(array_intersect($usedFor, $l['used_for'])) > 0;
+            });
+            $data = array_values($data);
+        }
 
         return response()->json([
             'status' => 'success',
@@ -191,7 +222,7 @@ class FoLokasiController extends Controller
         $lokasi = FoLokasi::withTrashed()->findOrFail($id);
 
         // Eager‐load related models
-        $lokasi->load(['odcs', 'odps', 'clientFtths']);
+        $lokasi->load(['odcs', 'odps', 'clientFtths', 'jointBoxes']);
 
         return response()->json([
             'status' => 'success',
@@ -217,6 +248,10 @@ class FoLokasiController extends Controller
                 'clients'       => $lokasi->clientFtths->map(fn($c) => [
                     'id'         => $c->id,
                     'nama_client' => $c->nama_client,
+                ])->toArray(),
+                'jointboxes'    => $lokasi->jointBoxes->map(fn($j) => [
+                    'id' => $j->id,
+                    'nama_joint_box' => $j->nama_joint_box,
                 ])->toArray(),
                 'created_at'    => $lokasi->created_at->toDateTimeString(),
                 'updated_at'    => $lokasi->updated_at->toDateTimeString(),
