@@ -12,7 +12,6 @@ class FoClientFtthController extends Controller
     use MakesHash;
     protected $model = FoClientFtth::class;
     protected $table = 'fo_client_ftths';
-
     /**
      * List all FTTH clients with pagination, filtering, sorting, and status.
      *
@@ -162,117 +161,15 @@ class FoClientFtthController extends Controller
                         ] : null,
                     ] : null,
                 ] : null,
-                'odc' => $topOdc ? [
-                    'id' => $topOdc->id,
-                    'nama_odc' => $topOdc->nama_odc,
-                    'tipe_splitter' => $topOdc->tipe_splitter,
-                    'status' => $topOdc->status,
-                    'created_at' => $topOdc->created_at?->toDateTimeString(),
-                    'updated_at' => $topOdc->updated_at?->toDateTimeString(),
-                    'deleted_at' => $topOdc->deleted_at?->toDateTimeString(),
-                    'lokasi' => $topOdc->lokasi ? [
-                        'id' => $topOdc->lokasi->id,
-                        'nama_lokasi' => $topOdc->lokasi->nama_lokasi,
-                        'deskripsi' => $topOdc->lokasi->deskripsi,
-                        'latitude' => $topOdc->lokasi->latitude,
-                        'longitude' => $topOdc->lokasi->longitude,
-                        'status' => $topOdc->lokasi->status,
-                    ] : null,
-                    'kabel_odcs' => $topOdc->kabelOdcs->map(function ($k) {
-                        return [
-                            'id' => $k->id,
-                            'nama_kabel' => $k->nama_kabel,
-                            'tipe_kabel' => $k->tipe_kabel,
-                            'panjang_kabel' => $k->panjang_kabel,
-                            'jumlah_tube' => $k->jumlah_tube,
-                            'jumlah_core_in_tube' => $k->jumlah_core_in_tube,
-                            'jumlah_total_core' => $k->jumlah_total_core,
-                            'status' => $k->status,
-                            'created_at' => $k->created_at?->toDateTimeString(),
-                            'updated_at' => $k->updated_at?->toDateTimeString(),
-                            'deleted_at' => $k->deleted_at?->toDateTimeString(),
-                            'kabel_tube_odcs' => $k->kabelTubeOdcs->map(function ($t) {
-                                return [
-                                    'id' => $t->id,
-                                    'warna_tube' => $t->warna_tube,
-                                    'status' => $t->status,
-                                    'created_at' => $t->created_at?->toDateTimeString(),
-                                    'updated_at' => $t->updated_at?->toDateTimeString(),
-                                    'deleted_at' => $t->deleted_at?->toDateTimeString(),
-                                    'kabel_core_odcs' => $t->kabelCoreOdcs->map(function ($c) {
-                                        return [
-                                            'id' => $c->id,
-                                            'warna_core' => $c->warna_core,
-                                            'status' => $c->status,
-                                            'created_at' => $c->created_at?->toDateTimeString(),
-                                            'updated_at' => $c->updated_at?->toDateTimeString(),
-                                            'deleted_at' => $c->deleted_at?->toDateTimeString(),
-                                            'odp' => $c->odp ? [
-                                                'id' => $c->odp->id,
-                                                'nama_odp' => $c->odp->nama_odp,
-                                                'status' => $c->odp->status,
-                                                'created_at' => $c->odp->created_at?->toDateTimeString(),
-                                                'updated_at' => $c->odp->updated_at?->toDateTimeString(),
-                                                'deleted_at' => $c->odp->deleted_at?->toDateTimeString(),
-                                                'client_ftth' => $c->odp->clientFtth ? [
-                                                    'id' => $c->odp->clientFtth->id,
-                                                    'nama_client' => $c->odp->clientFtth->nama_client,
-                                                    'alamat' => $c->odp->clientFtth->alamat,
-                                                    'status' => $c->odp->clientFtth->status,
-                                                    'created_at' => $c->odp->clientFtth->created_at?->toDateTimeString(),
-                                                    'updated_at' => $c->odp->clientFtth->updated_at?->toDateTimeString(),
-                                                    'deleted_at' => $c->odp->clientFtth->deleted_at?->toDateTimeString(),
-                                                    'lokasi' => $c->odp->clientFtth->lokasi ? [
-                                                        'id' => $c->odp->clientFtth->lokasi->id,
-                                                        'nama_lokasi' => $c->odp->clientFtth->lokasi->nama_lokasi,
-                                                        'deskripsi' => $c->odp->clientFtth->lokasi->deskripsi,
-                                                        'latitude' => $c->odp->clientFtth->lokasi->latitude,
-                                                        'longitude' => $c->odp->clientFtth->lokasi->longitude,
-                                                        'status' => $c->odp->clientFtth->lokasi->status,
-                                                    ] : null,
-                                                    'client' => $c->odp->clientFtth->client ? [
-                                                        'id' => $c->odp->clientFtth->client->id,
-                                                        'name' => $c->odp->clientFtth->client->name,
-                                                        'phone' => $c->odp->clientFtth->client->phone,
-                                                        'email' => $c->odp->clientFtth->client->email,
-                                                        'address1' => $c->odp->clientFtth->client->address1,
-                                                        'address2' => $c->odp->clientFtth->client->address2,
-                                                        'city' => $c->odp->clientFtth->client->city,
-                                                        'state' => $c->odp->clientFtth->client->state,
-                                                        'postal_code' => $c->odp->clientFtth->client->postal_code,
-                                                        'country_id' => $c->odp->clientFtth->client->country_id,
-                                                        'status_id' => $c->odp->clientFtth->client->status_id,
-                                                    ] : null,
-                                                ] : null,
-                                            ] : null,
-                                        ];
-                                    })->toArray(),
-                                ];
-                            })->toArray(),
-                        ];
-                    })->toArray(),
+                'odc' => $firstOdc ? [
+                    'id' => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
                     'phone' => $c->client->phone,
                     'email' => $c->client->email,
-
-                    'address1' => $c->client->address1,
-                    'address2' => $c->client->address2,
-                    'city' => $c->client->city,
-                    'state' => $c->client->state,
-                    'postal_code' => $c->client->postal_code,
-                    'country_id' => $c->client->country_id,
-                    'status_id' => $c->client->status_id,
-                    'invoices' => $c->client->invoices->map(function ($invoice) {
-                        return [
-                            'id' => $invoice->id,
-                            'amount' => $invoice->amount,
-                            'status_id' => $invoice->status_id,
-                            'line_items' => $invoice->line_items,
-                        ];
-                    }),
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -300,6 +197,7 @@ class FoClientFtthController extends Controller
             ],
         ], 200);
     }
+
 
     /**
      * Create a new FTTH client (default status = active).
@@ -365,13 +263,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -411,13 +311,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -486,13 +388,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -553,13 +457,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -600,13 +506,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -647,13 +555,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odcs?->first() ? [
+                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->id,
+                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odcs->first()->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -749,13 +659,15 @@ class FoClientFtthController extends Controller
                     'id' => $c->odp->id,
                     'nama_odp' => $c->odp->nama_odp,
                 ] : null,
-                'odc' => $c->odp?->kabelCoreOdc?->kabelTubeOdc?->kabelOdc?->odc ? [
-                    'id' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->id,
-                    'nama_odc' => $c->odp->kabelCoreOdc->kabelTubeOdc->kabelOdc->odc->nama_odc,
+                'odc' => $firstOdc ? [
+                    'id' => $firstOdc->id,
+                    'nama_odc' => $firstOdc->nama_odc,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
+                    'phone' => $c->client->phone,
+                    'email' => $c->client->email,
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
