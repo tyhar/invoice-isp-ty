@@ -144,6 +144,7 @@ use App\Http\Controllers\FoClientFtthController;
 use App\Http\Controllers\FtthStatisticController;
 
 use App\Http\Controllers\FilterLokasiController;
+use App\Http\Controllers\MapSettingController;
 
 Route::group(['middleware' => ['throttle:api', 'api_secret_check']], function () {
     Route::post('api/v1/signup', [AccountController::class, 'store'])->name('signup.submit');
@@ -253,8 +254,13 @@ Route::group(['middleware' => ['throttle:api', 'api_db', 'token_auth', 'locale']
     Route::post('/fo-joint-boxes/bulk', [\App\Http\Controllers\FoJointBoxController::class, 'bulk']);
 
     Route::get('/ftth-statistics', [FtthStatisticController::class, 'index']);
+
+    // MAPPING
     Route::get('/filter-lokasi', [FilterLokasiController::class, 'index']);
     Route::get('/filter-lokasi/statistik', [FilterLokasiController::class, 'statistikPerDaerah']);
+    Route::get('/map-center', [MapSettingController::class, 'getMapCenter']);
+    Route::post('/map-center', [MapSettingController::class, 'updateMapCenter']);
+
 
 
     Route::get('/test-ftth', function () {

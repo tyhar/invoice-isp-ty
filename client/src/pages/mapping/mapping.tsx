@@ -36,6 +36,7 @@ interface MarkerData {
   tipe_splitter?: string;
   kabel_core_odc_id?: string;
   nama_odc?: string;
+  kabel_odc_id?: string;
 }
 
 interface AddMarkerFormProps {
@@ -75,6 +76,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
     latitude: initialData?.latitude || '',
     longitude: initialData?.longitude || '',
     client_id: initialData?.client_id || '',
+    kabel_odc_id: initialData?.kabel_odc_id || '',
   });
 
   const allowMapClick = !position && form.nama_lokasi.trim() === '' && form.nama.trim() === '';
@@ -82,6 +84,9 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
   const [odpList, setOdpList] = useState<any[]>([]);
   const [odcCoreList, setOdcCoreList] = useState<any[]>([]);
   const [clientList, setClientList] = useState<any[]>([]);
+  const [kabelOdcList, setKabelOdcList] = useState<any[]>([]);
+  const [formError, setFormError] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,6 +104,11 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
         } else if (mode === 'odp') {
           const res = await axios.get(`${api}/api/v1/fo-kabel-core-odcs/no-odp`, headers);
           setOdcCoreList(res.data.data);
+        } else if (mode === 'odc') {
+          const [res] = await Promise.all([
+            axios.get(`${api}/api/v1/fo-kabel-odcs`, headers),
+          ]);
+          setKabelOdcList(res.data.data);
         }
       } catch (error) {
         console.error(error);
@@ -178,7 +188,6 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
               lokasi_id: initialData?.lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
               nama_odp: form.nama,
-              tipe_splitter: form.tipe_splitter,
             },
             headers
           );
@@ -187,6 +196,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             `${api}/api/v1/fo-odcs/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
+              kabel_odc_id: form.kabel_odc_id,
               nama_odc: form.nama,
               tipe_splitter: form.tipe_splitter,
             },
@@ -228,7 +238,6 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
               lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
               nama_odp: form.nama,
-              tipe_splitter: form.tipe_splitter,
             },
             headers
           );
@@ -237,6 +246,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             `${api}/api/v1/fo-odcs`,
             {
               lokasi_id,
+              kabel_odc_id: form.kabel_odc_id,
               nama_odc: form.nama,
               tipe_splitter: form.tipe_splitter,
             },
@@ -244,13 +254,28 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           );
         }
 
+        setFormError(null);
         window.alert('Data berhasil disimpan.');
       }
 
       onSave();
-    } catch (error) {
-      console.error(error);
-      alert('Gagal menyimpan data.');
+    } catch (error: any) {
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors as Record<string, string[]>;
+        const rawError = (Object.values(errors)[0]?.[0]) || error.response.data.message;
+
+        const errorMap: Record<string, string> = {
+          'The nama odp has already been taken.': 'Nama ODP sudah digunakan.',
+          'The nama odc has already been taken.': 'Nama ODC sudah digunakan.',
+          'The nama client has already been taken.': 'Nama Client sudah digunakan.',
+        };
+
+        const translatedError = errorMap[rawError] || rawError || 'Terjadi kesalahan validasi.';
+        setFormError(translatedError);
+      } else {
+        console.error(error);
+        setFormError('Gagal menyimpan data.');
+      }
     }
   };
 
@@ -303,6 +328,11 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           {editingId ? mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : 'Edit ODC' : mode === 'client' ? 'Tambah Client' : mode === 'odp' ? 'Tambah ODP' : 'Tambah ODC'}</h3>
         <p className="mb-2 text-xs text-gray-600">Klik peta untuk memilih lokasi atau edit latitude dan longitude di bawah</p>
         <div className="max-h-[55vh] overflow-y-auto px-4">
+          {formError && (
+            <div className="bg-red-100 text-red-800 text-sm px-3 py-2 rounded mb-2">
+              {formError}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-3 text-sm">
             <div>
               <label className="block mb-1">Nama Lokasi</label>
@@ -407,6 +437,27 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
                     ))}
                   </select>
                 </div>
+              </>
+            )}
+
+            {mode === 'odc' && (
+              <>
+                <div>
+                  <label className="block mb-1">Kabel ODC</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.kabel_odc_id}
+                    onChange={(e) => setForm({ ...form, kabel_odc_id: e.target.value })}
+                    required
+                  >
+                    <option value="">Pilih Kabel ODC</option>
+                    {kabelOdcList.map((kabel) => (
+                      <option key={kabel.id} value={kabel.id}>
+                        {kabel.nama_kabel}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div>
                   <label className="block mb-1">Tipe Splitter</label>
@@ -415,27 +466,16 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
                     value={form.tipe_splitter}
                     onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
                   >
+                    <option value="1:2">1:2</option>
+                    <option value="1:4">1:4</option>
                     <option value="1:8">1:8</option>
                     <option value="1:16">1:16</option>
                     <option value="1:32">1:32</option>
+                    <option value="1:64">1:64</option>
+                    <option value="1:128">1:128</option>
                   </select>
                 </div>
               </>
-            )}
-
-            {mode === 'odc' && (
-              <div>
-                <label className="block mb-1">Tipe Splitter</label>
-                <select
-                  className="w-full border p-1"
-                  value={form.tipe_splitter}
-                  onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
-                >
-                  <option value="1:8">1:8</option>
-                  <option value="1:16">1:16</option>
-                  <option value="1:32">1:32</option>
-                </select>
-              </div>
             )}
 
             <div>
@@ -497,8 +537,11 @@ const MappingPage: React.FC = () => {
   const [validOdps, setValidOdps] = useState<any[]>([]);
   const api = "http://localhost:8000";
 
-  // Default CENTER MAP
   const mapDefaultCenter: [number, number] = [-7.56526, 110.81653];
+  const [latInput, setLatInput] = useState('');
+  const [lngInput, setLngInput] = useState('');
+  const [showCenterModal, setShowCenterModal] = useState(false);
+
 
   const pages: Page[] = [{ name: t('Mapping'), href: '/map' }];
 
@@ -544,8 +587,20 @@ const MappingPage: React.FC = () => {
     }
   };
 
+  const fetchMapCenter = async () => {
+    try {
+      const token = localStorage.getItem('X-API-TOKEN');
+      const headers = { headers: { 'X-API-TOKEN': token || '' } };
+      const res = await axios.get(`${api}/api/v1/map-center`, headers);
+      const { latitude, longitude } = res.data;
+      setSelectedCenter([parseFloat(latitude), parseFloat(longitude)]);
+    } catch (err) {
+      console.error('Gagal fetch Map Center:', err);
+    }
+  };
 
   useEffect(() => {
+    fetchMapCenter();
     fetchData();
     fetchFilterLokasi();
     fetchStatistikData();
@@ -675,6 +730,26 @@ const MappingPage: React.FC = () => {
     }
   };
 
+  const handleSaveMapCenter = async () => {
+    if (!latInput || !lngInput) return alert('Isi koordinat lengkap');
+
+    try {
+      const token = localStorage.getItem('X-API-TOKEN');
+      const headers = { headers: { 'X-API-TOKEN': token || '' } };
+
+      await axios.post(`${api}/api/v1/map-center`, {
+        latitude: parseFloat(latInput),
+        longitude: parseFloat(lngInput),
+      }, headers);
+
+      setSelectedCenter([parseFloat(latInput), parseFloat(lngInput)]);
+      alert('Pusat peta diperbarui!');
+      setShowCenterModal(false);
+    } catch (err) {
+      console.error(err);
+      alert('Gagal menyimpan center map.');
+    }
+  };
 
   const clientIcon = L.icon({
     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
@@ -825,6 +900,12 @@ const MappingPage: React.FC = () => {
           >
             Add Kabel
           </button>
+          <button
+            className="bg-gray-600 text-white px-4 py-2 rounded"
+            onClick={() => setShowCenterModal(true)}
+          >
+            Set Center Map
+          </button>
         </div>
         <div className="flex gap-4 w-full max-w-2xl">
           <div className="w-1/2">
@@ -858,7 +939,7 @@ const MappingPage: React.FC = () => {
             <p><b>Jumlah ODC:</b> {jumlahData.odc}</p>
           </div>
         )}
-        <MapContainer center={mapDefaultCenter} zoom={13} className="h-full w-full">
+        <MapContainer center={selectedCenter || mapDefaultCenter} zoom={13} className="h-full w-full">
           <MapCenterUpdater center={selectedCenter || mapDefaultCenter} />
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
@@ -1090,7 +1171,6 @@ const MappingPage: React.FC = () => {
             );
           })}
 
-
           {coordinateWarning && (
             <div style={{ color: 'red', marginTop: '10px' }}>
               ⚠️ Ada koordinat yang tidak terdeteksi. Beberapa garis mungkin tidak ditampilkan.
@@ -1141,6 +1221,45 @@ const MappingPage: React.FC = () => {
               </div>
             </div>
           )}
+
+          {showCenterModal && (
+            <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
+              <div className="bg-white rounded-lg shadow-md p-6 w-[300px]">
+                <h2 className="text-lg font-semibold mb-4">Set Map Center</h2>
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="number"
+                    placeholder="Latitude"
+                    value={latInput}
+                    onChange={(e) => setLatInput(e.target.value)}
+                    className="border px-2 py-1 rounded"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Longitude"
+                    value={lngInput}
+                    onChange={(e) => setLngInput(e.target.value)}
+                    className="border px-2 py-1 rounded"
+                  />
+                </div>
+                <div className="flex justify-end mt-4 gap-2">
+                  <button
+                    className="px-4 py-1 bg-gray-300 rounded hover:bg-gray-400"
+                    onClick={() => setShowCenterModal(false)}
+                  >
+                    Batal
+                  </button>
+                  <button
+                    className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    onClick={handleSaveMapCenter}
+                  >
+                    Simpan
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
 
           {/* Form Add */}
           {formMode && !editData && (

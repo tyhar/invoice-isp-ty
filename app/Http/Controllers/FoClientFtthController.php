@@ -164,12 +164,41 @@ class FoClientFtthController extends Controller
                 'odc' => $firstOdc ? [
                     'id' => $firstOdc->id,
                     'nama_odc' => $firstOdc->nama_odc,
+                    'tipe_splitter' => $firstOdc->tipe_splitter,
+                    'status' => $firstOdc->status,
+                    'created_at' => $firstOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $firstOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $firstOdc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $firstOdc->lokasi ? [
+                        'id' => $firstOdc->lokasi->id,
+                        'nama_lokasi' => $firstOdc->lokasi->nama_lokasi,
+                        'deskripsi' => $firstOdc->lokasi->deskripsi,
+                        'latitude' => $firstOdc->lokasi->latitude,
+                        'longitude' => $firstOdc->lokasi->longitude,
+                        'status' => $firstOdc->lokasi->status,
+                    ] : null,
                 ] : null,
                 'client' => $c->client ? [
                     'id' => $this->encodePrimaryKey($c->client->id),
                     'name' => $c->client->name,
                     'phone' => $c->client->phone,
                     'email' => $c->client->email,
+
+                    'address1' => $c->client->address1,
+                    'address2' => $c->client->address2,
+                    'city' => $c->client->city,
+                    'state' => $c->client->state,
+                    'postal_code' => $c->client->postal_code,
+                    'country_id' => $c->client->country_id,
+                    'status_id' => $c->client->status_id,
+                    'invoices' => $c->client->invoices->map(function ($invoice) {
+                        return [
+                            'id' => $invoice->id,
+                            'amount' => $invoice->amount,
+                            'status_id' => $invoice->status_id,
+                            'line_items' => $invoice->line_items,
+                        ];
+                    }),
                 ] : null,
                 'company' => $c->company ? [
                     'id' => $c->company->id,
@@ -198,7 +227,6 @@ class FoClientFtthController extends Controller
         ], 200);
     }
 
-
     /**
      * Create a new FTTH client (default status = active).
      *
@@ -211,7 +239,7 @@ class FoClientFtthController extends Controller
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'odp_id' => 'required|exists:fo_odps,id',
             'client_id' => 'nullable',
-            'nama_client' => 'nullable|string|max:255',
+            'nama_client' => 'required|string|max:255|unique:fo_client_ftths,nama_client',
             'alamat' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
@@ -348,7 +376,7 @@ class FoClientFtthController extends Controller
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'odp_id' => 'sometimes|exists:fo_odps,id',
             'client_id' => 'nullable',
-            'nama_client' => 'nullable|string|max:255',
+            'nama_client' => 'nullable|string|max:255|unique:fo_client_ftths,nama_client,' . $id,
             'alamat' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
