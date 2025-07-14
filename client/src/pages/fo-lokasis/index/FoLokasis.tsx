@@ -129,7 +129,7 @@ export default function FoLokasis() {
     ];
 
     // State for custom filter (used_by_status)
-    const [customFilter, setCustomFilter] = useState<string[]>([]);
+    const [customFilter] = useState<string[]>([]);
 
     // Build endpoint string based on current filter state
     const endpoint = useMemo(() => {
