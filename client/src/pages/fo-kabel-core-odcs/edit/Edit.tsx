@@ -47,7 +47,7 @@ export default function Edit() {
     useEffect(() => {
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-kabel-core-odcs/${id}`)),
-            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs')),
+            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000')),
         ])
             .then(([resCore, resTube]: any) => {
                 const data = (resCore as GenericSingleResourceResponse<any>)

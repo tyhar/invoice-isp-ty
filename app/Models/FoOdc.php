@@ -42,4 +42,6 @@ class FoOdc extends Model
         // kabel_odc_id is now nullable
         return $this->belongsTo(FoKabelOdc::class, 'kabel_odc_id');
     }
+
+    // Removed odps() relationship as per user instruction
 }

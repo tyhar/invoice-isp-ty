@@ -49,6 +49,8 @@ export default function Create() {
     const [lokasis, setLokasis] = useState<
         { id: number; nama_lokasi: string }[]
     >([]);
+    const [kabelOdcs, setKabelOdcs] = useState<any[]>([]); // New: all kabel ODCs
+    const [kabelTubes, setKabelTubes] = useState<any[]>([]); // New: all kabel tubes
     const [cores, setCores] = useState<CoreOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
@@ -63,8 +65,28 @@ export default function Create() {
                 }))
             )
         );
+        // fetch all kabel ODCs for dropdown
+        request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=1000')).then((res) =>
+            setKabelOdcs(
+                res.data.data.map((k: any) => ({
+                    id: k.id,
+                    nama_kabel: k.nama_kabel,
+                    kabel_tube_odcs: k.kabel_tube_odcs || [],
+                }))
+            )
+        );
+        // fetch all kabel tubes for dropdown
+        request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000')).then((res) =>
+            setKabelTubes(
+                res.data.data.map((t: any) => ({
+                    id: t.id,
+                    warna_tube: t.warna_tube,
+                    kabel_odc_id: t.kabel_odc_id,
+                }))
+            )
+        );
         // fetch core options (each includes nested cable & tube)
-        request('GET', endpoint('/api/v1/fo-kabel-core-odcs')).then((res) =>
+        request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=1000')).then((res) =>
             setCores(
                 res.data.data.map((c: any) => ({
                     id: c.id,
@@ -162,6 +184,8 @@ export default function Create() {
                         values={values}
                         setValues={setValues}
                         lokasis={lokasis}
+                        kabelOdcs={kabelOdcs}
+                        kabelTubes={kabelTubes} // Pass all kabel tubes
                         cores={cores}
                         errors={errors}
                     />

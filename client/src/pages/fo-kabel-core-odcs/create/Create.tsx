@@ -48,7 +48,7 @@ export default function Create() {
     const [isBusy, setIsBusy] = useState(false);
 
     useEffect(() => {
-        request('GET', endpoint('/api/v1/fo-kabel-tube-odcs')).then(
+        request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000')).then(
             (res: any) => {
                 setTubes(
                     res.data.data.map((o: any) => ({

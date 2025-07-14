@@ -37,6 +37,8 @@ interface Props {
     values: FoOdpFormValues;
     setValues: React.Dispatch<React.SetStateAction<FoOdpFormValues>>;
     lokasis: LokasiOption[];
+    kabelOdcs: { id: number; nama_kabel: string; kabel_tube_odcs: any[] }[];
+    kabelTubes: { id: number; warna_tube: string; kabel_odc_id: number }[]; // New prop
     cores: CoreOption[];
     errors?: ValidationBag;
 }
@@ -45,6 +47,8 @@ export function CreateFoOdp({
     values,
     setValues,
     lokasis,
+    kabelOdcs,
+    kabelTubes,
     cores,
     errors,
 }: Props) {
@@ -54,31 +58,11 @@ export function CreateFoOdp({
         value: FoOdpFormValues[K]
     ) => setValues((v) => ({ ...v, [field]: value }));
 
-    // derive unique kabel options
-    const kabelOptions = Array.from(
-        new Map(
-            cores.map((c) => [
-                c.kabel_odc_id,
-                { id: c.kabel_odc_id, nama_kabel: c.nama_kabel },
-            ])
-        ).values()
-    );
+    // derive kabel options from all kabelOdcs
+    const kabelOptions = kabelOdcs.map((k) => ({ id: k.id, nama_kabel: k.nama_kabel }));
 
-    // derive tube options based on selected kabel
-    const tubeOptions = values.kabel_odc_id
-        ? Array.from(
-              new Map(
-                  cores
-                      .filter(
-                          (c) => String(c.kabel_odc_id) === values.kabel_odc_id
-                      )
-                      .map((c) => [
-                          c.kabel_tube_odc_id,
-                          { id: c.kabel_tube_odc_id, warna_tube: c.warna_tube },
-                      ])
-              ).values()
-          )
-        : [];
+    // derive tube options from all kabelTubes for selected kabel_odc_id
+    const tubeOptions = kabelTubes.filter((t) => String(t.kabel_odc_id) === values.kabel_odc_id);
 
     // derive core options based on selected kabel and tube
     const coreOptions = cores.filter(

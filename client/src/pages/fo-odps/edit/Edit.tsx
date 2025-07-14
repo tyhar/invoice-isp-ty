@@ -46,6 +46,8 @@ export default function Edit() {
 
     const [values, setValues] = useState<FoOdpFormValues>(initial);
     const [lokasis, setLokasis] = useState<LokasiOpt[]>([]);
+    const [kabelOdcs, setKabelOdcs] = useState<any[]>([]); // New: all kabel ODCs
+    const [kabelTubes, setKabelTubes] = useState<any[]>([]); // New: all kabel tubes
     const [cores, setCores] = useState<CoreOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
@@ -55,9 +57,11 @@ export default function Edit() {
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-odps/${id}`)),
             request('GET', endpoint('/api/v1/fo-lokasis')),
-            request('GET', endpoint('/api/v1/fo-kabel-core-odcs')),
+            request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=1000')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=1000')),
+            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000')),
         ])
-            .then(([odpRes, lokRes, coreRes]: any) => {
+            .then(([odpRes, lokRes, coreRes, kabelOdcRes, kabelTubeRes]: any) => {
                 const odp = odpRes.data.data;
                 setValues({
                     create_new_lokasi: false,
@@ -85,6 +89,20 @@ export default function Edit() {
                         nama_kabel: c.kabel_odc.nama_kabel,
                         kabel_tube_odc_id: c.kabel_tube_odc.id,
                         warna_tube: c.kabel_tube_odc.warna_tube,
+                    }))
+                );
+                setKabelOdcs(
+                    kabelOdcRes.data.data.map((k: any) => ({
+                        id: k.id,
+                        nama_kabel: k.nama_kabel,
+                        kabel_tube_odcs: k.kabel_tube_odcs || [],
+                    }))
+                );
+                setKabelTubes(
+                    kabelTubeRes.data.data.map((t: any) => ({
+                        id: t.id,
+                        warna_tube: t.warna_tube,
+                        kabel_odc_id: t.kabel_odc_id,
                     }))
                 );
             })
@@ -175,6 +193,8 @@ export default function Edit() {
                         values={values}
                         setValues={setValues}
                         lokasis={lokasis}
+                        kabelOdcs={kabelOdcs}
+                        kabelTubes={kabelTubes} // Pass all kabel tubes
                         cores={cores}
                         errors={errors}
                     />
