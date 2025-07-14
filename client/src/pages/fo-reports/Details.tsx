@@ -9,6 +9,8 @@ import html2canvas from 'html2canvas';
 import { ChevronDown, ChevronUp, Folder, Server, GitBranch, Layers, MapPin, Activity, Filter } from 'react-feather';
 import { SelectField } from '$app/components/forms/SelectField';
 
+const PER_PAGE_OPTIONS: number[] = [10, 25, 50, 100];
+
 function flattenForCSV(lokasis: any[]) {
   // Flatten nested structure for CSV export
   const rows: any[] = [];
@@ -241,6 +243,46 @@ function flattenForCSV(lokasis: any[]) {
         client_status: client.status,
       });
     });
+
+    // Add JointBox level
+    if (lokasi.jointboxes) {
+      lokasi.jointboxes.forEach((jointbox: any) => {
+        rows.push({
+          level: 'Joint Box',
+          lokasi: lokasi.nama_lokasi,
+          lokasi_deskripsi: lokasi.deskripsi,
+          lokasi_lat: lokasi.latitude,
+          lokasi_lng: lokasi.longitude,
+          lokasi_city: lokasi.city,
+          lokasi_province: lokasi.province,
+          lokasi_country: lokasi.country,
+          lokasi_status: lokasi.status,
+          odc: '',
+          odc_tipe_splitter: '',
+          odc_status: '',
+          kabel: jointbox.kabel_odc?.nama_kabel || '',
+          kabel_tipe: jointbox.kabel_odc?.tipe_kabel || '',
+          kabel_panjang: jointbox.kabel_odc?.panjang_kabel || '',
+          kabel_status: jointbox.kabel_odc?.status || '',
+          tube: '',
+          tube_warna: '',
+          tube_status: '',
+          core: '',
+          core_warna: '',
+          core_status: '',
+          odp: '',
+          odp_status: '',
+          client: '',
+          client_alamat: '',
+          client_status: '',
+          jointbox_nama: jointbox.nama_joint_box,
+          jointbox_status: jointbox.status,
+          jointbox_created_at: jointbox.created_at,
+          jointbox_updated_at: jointbox.updated_at,
+          jointbox_deleted_at: jointbox.deleted_at,
+        });
+      });
+    }
   });
   return rows;
 }
@@ -356,6 +398,11 @@ function LocationCard({ lokasi }: { lokasi: any }) {
             {/* Standalone Clients */}
             {lokasi.client_ftths?.map((client: any, idx: number) => (
               <ClientCard key={client.id || idx} client={client} />
+            ))}
+
+            {/* Joint Boxes */}
+            {lokasi.jointboxes?.map((jointbox: any, idx: number) => (
+              <JointBoxCard key={jointbox.id || idx} jointbox={jointbox} />
             ))}
           </div>
         )}
@@ -608,6 +655,55 @@ function ClientCard({ client }: { client: any }) {
   );
 }
 
+// JointBox card component
+function JointBoxCard({ jointbox }: { jointbox: any }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="ml-6 border-l-2 border-pink-200 pl-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-pink-100 rounded">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" fill="#e75480" /></svg>
+          </div>
+          <div>
+            <h4 className="font-medium text-gray-900">Joint Box {jointbox.nama_joint_box}</h4>
+            <p className="text-sm text-gray-600">Status: {jointbox.status}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <StatusBadge status={jointbox.status} />
+          <button
+            type="button"
+            onClick={() => setExpanded(!expanded)}
+            className="p-1.5 text-gray-400 hover:text-gray-600 rounded transition-colors"
+          >
+            {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
+        </div>
+      </div>
+      {expanded && (
+        <div className="space-y-2 ml-4">
+          <div className="text-xs text-gray-500">Created: {jointbox.created_at}</div>
+          <div className="text-xs text-gray-500">Updated: {jointbox.updated_at}</div>
+          <div className="text-xs text-gray-500">Deleted: {jointbox.deleted_at || '-'}</div>
+          {jointbox.kabel_odc && (
+            <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+              <div className="font-semibold text-gray-700 mb-1">Kabel ODC</div>
+              <div className="text-xs text-gray-500">Nama Kabel: {jointbox.kabel_odc.nama_kabel}</div>
+              <div className="text-xs text-gray-500">Tipe Kabel: {jointbox.kabel_odc.tipe_kabel}</div>
+              <div className="text-xs text-gray-500">Panjang Kabel: {jointbox.kabel_odc.panjang_kabel}</div>
+              <div className="text-xs text-gray-500">Jumlah Tube: {jointbox.kabel_odc.jumlah_tube}</div>
+              <div className="text-xs text-gray-500">Jumlah Core/Tube: {jointbox.kabel_odc.jumlah_core_in_tube}</div>
+              <div className="text-xs text-gray-500">Jumlah Total Core: {jointbox.kabel_odc.jumlah_total_core}</div>
+              <div className="text-xs text-gray-500">Status: {jointbox.kabel_odc.status}</div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Details() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -617,6 +713,8 @@ export default function Details() {
   const [selectedProvince, setSelectedProvince] = useState<string>('');
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [groupBy, setGroupBy] = useState<'location' | 'city' | 'province' | 'country'>('location');
+  const [perPage, setPerPage] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
     // Get unique values for filters - only compute after data is loaded
   const countries = React.useMemo(() => {
@@ -746,6 +844,16 @@ export default function Details() {
     }
     return [] as GroupData[];
   }, [filteredLokasis, groupBy]);
+
+  // Pagination logic
+  const totalGroups = groupedData.length;
+  const totalPages = Math.max(1, Math.ceil(totalGroups / perPage));
+  const paginatedGroups = groupedData.slice((currentPage - 1) * perPage, currentPage * perPage);
+
+  // Reset to page 1 when filters/grouping/perPage change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredLokasis, groupBy, perPage]);
 
   const handleExportCSV = () => {
     const csv = Papa.unparse(flattenForCSV(filteredLokasis));
@@ -908,9 +1016,55 @@ export default function Details() {
         </div>
       </Card>
 
+      {/* Pagination controls above results */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-2">
+        <div className="flex items-center gap-2">
+          <label htmlFor="per-page-select" className="text-sm font-medium text-gray-700">Show per page:</label>
+          <select
+            id="per-page-select"
+            className="border rounded px-2 py-1 text-sm min-w-[80px] pr-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={perPage}
+            onChange={e => setPerPage(Number(e.target.value))}
+          >
+            {PER_PAGE_OPTIONS.map((opt: number) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setCurrentPage(1)}
+            disabled={currentPage === 1}
+            aria-label="First page"
+          >{'<<'}</button>
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            aria-label="Previous page"
+          >{'<'}</button>
+          <span className="text-sm text-gray-700">
+            Page {currentPage} of {totalPages} ({totalGroups} groups)
+          </span>
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            aria-label="Next page"
+          >{'>'}</button>
+          <button
+            className="px-2 py-1 border rounded disabled:opacity-50"
+            onClick={() => setCurrentPage(totalPages)}
+            disabled={currentPage === totalPages}
+            aria-label="Last page"
+          >{'>>'}</button>
+        </div>
+      </div>
+
       <div id="ftth-details-dashboard">
         <div className="space-y-6">
-          {groupedData.map((group: any, idx) => (
+          {paginatedGroups.map((group: any, idx) => (
             <div key={group.key || idx} className="bg-white rounded-lg border border-gray-200 shadow-sm">
               <div className="p-4 border-b border-gray-200 bg-gray-50">
                 <h3 className="text-lg font-semibold text-gray-900">{group.title}</h3>

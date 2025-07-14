@@ -64,26 +64,6 @@ export default function FoLokasis() {
             ),
         },
         {
-            id: 'odcs',
-            label: 'Jumlah ODC',
-            format: (_f, resource) => `${resource.odcs?.length ?? 0} ODC`,
-        },
-        {
-            id: 'odps',
-            label: 'Jumlah ODP',
-            format: (_f, resource) => `${resource.odps?.length ?? 0} ODP`,
-        },
-        {
-            id: 'clients',
-            label: 'Jumlah Client',
-            format: (_f, resource) => `${resource.clients?.length ?? 0} Client`,
-        },
-        {
-            id: 'jointboxes',
-            label: 'Jumlah JointBox',
-            format: (_f, resource) => `${resource.jointboxes?.length ?? 0} JointBox`,
-        },
-        {
             id: 'geocoding',
             label: 'Geocoding Status',
             format: (_f, resource) => {
@@ -103,6 +83,26 @@ export default function FoLokasis() {
                     <span className="text-orange-600">⚠ Needs geocoding</span>
                 );
             },
+        },
+        {
+            id: 'odcs',
+            label: 'Jumlah ODC',
+            format: (_f, resource) => `${resource.odcs?.length ?? 0} ODC`,
+        },
+        {
+            id: 'odps',
+            label: 'Jumlah ODP',
+            format: (_f, resource) => `${resource.odps?.length ?? 0} ODP`,
+        },
+        {
+            id: 'clients',
+            label: 'Jumlah Client',
+            format: (_f, resource) => `${resource.clients?.length ?? 0} Client`,
+        },
+        {
+            id: 'jointboxes',
+            label: 'Jumlah JointBox',
+            format: (_f, resource) => `${resource.jointboxes?.length ?? 0} JointBox`,
         },
         { id: 'latitude', label: 'Latitude' },
         { id: 'longitude', label: 'Longitude' },

@@ -10,6 +10,7 @@ use App\Models\FoKabelOdc;
 use App\Models\FoKabelCoreOdc;
 use App\Models\FoKabelTubeOdc;
 use App\Models\FoLokasi;
+use App\Models\FoJointBox;
 use Illuminate\Http\JsonResponse;
 
 class FtthStatisticController extends Controller
@@ -24,6 +25,7 @@ class FtthStatisticController extends Controller
         $kabelCoreOdcCount = FoKabelCoreOdc::count();
         $kabelTubeOdcCount = FoKabelTubeOdc::count();
         $clientFtthCount = FoClientFtth::count();
+        $jointBoxCount = FoJointBox::count();
 
         // Calculate total kabel length
         $totalKabelLength = FoKabelOdc::sum('panjang_kabel');
@@ -46,6 +48,7 @@ class FtthStatisticController extends Controller
         $kabelStatusCounts = $this->getStatusCounts(FoKabelOdc::all(), 'status');
         $lokasiStatusCounts = $this->getStatusCounts(FoLokasi::all(), 'status');
         $clientStatusCounts = $this->getStatusCounts(FoClientFtth::all(), 'status');
+        $jointBoxStatusCounts = $this->getStatusCounts(FoJointBox::all(), 'status');
 
         // Calculate active counts for status summary
         $activeLokasi = FoLokasi::where('status', 'active')->count();
@@ -53,6 +56,7 @@ class FtthStatisticController extends Controller
         $activeOdp = FoOdp::where('status', 'active')->count();
         $activeKabel = FoKabelOdc::where('status', 'active')->count();
         $activeClients = FoClientFtth::where('status', 'active')->count();
+        $activeJointBox = FoJointBox::where('status', 'active')->count();
 
         // ODPs per ODC (for bar chart)
         $odpsPerOdc = $this->getOdpsPerOdc();
@@ -91,6 +95,7 @@ class FtthStatisticController extends Controller
                 'clientFtth' => $clientFtthCount,
                 'tubes' => $kabelTubeOdcCount,
                 'cores' => $kabelCoreOdcCount,
+                'jointbox' => $jointBoxCount,
                 'odpUtilization' => $odpUtilization,
                 'kabelUtilization' => $tubeUtilization,
             ],
@@ -105,6 +110,8 @@ class FtthStatisticController extends Controller
                 'activeKabel' => $activeKabel,
                 'totalClients' => $clientFtthCount,
                 'activeClients' => $activeClients,
+                'totalJointBox' => $jointBoxCount,
+                'activeJointBox' => $activeJointBox,
             ],
             'utilization' => [
                 'totalCores' => $kabelCoreOdcCount,
@@ -128,7 +135,8 @@ class FtthStatisticController extends Controller
                 'odcStatus' => $odcStatusCounts,
                 'kabelStatus' => $kabelStatusCounts,
                 'clientStatus' => $clientStatusCounts,
-                'statusBreakdown' => array_merge($lokasiStatusCounts, $odcStatusCounts, $odpStatusCounts, $kabelStatusCounts, $clientStatusCounts),
+                'jointBoxStatus' => $jointBoxStatusCounts,
+                'statusBreakdown' => array_merge($lokasiStatusCounts, $odcStatusCounts, $odpStatusCounts, $kabelStatusCounts, $clientStatusCounts, $jointBoxStatusCounts),
             ],
             'detailed' => $detailedData,
         ];
@@ -151,14 +159,14 @@ class FtthStatisticController extends Controller
     private function getOdpsPerOdc()
     {
         // Use the new KabelOdc->odcs relationship (plural)
-        $odcs = \App\Models\FoKabelOdc::with('odcs')->get();
+        $odcs = FoKabelOdc::with('odcs')->get();
         $odpsByOdc = [];
         foreach ($odcs as $kabelOdc) {
             $odcName = $kabelOdc->nama_kabel ?? 'Unknown';
             $odpCount = 0;
             foreach ($kabelOdc->odcs as $odc) {
                 // Each ODC can have multiple ODPs via KabelCoreOdc->ODP, but for stats, count ODPs linked to this ODC's KabelOdc
-                $odpCount += \App\Models\FoOdp::whereHas('kabelCoreOdc.kabelTubeOdc.kabelOdc', function($q) use ($kabelOdc) {
+                $odpCount += FoOdp::whereHas('kabelCoreOdc.kabelTubeOdc.kabelOdc', function($q) use ($kabelOdc) {
                     $q->where('id', $kabelOdc->id);
                 })->count();
             }
@@ -187,11 +195,12 @@ class FtthStatisticController extends Controller
     private function getDetailedData()
     {
         // Eager load all relationships for detailed drill-down using new structure
-        $lokasis = \App\Models\FoLokasi::with([
+        $lokasis = FoLokasi::with([
             'odcs.kabelOdc',
             'odps.kabelCoreOdc.kabelTubeOdc.kabelOdc',
             'odps.clientFtth',
-            'clientFtths.odp'
+            'clientFtths.odp',
+            'jointBoxes.kabelOdc',
         ])->get();
         return $lokasis->map(function($lokasi) {
             return [
@@ -229,7 +238,7 @@ class FtthStatisticController extends Controller
                             'created_at' => $odc->kabelOdc->created_at?->toDateTimeString(),
                             'updated_at' => $odc->kabelOdc->updated_at?->toDateTimeString(),
                             'deleted_at' => $odc->kabelOdc->deleted_at?->toDateTimeString(),
-                                                ] : null,
+                        ] : null,
                     ];
                 }),
                 'odps' => $lokasi->odps->map(function($odp) {
@@ -279,6 +288,29 @@ class FtthStatisticController extends Controller
                             'id' => $client->odp->id,
                             'nama_odp' => $client->odp->nama_odp,
                             'status' => $client->odp->status,
+                        ] : null,
+                    ];
+                }),
+                'jointboxes' => $lokasi->jointBoxes->map(function($jointbox) {
+                    return [
+                        'id' => $jointbox->id,
+                        'nama_joint_box' => $jointbox->nama_joint_box,
+                        'status' => $jointbox->status,
+                        'created_at' => $jointbox->created_at?->toDateTimeString(),
+                        'updated_at' => $jointbox->updated_at?->toDateTimeString(),
+                        'deleted_at' => $jointbox->deleted_at?->toDateTimeString(),
+                        'kabel_odc' => $jointbox->kabelOdc ? [
+                            'id' => $jointbox->kabelOdc->id,
+                            'nama_kabel' => $jointbox->kabelOdc->nama_kabel,
+                            'tipe_kabel' => $jointbox->kabelOdc->tipe_kabel,
+                            'panjang_kabel' => $jointbox->kabelOdc->panjang_kabel,
+                            'jumlah_tube' => $jointbox->kabelOdc->jumlah_tube,
+                            'jumlah_core_in_tube' => $jointbox->kabelOdc->jumlah_core_in_tube,
+                            'jumlah_total_core' => $jointbox->kabelOdc->jumlah_total_core,
+                            'status' => $jointbox->kabelOdc->status,
+                            'created_at' => $jointbox->kabelOdc->created_at?->toDateTimeString(),
+                            'updated_at' => $jointbox->kabelOdc->updated_at?->toDateTimeString(),
+                            'deleted_at' => $jointbox->kabelOdc->deleted_at?->toDateTimeString(),
                         ] : null,
                     ];
                 }),

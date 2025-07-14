@@ -36,12 +36,14 @@ export default function Overview() {
     clientFtth: 0,
     tubes: 0,
     cores: 0,
+    jointbox: 0,
     odpUtilization: 0,
     kabelUtilization: 0,
   });
   const [odpsPerOdc, setOdpsPerOdc] = useState<any[]>([]);
   const [clientsPerOdp, setClientsPerOdp] = useState<any[]>([]);
   const [odpStatusPie, setOdpStatusPie] = useState<any[]>([]);
+  const [jointBoxStatusPie, setJointBoxStatusPie] = useState<any[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -50,10 +52,11 @@ export default function Overview() {
     request('GET', endpoint('/api/v1/ftth-statistics'))
       .then((response) => {
         const data = response.data.data;
-        setSummary(data.summary);
+        setSummary({ ...data.summary, jointbox: data.summary.jointbox ?? 0 });
         setOdpsPerOdc(data.charts.odpsPerOdc);
         setClientsPerOdp(data.charts.clientsPerOdp);
         setOdpStatusPie(data.charts.odpStatusPie);
+        setJointBoxStatusPie(data.charts.jointBoxStatus ?? []);
       })
       .catch(() => {
         setError('Failed to load FTTH data.');
@@ -72,6 +75,7 @@ export default function Overview() {
       ['Total Tubes', summary.tubes],
       ['Total Cores', summary.cores],
       ['Total Client FTTH', summary.clientFtth],
+      ['Total Joint Box', summary.jointbox],
       ['ODP Utilization (%)', summary.odpUtilization],
       ['Kabel Utilization (%)', summary.kabelUtilization],
     ];
@@ -119,12 +123,13 @@ export default function Overview() {
           <Card title="Total Tubes" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-red-600">{summary.tubes}</Card>
           <Card title="Total Cores" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-indigo-600">{summary.cores}</Card>
           <Card title="Total Client FTTH" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-teal-600">{summary.clientFtth}</Card>
+          <Card title="Total Joint Box" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-pink-600">{summary.jointbox}</Card>
           <Card title="ODP Utilization (%)" childrenClassName="flex justify-center items-center text-2xl font-semibold min-h-[3rem] text-emerald-600">{summary.odpUtilization}%</Card>
           <Card title="Kabel Utilization (%)" childrenClassName="flex justify-center items-center text-2xl font-semibold min-h-[3rem] text-cyan-600">{summary.kabelUtilization}%</Card>
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 gap-8 mb-8">
           {/* ODPs per ODC Chart */}
           <Card title="ODPs per ODC Distribution" className="h-[550px]">
             <div className="p-4">
@@ -193,7 +198,7 @@ export default function Overview() {
         </div>
 
         {/* ODP Status Pie Chart - Full Width */}
-        <Card title="ODP Status Breakdown" className="mb-8">
+        {/* <Card title="ODP Status Breakdown" className="mb-8">
           <div className="p-6">
             <ResponsiveContainer width="100%" height={400}>
               <PieChart>
@@ -242,7 +247,59 @@ export default function Overview() {
               Distribution of ODPs by their current status (Active, Archived, Deleted, etc.)
             </div>
           </div>
-        </Card>
+        </Card> */}
+
+        {/* Joint Box Status Pie Chart - Full Width */}
+        {/* <Card title="Joint Box Status Breakdown" className="mb-8">
+          <div className="p-6">
+            <ResponsiveContainer width="100%" height={400}>
+              <PieChart>
+                <Pie
+                  data={jointBoxStatusPie}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={120}
+                  innerRadius={60}
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={true}
+                >
+                  {jointBoxStatusPie.map((entry, idx) => (
+                    <Cell
+                      key={`cell-jointbox-${idx}`}
+                      fill={["#e75480", "#ffc658", "#8884d8", "#82ca9d", "#ff8042", "#0088FE", "#00C49F"][idx % 7]}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      const data = payload[0].payload;
+                      return (
+                        <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+                          <p className="font-semibold">{data.name}</p>
+                          <p className="text-sm">Count: {data.value}</p>
+                          <p className="text-sm">Percentage: {((data.value / jointBoxStatusPie.reduce((sum, item) => sum + item.value, 0)) * 100).toFixed(1)}%</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Legend
+                  layout="horizontal"
+                  verticalAlign="bottom"
+                  align="center"
+                  wrapperStyle={{ paddingTop: '20px' }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-4 text-sm text-gray-600 text-center">
+              Distribution of Joint Boxes by status (Active, Archived, Deleted)
+            </div>
+          </div>
+        </Card> */}
 
         {/* Additional Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

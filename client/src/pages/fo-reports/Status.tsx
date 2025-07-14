@@ -9,6 +9,23 @@ import html2canvas from 'html2canvas';
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
+const ENTITY_LABELS = [
+  'Lokasi',
+  'ODC',
+  'ODP',
+  'Kabel',
+  'Client',
+  'Joint Box',
+];
+const ENTITY_COLORS = [
+  '#3490dc', // blue - Lokasi
+  '#fbbf24', // yellow - ODC
+  '#a78bfa', // purple - ODP
+  '#f97316', // orange - Kabel
+  '#10b981', // green - Client
+  '#e75480', // pink - Joint Box
+];
+
 // Custom tooltip for pie charts
 const CustomPieTooltip = ({ active, payload }: any) => {
   if (active && payload && payload.length) {
@@ -49,6 +66,7 @@ export default function Status() {
   const [odpStatus, setOdpStatus] = useState<any[]>([]);
   const [kabelStatus, setKabelStatus] = useState<any[]>([]);
   const [clientStatus, setClientStatus] = useState<any[]>([]);
+  const [jointBoxStatus, setJointBoxStatus] = useState<any[]>([]);
   const [statusBreakdown, setStatusBreakdown] = useState<any[]>([]);
   const [summary, setSummary] = useState({
     totalLokasi: 0,
@@ -61,6 +79,8 @@ export default function Status() {
     activeKabel: 0,
     totalClients: 0,
     activeClients: 0,
+    totalJointBox: 0,
+    activeJointBox: 0,
   });
 
   useEffect(() => {
@@ -70,10 +90,12 @@ export default function Status() {
     request('GET', endpoint('/api/v1/ftth-statistics'))
       .then((response) => {
         const data = response.data.data;
-
-        // Set summary data
-        setSummary(data.status);
-
+        setSummary({
+          ...summary,
+          ...data.status,
+          totalJointBox: data.status.totalJointBox ?? 0,
+          activeJointBox: data.status.activeJointBox ?? 0,
+        });
         // Calculate percentages for all status charts
         const lokasiStatusWithPercentages = data.charts.lokasiStatus.map((item: any) => ({
           ...item,
@@ -95,6 +117,10 @@ export default function Status() {
           ...item,
           percentage: data.status.totalClients > 0 ? Math.round((item.value / data.status.totalClients) * 100) : 0
         }));
+        const jointBoxStatusWithPercentages = (data.charts.jointBoxStatus ?? []).map((item: any) => ({
+          ...item,
+          percentage: data.status.totalJointBox > 0 ? Math.round((item.value / data.status.totalJointBox) * 100) : 0
+        }));
         const statusBreakdownWithPercentages = data.charts.statusBreakdown.map((item: any) => ({
           ...item,
           percentage: data.charts.statusBreakdown.reduce((sum: number, i: any) => sum + i.value, 0) > 0
@@ -108,6 +134,7 @@ export default function Status() {
         setOdpStatus(odpStatusWithPercentages);
         setKabelStatus(kabelStatusWithPercentages);
         setClientStatus(clientStatusWithPercentages);
+        setJointBoxStatus(jointBoxStatusWithPercentages);
         setStatusBreakdown(statusBreakdownWithPercentages);
       })
       .catch(() => setError('Failed to load status data.'))
@@ -179,6 +206,8 @@ export default function Status() {
           <Card title="Active Kabel" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-red-600">{summary.activeKabel.toLocaleString()}</Card>
           <Card title="Total Clients" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-emerald-600">{summary.totalClients.toLocaleString()}</Card>
           <Card title="Active Clients" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-cyan-600">{summary.activeClients.toLocaleString()}</Card>
+          <Card title="Total Joint Box" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-pink-600">{summary.totalJointBox.toLocaleString()}</Card>
+          <Card title="Active Joint Box" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-pink-400">{summary.activeJointBox.toLocaleString()}</Card>
         </div>
 
         {/* Status Charts */}
@@ -202,7 +231,7 @@ export default function Status() {
                     {lokasiStatus.map((entry, idx) => (
                       <Cell
                         key={`cell-lokasi-${idx}`}
-                        fill={COLORS[idx % COLORS.length]}
+                        fill={ENTITY_COLORS[0]}
                       />
                     ))}
                   </Pie>
@@ -240,7 +269,7 @@ export default function Status() {
                     {odcStatus.map((entry, idx) => (
                       <Cell
                         key={`cell-odc-${idx}`}
-                        fill={COLORS[idx % COLORS.length]}
+                        fill={ENTITY_COLORS[1]}
                       />
                     ))}
                   </Pie>
@@ -278,7 +307,7 @@ export default function Status() {
                     {odpStatus.map((entry, idx) => (
                       <Cell
                         key={`cell-odp-${idx}`}
-                        fill={COLORS[idx % COLORS.length]}
+                        fill={ENTITY_COLORS[2]}
                       />
                     ))}
                   </Pie>
@@ -316,7 +345,7 @@ export default function Status() {
                     {kabelStatus.map((entry, idx) => (
                       <Cell
                         key={`cell-kabel-${idx}`}
-                        fill={COLORS[idx % COLORS.length]}
+                        fill={ENTITY_COLORS[3]}
                       />
                     ))}
                   </Pie>
@@ -331,6 +360,82 @@ export default function Status() {
               </ResponsiveContainer>
               <div className="mt-4 text-sm text-gray-600 text-center">
                 Distribution of Kabel by status (Active, Archived, Deleted)
+              </div>
+            </div>
+          </Card>
+
+          {/* Joint Box Status Chart */}
+          <Card title="Joint Box Status Distribution" className="h-[550px]">
+            <div className="p-4">
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={jointBoxStatus}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={120}
+                    innerRadius={60}
+                    label={({ name, percentage }) => `${name} ${percentage}%`}
+                    labelLine={true}
+                  >
+                    {jointBoxStatus.map((entry, idx) => (
+                      <Cell
+                        key={`cell-jointbox-${idx}`}
+                        fill={ENTITY_COLORS[5]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomPieTooltip />} />
+                  <Legend
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{ paddingTop: '20px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="mt-4 text-sm text-gray-600 text-center">
+                Distribution of Joint Boxes by status (Active, Archived, Deleted)
+              </div>
+            </div>
+          </Card>
+
+          {/* Client Status Chart - now half width, not full width */}
+          <Card title="Client FTTH Status Distribution" className="h-[550px]">
+            <div className="p-4">
+              <ResponsiveContainer width="100%" height={350}>
+                <PieChart>
+                  <Pie
+                    data={clientStatus}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={120}
+                    innerRadius={60}
+                    label={({ name, percentage }) => `${name} ${percentage}%`}
+                    labelLine={true}
+                  >
+                    {clientStatus.map((entry, idx) => (
+                      <Cell
+                        key={`cell-client-${idx}`}
+                        fill={ENTITY_COLORS[4]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<CustomPieTooltip />} />
+                  <Legend
+                    layout="horizontal"
+                    verticalAlign="bottom"
+                    align="center"
+                    wrapperStyle={{ paddingTop: '20px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="mt-4 text-sm text-gray-600 text-center">
+                Distribution of Client FTTH connections by status (Active, Archived, Deleted)
               </div>
             </div>
           </Card>
@@ -355,54 +460,27 @@ export default function Status() {
                   label={{ value: 'Count', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
                 />
                 <Tooltip content={<CustomBarTooltip />} />
-                <Bar
-                  dataKey="value"
-                  fill="#8884d8"
-                  radius={[4, 4, 0, 0]}
-                  name="Count"
-                />
+                <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Count">
+                  {statusBreakdown.map((entry, idx) => {
+                    // Map entity name to color by ENTITY_LABELS order
+                    const entityIdx = ENTITY_LABELS.findIndex(label => entry.name.toLowerCase().includes(label.toLowerCase()));
+                    const color = entityIdx !== -1 ? ENTITY_COLORS[entityIdx] : COLORS[idx % COLORS.length];
+                    return <Cell key={`cell-bar-${idx}`} fill={color} />;
+                  })}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
             <div className="mt-4 text-sm text-gray-600 text-center">
               Overall distribution of all FTTH entities by their current status
             </div>
-          </div>
-        </Card>
-
-        {/* Client Status Chart - Full Width */}
-        <Card title="Client FTTH Status Distribution" className="mb-8">
-          <div className="p-6">
-            <ResponsiveContainer width="100%" height={400}>
-              <PieChart>
-                <Pie
-                  data={clientStatus}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={120}
-                  innerRadius={60}
-                  label={({ name, percentage }) => `${name} ${percentage}%`}
-                  labelLine={true}
-                >
-                  {clientStatus.map((entry, idx) => (
-                    <Cell
-                      key={`cell-client-${idx}`}
-                      fill={COLORS[idx % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomPieTooltip />} />
-                <Legend
-                  layout="horizontal"
-                  verticalAlign="bottom"
-                  align="center"
-                  wrapperStyle={{ paddingTop: '20px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="mt-4 text-sm text-gray-600 text-center">
-              Distribution of Client FTTH connections by status (Active, Archived, Deleted)
+            {/* Custom Legend for Bar Colors */}
+            <div className="flex flex-wrap justify-center gap-4 mt-4">
+              {ENTITY_LABELS.map((label, idx) => (
+                <div key={`legend-bar-${label}`} className="flex items-center gap-2">
+                  <span className="inline-block w-4 h-4 rounded" style={{ backgroundColor: ENTITY_COLORS[idx] }}></span>
+                  <span className="text-xs text-gray-700">{label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </Card>
