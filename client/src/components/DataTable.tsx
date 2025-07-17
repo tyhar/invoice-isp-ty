@@ -409,7 +409,7 @@ export function DataTable<T extends object>(props: Props<T>) {
   };
 
   const getColumnValues = (columnId: string) => {
-    return (data?.data?.data ?? []).map(
+    return data?.data.data.map(
       (resource: T) => resource[columnId as keyof typeof resource]
     );
   };
@@ -420,24 +420,24 @@ export function DataTable<T extends object>(props: Props<T>) {
 
   useEffect(() => {
     if (Array.isArray(data?.data?.data)) {
-      const filteredSelectedResources = (data?.data?.data ?? []).filter((resource: any) =>
+      const filteredSelectedResources = data?.data?.data.filter((resource: any) =>
         selected.includes(resource.id)
       );
 
       setSelectedResources(filteredSelectedResources);
 
-      const shouldDeselectMainCheckbox = (data?.data?.data ?? []).some(
+      const shouldDeselectMainCheckbox = data?.data?.data.some(
         (resource: any) => !selected.includes(resource.id)
       );
 
       if (mainCheckbox.current) {
         mainCheckbox.current.checked =
-          !shouldDeselectMainCheckbox && (data?.data?.data ?? []).length > 0;
+          !shouldDeselectMainCheckbox && data?.data?.data.length > 0;
       }
     }
   }, [selected, data]);
   useEffect(() => {
-    if (Array.isArray(data?.data?.data) && (data?.data?.data ?? []).length === 0) {
+    if (Array.isArray(data?.data?.data) && data?.data?.data.length === 0) {
       setCurrentPage(1);
     }
   }, [data]);
@@ -449,7 +449,7 @@ export function DataTable<T extends object>(props: Props<T>) {
         Number(perPage) === selected.length
       ) {
         setSelected(
-          (data?.data?.data ?? [])
+          data.data.data
             .map((resource: any) => resource.id)
             .filter((resourceId: string) => selected.includes(resourceId))
         );
@@ -695,7 +695,7 @@ export function DataTable<T extends object>(props: Props<T>) {
           )}
 
           {data &&
-            (data?.data?.data ?? []).map((resource: any, index: number) => (
+            data?.data?.data?.map((resource: any, index: number) => (
               <Tr
                 key={index}
                 className={classNames({
