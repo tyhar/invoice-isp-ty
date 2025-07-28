@@ -1,0 +1,245 @@
+
+2. Pengujian API FO (Fiber Optic)
+
+---
+
+a. Login Superadmin
+Untuk menguji proses login, permintaan dikirim ke endpoint `/superadmin/auth/login` menggunakan metode POST dengan menyertakan email dan password. Sistem merespons dengan token autentikasi dan data pengguna, menandakan login berhasil. Hasil pengujian ini dapat dilihat pada Gambar 5.0.
+
+b. Statistik/FTTH Report
+Pengambilan data statistik FTTH dilakukan dengan mengirim permintaan GET ke endpoint `/api/v1/fo-client-ftths/statistik`. Sistem memberikan data statistik yang lengkap, menandakan fitur ini berjalan sesuai harapan. Dokumentasi hasil pengujian tersedia pada Gambar 5.1.
+
+---
+
+### FoLokasi
+
+1. Create
+Penambahan data lokasi dilakukan dengan mengirim permintaan POST ke `/api/v1/fo-lokasis` beserta data nama_lokasi, deskripsi, latitude, longitude, dan status. Sistem mengembalikan data lokasi baru dan status sukses, menandakan proses berjalan lancar. Ilustrasi pengujian dapat dilihat pada Gambar 5.2.
+
+2. List
+Untuk melihat daftar lokasi, permintaan GET dikirim ke `/api/v1/fo-lokasis`. Sistem menampilkan seluruh data lokasi yang tersimpan, menandakan fitur list berfungsi baik. Hasil pengujian ini dapat dilihat pada Gambar 5.3.
+
+3. Update
+Proses pembaruan data lokasi dilakukan melalui endpoint `/api/v1/fo-lokasis/{id}` dengan metode PUT/PATCH dan data yang ingin diubah. Sistem mengembalikan data terbaru, menandakan update berhasil. Dokumentasi pengujian tersedia pada Gambar 5.4.
+
+4. Delete
+Penghapusan lokasi dilakukan dengan permintaan DELETE ke `/api/v1/fo-lokasis/{id}`. Sistem menandai data sebagai terhapus (soft delete) dan mengirim respons sukses. Hasil pengujian dapat dilihat pada Gambar 5.5.
+
+5. Archive
+Untuk mengarsipkan lokasi, PATCH dikirim ke `/api/v1/fo-lokasis/{id}/archive`. Sistem mengubah status menjadi archived dan mengonfirmasi keberhasilan. Simulasi pengujian ini dapat dilihat pada Gambar 5.6.
+
+6. Unarchive
+Pengaktifan kembali lokasi yang diarsipkan dilakukan dengan PATCH ke `/api/v1/fo-lokasis/{id}/unarchive`. Sistem mengembalikan status menjadi active. Dokumentasi pengujian tersedia pada Gambar 5.7.
+
+7. Restore
+Pemulihan data lokasi yang terhapus dilakukan dengan PATCH ke `/api/v1/fo-lokasis/{id}/restore`. Sistem mengembalikan data ke kondisi aktif. Hasil pengujian dapat dilihat pada Gambar 5.8.
+
+8. Bulk
+Operasi bulk (archive, delete, restore) dilakukan dengan POST ke `/api/v1/fo-lokasis/bulk` beserta daftar ID dan aksi. Sistem memproses setiap permintaan secara massal dan mengirimkan status sukses. Ilustrasi pengujian dapat dilihat pada Gambar 5.9.
+
+---
+
+### FoKabelOdc
+
+1. Create
+Penambahan kabel ODC dilakukan dengan POST ke `/api/v1/fo-kabel-odcs` dan data kabel yang diperlukan. Sistem mengembalikan data kabel baru dan status sukses. Hasil pengujian dapat dilihat pada Gambar 5.10.
+
+2. List
+Permintaan GET ke `/api/v1/fo-kabel-odcs` menampilkan seluruh kabel ODC yang tersimpan. Fitur ini berjalan baik sesuai hasil pada Gambar 5.11.
+
+3. Update
+Pembaruan data kabel ODC dilakukan melalui PUT/PATCH ke `/api/v1/fo-kabel-odcs/{id}`. Sistem mengembalikan data terbaru, menandakan update berhasil. Dokumentasi pengujian tersedia pada Gambar 5.12.
+
+4. Delete
+Penghapusan kabel ODC dilakukan dengan DELETE ke `/api/v1/fo-kabel-odcs/{id}`. Sistem menandai data sebagai terhapus sementara. Hasil pengujian dapat dilihat pada Gambar 5.13.
+
+5. Archive
+PATCH ke `/api/v1/fo-kabel-odcs/{id}/archive` digunakan untuk mengarsipkan kabel ODC. Sistem mengonfirmasi status archived. Simulasi pengujian ini dapat dilihat pada Gambar 5.14.
+
+6. Unarchive
+Pengaktifan kembali kabel ODC dilakukan dengan PATCH ke `/api/v1/fo-kabel-odcs/{id}/unarchive`. Sistem mengembalikan status menjadi active. Dokumentasi pengujian tersedia pada Gambar 5.15.
+
+7. Restore
+Pemulihan kabel ODC yang terhapus dilakukan dengan PATCH ke `/api/v1/fo-kabel-odcs/{id}/restore`. Sistem mengembalikan data ke kondisi aktif. Hasil pengujian dapat dilihat pada Gambar 5.16.
+
+8. Bulk
+Operasi bulk pada kabel ODC (archive, delete, restore, unarchive) dilakukan dengan POST ke `/api/v1/fo-kabel-odcs/bulk`. Sistem memproses permintaan secara massal dan mengirimkan status sukses. Ilustrasi pengujian dapat dilihat pada Gambar 5.17.
+
+---
+
+### FoKabelTubeOdc
+
+1. Create
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs` dengan metode POST, berisi data tube seperti kabel_odc_id, warna_tube, dan status. Respons yang diterima berupa data tube yang baru dibuat beserta status sukses, menandakan proses penambahan tube berhasil dilakukan. Simulasi pengujian pembuatan tube kabel ODC menggunakan Postman dapat dilihat pada Gambar 5.18.
+
+2. List
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs` dengan metode GET untuk mengambil daftar tube kabel ODC. Respons yang diterima berupa daftar tube kabel ODC lengkap, menandakan fitur pengambilan data tube berjalan dengan baik. Simulasi pengujian pengambilan daftar tube dapat dilihat pada Gambar 5.19.
+
+3. Update
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs/{id}` dengan metode PUT/PATCH, berisi data yang ingin diperbarui. Respons yang diterima berupa data tube yang telah diperbarui, menandakan proses update berhasil. Simulasi pengujian update data tube dapat dilihat pada Gambar 5.20.
+
+4. Delete
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs/{id}` dengan metode DELETE untuk menghapus data tube secara soft delete. Respons yang diterima berupa status sukses, menandakan data tube berhasil dihapus sementara. Simulasi pengujian penghapusan data tube dapat dilihat pada Gambar 5.21.
+
+5. Archive
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs/{id}/archive` dengan metode PATCH untuk mengarsipkan data tube. Respons yang diterima berupa status sukses, menandakan data tube berhasil diarsipkan. Simulasi pengujian pengarsipan data tube dapat dilihat pada Gambar 5.22.
+
+6. Unarchive
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs/{id}/unarchive` dengan metode PATCH untuk mengaktifkan kembali data tube yang diarsipkan. Respons yang diterima berupa status sukses, menandakan data tube berhasil diaktifkan kembali. Simulasi pengujian unarchive data tube dapat dilihat pada Gambar 5.23.
+
+7. Restore
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs/{id}/restore` dengan metode PATCH untuk mengembalikan data tube yang telah dihapus. Respons yang diterima berupa status sukses, menandakan data tube berhasil dikembalikan. Simulasi pengujian restore data tube dapat dilihat pada Gambar 5.24.
+
+8. Bulk
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-tube-odcs/bulk` dengan metode POST, berisi daftar ID dan aksi (archive, delete, restore, unarchive). Respons yang diterima berupa status sukses untuk setiap aksi bulk yang dilakukan. Simulasi pengujian bulk operasi pada data tube dapat dilihat pada Gambar 5.25.
+
+---
+
+### FoKabelCoreOdc
+
+1. Create
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs` dengan metode POST, berisi data core seperti kabel_tube_odc_id, warna_core, dan status. Respons yang diterima berupa data core yang baru dibuat beserta status sukses, menandakan proses penambahan core berhasil dilakukan. Simulasi pengujian pembuatan core kabel ODC menggunakan Postman dapat dilihat pada Gambar 5.26.
+
+2. List
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs` dengan metode GET untuk mengambil daftar core kabel ODC. Respons yang diterima berupa daftar core kabel ODC lengkap, menandakan fitur pengambilan data core berjalan dengan baik. Simulasi pengujian pengambilan daftar core dapat dilihat pada Gambar 5.27.
+
+3. Update
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs/{id}` dengan metode PUT/PATCH, berisi data yang ingin diperbarui. Respons yang diterima berupa data core yang telah diperbarui, menandakan proses update berhasil. Simulasi pengujian update data core dapat dilihat pada Gambar 5.28.
+
+4. Delete
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs/{id}` dengan metode DELETE untuk menghapus data core secara soft delete. Respons yang diterima berupa status sukses, menandakan data core berhasil dihapus sementara. Simulasi pengujian penghapusan data core dapat dilihat pada Gambar 5.29.
+
+5. Archive
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs/{id}/archive` dengan metode PATCH untuk mengarsipkan data core. Respons yang diterima berupa status sukses, menandakan data core berhasil diarsipkan. Simulasi pengujian pengarsipan data core dapat dilihat pada Gambar 5.30.
+
+6. Unarchive
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs/{id}/unarchive` dengan metode PATCH untuk mengaktifkan kembali data core yang diarsipkan. Respons yang diterima berupa status sukses, menandakan data core berhasil diaktifkan kembali. Simulasi pengujian unarchive data core dapat dilihat pada Gambar 5.31.
+
+7. Restore
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs/{id}/restore` dengan metode PATCH untuk mengembalikan data core yang telah dihapus. Respons yang diterima berupa status sukses, menandakan data core berhasil dikembalikan. Simulasi pengujian restore data core dapat dilihat pada Gambar 5.32.
+
+8. Bulk
+Permintaan dikirim ke endpoint `/api/v1/fo-kabel-core-odcs/bulk` dengan metode POST, berisi daftar ID dan aksi (archive, delete, restore, unarchive). Respons yang diterima berupa status sukses untuk setiap aksi bulk yang dilakukan. Simulasi pengujian bulk operasi pada data core dapat dilihat pada Gambar 5.33.
+
+---
+
+### FoOdc
+
+1. Create
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs` dengan metode POST, berisi data ODC seperti lokasi_id, kabel_odc_id, nama_odc, tipe_splitter, dan status. Respons yang diterima berupa data ODC yang baru dibuat beserta status sukses, menandakan proses penambahan ODC berhasil dilakukan. Simulasi pengujian pembuatan ODC menggunakan Postman dapat dilihat pada Gambar 5.34.
+
+2. List
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs` dengan metode GET untuk mengambil daftar ODC. Respons yang diterima berupa daftar ODC lengkap, menandakan fitur pengambilan data ODC berjalan dengan baik. Simulasi pengujian pengambilan daftar ODC dapat dilihat pada Gambar 5.35.
+
+3. Update
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs/{id}` dengan metode PUT/PATCH, berisi data yang ingin diperbarui. Respons yang diterima berupa data ODC yang telah diperbarui, menandakan proses update berhasil. Simulasi pengujian update data ODC dapat dilihat pada Gambar 5.36.
+
+4. Delete
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs/{id}` dengan metode DELETE untuk menghapus data ODC secara soft delete. Respons yang diterima berupa status sukses, menandakan data ODC berhasil dihapus sementara. Simulasi pengujian penghapusan data ODC dapat dilihat pada Gambar 5.37.
+
+5. Archive
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs/{id}/archive` dengan metode PATCH untuk mengarsipkan data ODC. Respons yang diterima berupa status sukses, menandakan data ODC berhasil diarsipkan. Simulasi pengujian pengarsipan data ODC dapat dilihat pada Gambar 5.38.
+
+6. Unarchive
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs/{id}/unarchive` dengan metode PATCH untuk mengaktifkan kembali data ODC yang diarsipkan. Respons yang diterima berupa status sukses, menandakan data ODC berhasil diaktifkan kembali. Simulasi pengujian unarchive data ODC dapat dilihat pada Gambar 5.39.
+
+7. Restore
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs/{id}/restore` dengan metode PATCH untuk mengembalikan data ODC yang telah dihapus. Respons yang diterima berupa status sukses, menandakan data ODC berhasil dikembalikan. Simulasi pengujian restore data ODC dapat dilihat pada Gambar 5.40.
+
+8. Bulk
+Permintaan dikirim ke endpoint `/api/v1/fo-odcs/bulk` dengan metode POST, berisi daftar ID dan aksi (archive, delete, restore, unarchive). Respons yang diterima berupa status sukses untuk setiap aksi bulk yang dilakukan. Simulasi pengujian bulk operasi pada data ODC dapat dilihat pada Gambar 5.41.
+
+---
+
+### FoOdp
+
+1. Create
+Permintaan dikirim ke endpoint `/api/v1/fo-odps` dengan metode POST, berisi data ODP seperti lokasi_id, kabel_core_odc_id, nama_odp, dan status. Respons yang diterima berupa data ODP yang baru dibuat beserta status sukses, menandakan proses penambahan ODP berhasil dilakukan. Simulasi pengujian pembuatan ODP menggunakan Postman dapat dilihat pada Gambar 5.42.
+
+2. List
+Permintaan dikirim ke endpoint `/api/v1/fo-odps` dengan metode GET untuk mengambil daftar ODP. Respons yang diterima berupa daftar ODP lengkap, menandakan fitur pengambilan data ODP berjalan dengan baik. Simulasi pengujian pengambilan daftar ODP dapat dilihat pada Gambar 5.43.
+
+3. Update
+Permintaan dikirim ke endpoint `/api/v1/fo-odps/{id}` dengan metode PUT/PATCH, berisi data yang ingin diperbarui. Respons yang diterima berupa data ODP yang telah diperbarui, menandakan proses update berhasil. Simulasi pengujian update data ODP dapat dilihat pada Gambar 5.44.
+
+4. Delete
+Permintaan dikirim ke endpoint `/api/v1/fo-odps/{id}` dengan metode DELETE untuk menghapus data ODP secara soft delete. Respons yang diterima berupa status sukses, menandakan data ODP berhasil dihapus sementara. Simulasi pengujian penghapusan data ODP dapat dilihat pada Gambar 5.45.
+
+5. Archive
+Permintaan dikirim ke endpoint `/api/v1/fo-odps/{id}/archive` dengan metode PATCH untuk mengarsipkan data ODP. Respons yang diterima berupa status sukses, menandakan data ODP berhasil diarsipkan. Simulasi pengujian pengarsipan data ODP dapat dilihat pada Gambar 5.46.
+
+6. Unarchive
+Permintaan dikirim ke endpoint `/api/v1/fo-odps/{id}/unarchive` dengan metode PATCH untuk mengaktifkan kembali data ODP yang diarsipkan. Respons yang diterima berupa status sukses, menandakan data ODP berhasil diaktifkan kembali. Simulasi pengujian unarchive data ODP dapat dilihat pada Gambar 5.47.
+
+7. Restore
+Permintaan dikirim ke endpoint `/api/v1/fo-odps/{id}/restore` dengan metode PATCH untuk mengembalikan data ODP yang telah dihapus. Respons yang diterima berupa status sukses, menandakan data ODP berhasil dikembalikan. Simulasi pengujian restore data ODP dapat dilihat pada Gambar 5.48.
+
+8. Bulk
+Permintaan dikirim ke endpoint `/api/v1/fo-odps/bulk` dengan metode POST, berisi daftar ID dan aksi (archive, delete, restore, unarchive). Respons yang diterima berupa status sukses untuk setiap aksi bulk yang dilakukan. Simulasi pengujian bulk operasi pada data ODP dapat dilihat pada Gambar 5.49.
+
+---
+
+### FoClientFtth
+
+1. Create
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths` dengan metode POST, berisi data client FTTH seperti lokasi_id, odp_id, client_id, nama_client, alamat, dan status. Respons yang diterima berupa data client FTTH yang baru dibuat beserta status sukses, menandakan proses penambahan client FTTH berhasil dilakukan. Simulasi pengujian pembuatan client FTTH menggunakan Postman dapat dilihat pada Gambar 5.50.
+
+2. List
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths` dengan metode GET untuk mengambil daftar client FTTH. Respons yang diterima berupa daftar client FTTH lengkap, menandakan fitur pengambilan data client FTTH berjalan dengan baik. Simulasi pengujian pengambilan daftar client FTTH dapat dilihat pada Gambar 5.51.
+
+3. Update
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/{id}` dengan metode PUT/PATCH, berisi data yang ingin diperbarui. Respons yang diterima berupa data client FTTH yang telah diperbarui, menandakan proses update berhasil. Simulasi pengujian update data client FTTH dapat dilihat pada Gambar 5.52.
+
+4. Delete
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/{id}` dengan metode DELETE untuk menghapus data client FTTH secara soft delete. Respons yang diterima berupa status sukses, menandakan data client FTTH berhasil dihapus sementara. Simulasi pengujian penghapusan data client FTTH dapat dilihat pada Gambar 5.53.
+
+5. Archive
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/{id}/archive` dengan metode PATCH untuk mengarsipkan data client FTTH. Respons yang diterima berupa status sukses, menandakan data client FTTH berhasil diarsipkan. Simulasi pengujian pengarsipan data client FTTH dapat dilihat pada Gambar 5.54.
+
+6. Unarchive
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/{id}/unarchive` dengan metode PATCH untuk mengaktifkan kembali data client FTTH yang diarsipkan. Respons yang diterima berupa status sukses, menandakan data client FTTH berhasil diaktifkan kembali. Simulasi pengujian unarchive data client FTTH dapat dilihat pada Gambar 5.55.
+
+7. Restore
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/{id}/restore` dengan metode PATCH untuk mengembalikan data client FTTH yang telah dihapus. Respons yang diterima berupa status sukses, menandakan data client FTTH berhasil dikembalikan. Simulasi pengujian restore data client FTTH dapat dilihat pada Gambar 5.56.
+
+8. Bulk
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/bulk` dengan metode POST, berisi daftar ID dan aksi (archive, delete, restore, unarchive). Respons yang diterima berupa status sukses untuk setiap aksi bulk yang dilakukan. Simulasi pengujian bulk operasi pada data client FTTH dapat dilihat pada Gambar 5.57.
+
+---
+
+### FoJointBox
+
+1. Create
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes` dengan metode POST, berisi data JointBox seperti lokasi_id, kabel_odc_id, nama_joint_box, dan status. Respons yang diterima berupa data JointBox yang baru dibuat beserta status sukses, menandakan proses penambahan JointBox berhasil dilakukan. Simulasi pengujian pembuatan JointBox menggunakan Postman dapat dilihat pada Gambar 5.58.
+
+2. List
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes` dengan metode GET untuk mengambil daftar JointBox. Respons yang diterima berupa daftar JointBox lengkap, menandakan fitur pengambilan data JointBox berjalan dengan baik. Simulasi pengujian pengambilan daftar JointBox dapat dilihat pada Gambar 5.59.
+
+3. Update
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes/{id}` dengan metode PUT/PATCH, berisi data yang ingin diperbarui. Respons yang diterima berupa data JointBox yang telah diperbarui, menandakan proses update berhasil. Simulasi pengujian update data JointBox dapat dilihat pada Gambar 5.60.
+
+4. Delete
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes/{id}` dengan metode DELETE untuk menghapus data JointBox secara soft delete. Respons yang diterima berupa status sukses, menandakan data JointBox berhasil dihapus sementara. Simulasi pengujian penghapusan data JointBox dapat dilihat pada Gambar 5.61.
+
+5. Archive
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes/{id}/archive` dengan metode PATCH untuk mengarsipkan data JointBox. Respons yang diterima berupa status sukses, menandakan data JointBox berhasil diarsipkan. Simulasi pengujian pengarsipan data JointBox dapat dilihat pada Gambar 5.62.
+
+6. Unarchive
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes/{id}/unarchive` dengan metode PATCH untuk mengaktifkan kembali data JointBox yang diarsipkan. Respons yang diterima berupa status sukses, menandakan data JointBox berhasil diaktifkan kembali. Simulasi pengujian unarchive data JointBox dapat dilihat pada Gambar 5.63.
+
+7. Restore
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes/{id}/restore` dengan metode PATCH untuk mengembalikan data JointBox yang telah dihapus. Respons yang diterima berupa status sukses, menandakan data JointBox berhasil dikembalikan. Simulasi pengujian restore data JointBox dapat dilihat pada Gambar 5.64.
+
+8. Bulk
+Permintaan dikirim ke endpoint `/api/v1/fo-joint-boxes/bulk` dengan metode POST, berisi daftar ID dan aksi (archive, delete, restore, unarchive). Respons yang diterima berupa status sukses untuk setiap aksi bulk yang dilakukan. Simulasi pengujian bulk operasi pada data JointBox dapat dilihat pada Gambar 5.65.
+
+---
+
+### Statistik/FTTH Report
+
+Permintaan dikirim ke endpoint `/api/v1/fo-client-ftths/statistik` dengan metode GET untuk mengambil data statistik FTTH. Respons yang diterima berupa data statistik lengkap, menandakan fitur statistik berjalan dengan baik. Simulasi pengujian statistik FTTH pada Postman dapat dilihat pada Gambar 5.1.
+
+---
+
+Seluruh pengujian di atas menunjukkan bahwa setiap fitur API pada modul FO berjalan dengan baik, respons yang diterima sesuai harapan, dan data yang dikelola sistem tetap konsisten serta valid.
+
