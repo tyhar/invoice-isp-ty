@@ -1,112 +1,112 @@
-# Invoice ISP - Fiber Optic Network Management System
+# Invoice ISP - Sistem Manajemen Jaringan Fiber Optik
 
 <p align="center">
-<img src="https://raw.githubusercontent.com/invoiceninja/invoiceninja/master/public/images/round_logo.png" alt="Invoice ISP Logo" width="200"/>
+<img src="https://raw.githubusercontent.com/invoiceninja/invoiceninja/master/public/images/round_logo.png" alt="Logo Invoice ISP" width="200"/>
 </p>
 
 <p align="center">
-<strong>Complete ISP Business Management Platform with FTTH Infrastructure & WhatsApp Integration</strong>
+<strong>Platform Manajemen Bisnis ISP Lengkap dengan Infrastruktur FTTH & Integrasi WhatsApp</strong>
 </p>
 
 ---
 
-## 🚀 What is Invoice ISP?
+## 🚀 Apa itu Invoice ISP?
 
-**Invoice ISP** is a comprehensive business management platform specifically designed for Internet Service Providers (ISPs) that combines traditional invoicing capabilities with advanced fiber optic network management and customer communication tools.
+**Invoice ISP** adalah platform manajemen bisnis komprehensif yang dirancang khusus untuk Internet Service Provider (ISP) yang menggabungkan kemampuan penagihan tradisional dengan manajemen infrastruktur fiber optik tingkat lanjut dan alat komunikasi pelanggan.
 
-Built on top of Invoice Ninja's robust foundation, this application extends the core functionality with specialized modules for FTTH (Fiber to the Home) infrastructure management, network visualization, and WhatsApp integration for customer communication.
-
----
-
-## 🎯 Key Features
-
-### 📊 **Core Business Management**
-- **Invoice Management**: Create, send, and track invoices with automated billing
-- **Client Management**: Comprehensive customer database with service history
-- **Payment Processing**: Multiple payment gateway integrations
-- **Financial Reports**: Cash flow analysis, revenue tracking, and financial insights
-- **Product/Service Catalog**: Manage internet packages and additional services
-
-### 🌐 **FTTH Infrastructure Management**
-- **Network Topology**: Complete fiber optic network mapping and management
-- **Component Tracking**: Manage ODC, ODP, cables, tubes, cores, and client connections
-- **Geolocation Support**: GPS coordinates and address geocoding for all network components
-- **Capacity Planning**: Real-time utilization monitoring and capacity analysis
-- **Maintenance Scheduling**: Track joint boxes and maintenance activities
-
-### 🗺️ **Network Visualization & Mapping**
-- **Interactive Maps**: Visual representation of network infrastructure using Leaflet.js
-- **Component Markers**: Color-coded markers for ODC, ODP, and client locations
-- **Connection Lines**: Visual representation of fiber connections with distance calculations
-- **Filtering & Search**: Filter by province, city, or component type
-- **Export Capabilities**: Export network data to CSV/PDF formats
-
-### 📱 **WhatsApp Gateway Integration**
-- **Multi-Device Support**: Manage multiple WhatsApp devices
-- **Message Templates**: Pre-defined templates with variable placeholders
-- **Bulk Messaging**: Send messages to multiple clients simultaneously
-- **Automated Notifications**: Invoice reminders, payment confirmations, and service updates
-- **Chatbot Support**: Automated responses and FAQ handling
-- **Message History**: Complete conversation tracking and analytics
-
-### 📈 **Advanced Reporting & Analytics**
-- **FTTH Reports**: 4 comprehensive report tabs (Overview, Utilization, Status, Details)
-- **Network Statistics**: Real-time infrastructure utilization metrics
-- **Customer Analytics**: Service usage patterns and customer behavior insights
-- **Financial Analytics**: Revenue analysis and business performance metrics
-- **Export & Integration**: Data export capabilities for external analysis
+Dibangun di atas fondasi Invoice Ninja yang kokoh, aplikasi ini memperluas fungsionalitas inti dengan modul khusus untuk manajemen infrastruktur FTTH (Fiber to the Home), visualisasi jaringan, dan integrasi WhatsApp untuk komunikasi pelanggan.
 
 ---
 
-## 🏗️ System Architecture
+## 🎯 Fitur Utama
+
+### 📊 **Manajemen Bisnis Inti**
+- **Manajemen Invoice**: Buat, kirim, dan lacak invoice dengan penagihan otomatis
+- **Manajemen Klien**: Database pelanggan komprehensif dengan riwayat layanan
+- **Pemrosesan Pembayaran**: Integrasi multiple gateway pembayaran
+- **Laporan Keuangan**: Analisis arus kas, pelacakan pendapatan, dan wawasan keuangan
+- **Katalog Produk/Layanan**: Kelola paket internet dan layanan tambahan
+
+### 🌐 **Manajemen Infrastruktur FTTH**
+- **Topologi Jaringan**: Pemetaan dan manajemen jaringan fiber optik lengkap
+- **Pelacakan Komponen**: Kelola ODC, ODP, kabel, tube, core, dan koneksi pelanggan
+- **Dukungan Geolokasi**: Koordinat GPS dan geocoding alamat untuk semua komponen jaringan
+- **Perencanaan Kapasitas**: Monitoring utilisasi real-time dan analisis kapasitas
+- **Penjadwalan Maintenance**: Lacak joint box dan aktivitas maintenance
+
+### 🗺️ **Visualisasi & Pemetaan Jaringan**
+- **Peta Interaktif**: Representasi visual infrastruktur jaringan menggunakan Leaflet.js
+- **Marker Komponen**: Marker berwarna untuk lokasi ODC, ODP, dan pelanggan
+- **Garis Koneksi**: Representasi visual koneksi fiber dengan perhitungan jarak
+- **Filter & Pencarian**: Filter berdasarkan provinsi, kota, atau tipe komponen
+- **Kemampuan Export**: Export data jaringan ke format CSV/PDF
+
+### 📱 **Integrasi Gateway WhatsApp**
+- **Dukungan Multi-Device**: Kelola multiple device WhatsApp
+- **Template Pesan**: Template pesan yang telah ditentukan dengan placeholder variabel
+- **Pesan Massal**: Kirim pesan ke multiple pelanggan secara bersamaan
+- **Notifikasi Otomatis**: Reminder invoice, konfirmasi pembayaran, dan update layanan
+- **Dukungan Chatbot**: Respons otomatis dan penanganan FAQ
+- **Riwayat Pesan**: Pelacakan percakapan dan analitik lengkap
+
+### 📈 **Laporan & Analitik Tingkat Lanjut**
+- **Laporan FTTH**: 4 tab laporan komprehensif (Overview, Utilization, Status, Details)
+- **Statistik Jaringan**: Metrik utilisasi infrastruktur real-time
+- **Analitik Pelanggan**: Pola penggunaan layanan dan wawasan perilaku pelanggan
+- **Analitik Keuangan**: Analisis pendapatan dan metrik performa bisnis
+- **Export & Integrasi**: Kemampuan export data untuk analisis eksternal
+
+---
+
+## 🏗️ Arsitektur Sistem
 
 ### **Backend (Laravel 10)**
-- RESTful API architecture
-- MySQL database with optimized relationships
-- Real-time data processing and calculations
-- Secure authentication and authorization
-- Webhook support for external integrations
+- Arsitektur API RESTful
+- Database MySQL dengan relasi yang dioptimalkan
+- Pemrosesan data real-time dan kalkulasi
+- Autentikasi dan otorisasi yang aman
+- Dukungan webhook untuk integrasi eksternal
 
 ### **Frontend (React + TypeScript)**
-- Modern, responsive user interface
-- Interactive data visualization with charts
-- Real-time updates and notifications
-- Mobile-friendly design
-- Progressive Web App capabilities
+- Antarmuka pengguna modern dan responsif
+- Visualisasi data interaktif dengan grafik
+- Update real-time dan notifikasi
+- Desain yang ramah mobile
+- Kemampuan Progressive Web App
 
-### **Database Schema**
+### **Skema Database**
 ```
-FTTH Infrastructure Hierarchy:
-Lokasi (Location) → ODC (Optical Distribution Cabinet) → 
-Kabel ODC (Cable) → Tube Kabel (Tube) → Core Kabel (Core) → 
-ODP (Optical Distribution Point) → Client FTTH (Customer)
+Hierarki Infrastruktur FTTH:
+Lokasi → ODC (Optical Distribution Cabinet) → 
+Kabel ODC → Tube Kabel → Core Kabel → 
+ODP (Optical Distribution Point) → Client FTTH (Pelanggan)
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Mulai Cepat
 
-### Prerequisites
+### Prasyarat
 - PHP 8.1+
 - MySQL 8.0+
 - Node.js 16+
 - Composer
 - Git
 
-### Installation
+### Instalasi
 
-1. **Clone the repository**
+1. **Clone repository**
 ```bash
 git clone https://github.com/your-username/invoice-isp.git
 cd invoice-isp
 ```
 
-2. **Install PHP dependencies**
+2. **Install dependensi PHP**
 ```bash
 composer install --optimize-autoloader --no-dev
 ```
 
-3. **Install Node.js dependencies**
+3. **Install dependensi Node.js**
 ```bash
 cd client
 npm install
@@ -114,51 +114,51 @@ npm run build
 cd ..
 ```
 
-4. **Environment setup**
+4. **Setup environment**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-5. **Database setup**
+5. **Setup database**
 ```bash
 php artisan migrate
 php artisan db:seed
 ```
 
-6. **Start the application**
+6. **Jalankan aplikasi**
 ```bash
 php artisan serve
 ```
 
-### Default Login Credentials
+### Kredensial Login Default
 - **Admin**: `admin@example.com` / `password`
-- **Client Portal**: `client@example.com` / `password`
+- **Portal Klien**: `client@example.com` / `password`
 
 ---
 
-## 📋 System Requirements
+## 📋 Persyaratan Sistem
 
-### **Minimum Requirements**
+### **Persyaratan Minimum**
 - **Server**: 2GB RAM, 20GB Storage
-- **PHP**: 8.1+ with extensions (BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML)
-- **Database**: MySQL 8.0+ or MariaDB 10.3+
-- **Web Server**: Apache 2.4+ or Nginx 1.18+
+- **PHP**: 8.1+ dengan ekstensi (BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML)
+- **Database**: MySQL 8.0+ atau MariaDB 10.3+
+- **Web Server**: Apache 2.4+ atau Nginx 1.18+
 
-### **Recommended Requirements**
+### **Persyaratan yang Direkomendasikan**
 - **Server**: 4GB RAM, 50GB SSD Storage
-- **PHP**: 8.2+ with OPcache enabled
-- **Database**: MySQL 8.0+ with InnoDB engine
-- **Web Server**: Nginx with PHP-FPM
-- **SSL Certificate**: For production deployment
+- **PHP**: 8.2+ dengan OPcache diaktifkan
+- **Database**: MySQL 8.0+ dengan engine InnoDB
+- **Web Server**: Nginx dengan PHP-FPM
+- **Sertifikat SSL**: Untuk deployment produksi
 
 ---
 
-## 🔧 Configuration
+## 🔧 Konfigurasi
 
-### **Environment Variables**
+### **Variabel Environment**
 ```env
-# Database Configuration
+# Konfigurasi Database
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -166,258 +166,238 @@ DB_DATABASE=invoice_isp
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 
-# WhatsApp Gateway Configuration
+# Konfigurasi Gateway WhatsApp
 WA_SERVICE_URL=http://localhost:3000
 WA_SERVICE_TOKEN=your_wa_token
 
-# Google Maps API (for geocoding)
+# API Google Maps (untuk geocoding)
 GOOGLE_MAPS_API_KEY=your_google_maps_key
 
-# Payment Gateway Configuration
+# Konfigurasi Gateway Pembayaran
 STRIPE_KEY=your_stripe_key
 STRIPE_SECRET=your_stripe_secret
 ```
 
-### **WhatsApp Gateway Setup**
-1. Configure WhatsApp service URL in `.env`
-2. Set up WhatsApp devices in the admin panel
-3. Scan QR codes to connect devices
-4. Configure message templates and chatbots
+### **Setup Gateway WhatsApp**
+1. Konfigurasi URL layanan WhatsApp di `.env`
+2. Setup device WhatsApp di panel admin
+3. Scan QR code untuk menghubungkan device
+4. Konfigurasi template pesan dan chatbot
 
 ---
 
-## 📊 FTTH Infrastructure Management
+## 📊 Manajemen Infrastruktur FTTH
 
-### **Network Components**
+### **Komponen Jaringan**
 
-#### **Lokasi (Location)**
-- Geographic locations with GPS coordinates
-- Address information with geocoding
-- Status tracking (active/archived)
+#### **Lokasi**
+- Lokasi geografis dengan koordinat GPS
+- Informasi alamat dengan geocoding
+- Pelacakan status (aktif/arsip)
 
 #### **ODC (Optical Distribution Cabinet)**
-- Central distribution points
-- Capacity management and utilization tracking
-- Connection to multiple ODPs
+- Titik distribusi pusat
+- Manajemen kapasitas dan pelacakan utilisasi
+- Koneksi ke multiple ODP
 
-#### **Kabel ODC (Cable)**
-- Fiber optic cable specifications
-- Length, type, and capacity information
-- Tube and core organization
+#### **Kabel ODC**
+- Spesifikasi kabel fiber optik
+- Informasi panjang, tipe, dan kapasitas
+- Organisasi tube dan core
 
-#### **Tube Kabel (Tube)**
-- Color-coded tube identification
-- Core organization within tubes
-- Capacity and utilization tracking
+#### **Tube Kabel**
+- Identifikasi tube dengan kode warna
+- Organisasi core dalam tube
+- Pelacakan kapasitas dan utilisasi
 
-#### **Core Kabel (Core)**
-- Individual fiber core management
-- Connection status to ODPs
-- Color coding and identification
+#### **Core Kabel**
+- Manajemen core fiber individual
+- Status koneksi ke ODP
+- Kode warna dan identifikasi
 
 #### **ODP (Optical Distribution Point)**
-- Local distribution points
-- Splitter configuration and capacity
-- Client connection management
+- Titik distribusi lokal
+- Konfigurasi splitter dan kapasitas
+- Manajemen koneksi pelanggan
 
-#### **Client FTTH (Customer)**
-- Customer information and service details
-- Package and billing integration
-- Connection status and history
-
----
-
-## 🗺️ Mapping & Visualization
-
-### **Interactive Network Map**
-- **Real-time Visualization**: Live network topology display
-- **Component Markers**: Color-coded markers for different components
-- **Connection Lines**: Visual representation of fiber connections
-- **Distance Calculations**: Automatic distance calculation between components
-- **Filtering Options**: Filter by location, component type, or status
-
-### **Geolocation Features**
-- **GPS Integration**: Coordinate-based component positioning
-- **Address Geocoding**: Automatic coordinate generation from addresses
-- **Map Center Management**: Configurable map center points
-- **Export Capabilities**: Export map data and statistics
+#### **Client FTTH (Pelanggan)**
+- Informasi pelanggan dan detail layanan
+- Integrasi paket dan penagihan
+- Status koneksi dan riwayat
 
 ---
 
-## 📱 WhatsApp Gateway Features
+## 🗺️ Pemetaan & Visualisasi
 
-### **Device Management**
-- **Multi-Device Support**: Manage multiple WhatsApp devices
-- **Connection Status**: Real-time device connection monitoring
-- **QR Code Authentication**: Secure device connection via QR codes
-- **Default Device**: Set primary device for automated messages
+### **Peta Jaringan Interaktif**
+- **Visualisasi Real-time**: Tampilan topologi jaringan langsung
+- **Marker Komponen**: Marker berwarna untuk komponen berbeda
+- **Garis Koneksi**: Representasi visual koneksi fiber
+- **Perhitungan Jarak**: Perhitungan jarak otomatis antar komponen
+- **Opsi Filter**: Filter berdasarkan lokasi, tipe komponen, atau status
 
-### **Message Management**
-- **Template System**: Pre-defined message templates with variables
-- **Bulk Messaging**: Send messages to multiple clients
-- **File Attachments**: Support for images, documents, and PDFs
-- **Message History**: Complete conversation tracking
-- **Delivery Status**: Real-time message delivery tracking
-
-### **Automation Features**
-- **Invoice Notifications**: Automatic invoice delivery via WhatsApp
-- **Payment Reminders**: Scheduled payment reminder messages
-- **Service Updates**: Automated service status notifications
-- **Chatbot Integration**: Automated FAQ and support responses
+### **Fitur Geolokasi**
+- **Integrasi GPS**: Penempatan komponen berbasis koordinat
+- **Geocoding Alamat**: Generasi koordinat otomatis dari alamat
+- **Manajemen Pusat Peta**: Titik pusat peta yang dapat dikonfigurasi
+- **Kemampuan Export**: Export data peta dan statistik
 
 ---
 
-## 📈 Reporting & Analytics
+## 📱 Fitur Gateway WhatsApp
 
-### **FTTH Reports Dashboard**
+### **Manajemen Device**
+- **Dukungan Multi-Device**: Kelola multiple device WhatsApp
+- **Status Koneksi**: Monitoring koneksi device real-time
+- **Autentikasi QR Code**: Koneksi device yang aman via QR code
+- **Device Default**: Set device utama untuk pesan otomatis
 
-#### **Overview Tab**
-- Summary cards for all network components
-- Bar charts showing distribution patterns
-- Network coverage statistics
-- Export capabilities for data analysis
+### **Manajemen Pesan**
+- **Sistem Template**: Template pesan yang telah ditentukan dengan variabel
+- **Pesan Massal**: Kirim pesan ke multiple pelanggan
+- **Lampiran File**: Dukungan untuk gambar, dokumen, dan PDF
+- **Riwayat Pesan**: Pelacakan percakapan lengkap
+- **Status Pengiriman**: Pelacakan status pengiriman pesan real-time
 
-#### **Utilization Tab**
-- Real-time capacity utilization metrics
-- Pie charts for core, tube, and ODP utilization
-- Bottleneck identification tools
-- Capacity planning insights
-
-#### **Status Tab**
-- Component status distribution
-- Active vs. archived component tracking
-- Maintenance scheduling overview
-- Status trend analysis
-
-#### **Details Tab**
-- Hierarchical network view
-- Drill-down capabilities for detailed analysis
-- Component relationship mapping
-- Comprehensive data export options
+### **Fitur Otomatisasi**
+- **Notifikasi Invoice**: Pengiriman invoice otomatis via WhatsApp
+- **Reminder Pembayaran**: Pesan reminder pembayaran terjadwal
+- **Update Layanan**: Notifikasi status layanan otomatis
+- **Integrasi Chatbot**: Respons FAQ dan dukungan otomatis
 
 ---
 
-## 🔒 Security Features
+## 📈 Laporan & Analitik
 
-### **Authentication & Authorization**
-- Role-based access control (RBAC)
-- Multi-factor authentication support
-- Session management and security
-- API token authentication
+### **Dashboard Laporan FTTH**
 
-### **Data Protection**
-- Encrypted data storage
-- Secure API communications
-- GDPR compliance features
-- Regular security updates
+#### **Tab Overview**
+- Kartu ringkasan untuk semua komponen jaringan
+- Grafik batang menunjukkan pola distribusi
+- Statistik coverage jaringan
+- Kemampuan export untuk analisis data
+
+#### **Tab Utilization**
+- Metrik utilisasi kapasitas real-time
+- Grafik pie untuk utilisasi core, tube, dan ODP
+- Alat identifikasi bottleneck
+- Wawasan perencanaan kapasitas
+
+#### **Tab Status**
+- Distribusi status komponen
+- Pelacakan komponen aktif vs arsip
+- Overview penjadwalan maintenance
+- Analisis trend status
+
+#### **Tab Details**
+- Tampilan jaringan hierarkis
+- Kemampuan drill-down untuk analisis detail
+- Pemetaan relasi komponen
+- Opsi export data komprehensif
 
 ---
 
-## 🚀 Deployment Options
+## 🔒 Fitur Keamanan
 
-### **Self-Hosted Deployment**
-- Full control over data and infrastructure
-- Customizable branding and features
-- No recurring subscription fees
-- Complete data ownership
+### **Autentikasi & Otorisasi**
+- Kontrol akses berbasis peran (RBAC)
+- Dukungan autentikasi multi-faktor
+- Manajemen sesi dan keamanan
+- Autentikasi token API
 
-### **Cloud Deployment**
-- Scalable cloud infrastructure
-- Automated backups and monitoring
-- High availability and performance
-- Managed security updates
+### **Perlindungan Data**
+- Penyimpanan data terenkripsi
+- Komunikasi API yang aman
+- Fitur kepatuhan GDPR
+- Update keamanan berkala
 
-### **Docker Deployment**
+---
+
+## 🚀 Opsi Deployment
+
+### **Deployment Self-Hosted**
+- Kontrol penuh atas data dan infrastruktur
+- Branding dan fitur yang dapat dikustomisasi
+- Tidak ada biaya berlangganan berulang
+- Kepemilikan data lengkap
+
+### **Deployment Cloud**
+- Infrastruktur cloud yang dapat diskalakan
+- Backup dan monitoring otomatis
+- Ketersediaan tinggi dan performa
+- Update keamanan yang dikelola
+
+### **Deployment Docker**
 ```bash
-# Using Docker Compose
+# Menggunakan Docker Compose
 docker-compose up -d
 
-# Using Docker Hub image
+# Menggunakan image Docker Hub
 docker pull invoice-isp/latest
 docker run -d -p 8000:8000 invoice-isp
 ```
 
 ---
 
-## 🤝 Contributing
+## 🤝 Berkontribusi
 
-We welcome contributions to improve Invoice ISP! Please read our contributing guidelines:
+Kami menyambut kontribusi untuk meningkatkan Invoice ISP! Silakan baca panduan kontribusi kami:
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. Fork repository
+2. Buat branch fitur (`git checkout -b feature/fitur-menakjubkan`)
+3. Commit perubahan Anda (`git commit -m 'Tambah fitur menakjubkan'`)
+4. Push ke branch (`git push origin feature/fitur-menakjubkan`)
+5. Buka Pull Request
 
-### **Development Setup**
+### **Setup Development**
 ```bash
-# Install development dependencies
+# Install dependensi development
 composer install
 npm install
 
-# Run development server
+# Jalankan server development
 php artisan serve
 npm run dev
 
-# Run tests
+# Jalankan test
 php artisan test
 npm run test
 ```
 
 ---
 
-## 📚 Documentation
+## 📚 Dokumentasi
 
-- **[User Manual](BUKU_MANUAL_SISTEM_INVOICE_ISP.md)**: Comprehensive user guide in Indonesian
-- **[API Documentation](openapi/api-docs.yaml)**: Complete API reference
-- **[Developer Guide](docs/developer-guide.md)**: Technical documentation for developers
-- **[Installation Guide](docs/installation.md)**: Detailed installation instructions
-
----
-
-## 🆘 Support
-
-### **Community Support**
-- **GitHub Issues**: Report bugs and request features
-- **Discussions**: Community discussions and Q&A
-- **Wiki**: Community-maintained documentation
-
-### **Professional Support**
-- **Email Support**: support@invoice-isp.com
-- **WhatsApp Support**: +62-xxx-xxxx-xxxx
-- **Phone Support**: +62-xxx-xxxx-xxxx
+- **[Manual Pengguna](BUKU_MANUAL_SISTEM_INVOICE_ISP.md)**: Panduan pengguna komprehensif dalam bahasa Indonesia
+- **[Dokumentasi API](openapi/api-docs.yaml)**: Referensi API lengkap
+- **[Panduan Developer](docs/developer-guide.md)**: Dokumentasi teknis untuk developer
+- **[Panduan Instalasi](docs/installation.md)**: Instruksi instalasi detail
 
 ---
 
-## 📄 License
+## 🆘 Dukungan
 
-This project is licensed under the Elastic License 2.0 - see the [LICENSE](LICENSE) file for details.
-
-### **Commercial Licensing**
-- **White-label License**: $30/year to remove branding
-- **Enterprise Support**: Custom pricing for enterprise deployments
-- **Custom Development**: Tailored solutions for specific requirements
+### **Dukungan Komunitas**
+- **GitHub Issues**: Laporkan bug dan minta fitur
+- **Discussions**: Diskusi komunitas dan Q&A
+- **Wiki**: Dokumentasi yang dikelola komunitas
 
 ---
 
-## 🙏 Acknowledgments
+## 📄 Lisensi
 
-- **Invoice Ninja Team**: For the robust foundation and core functionality
-- **Laravel Community**: For the excellent PHP framework
-- **React Community**: For the powerful frontend framework
-- **Open Source Contributors**: For various libraries and tools used
+Proyek ini dilisensikan di bawah Elastic License 2.0 - lihat file [LICENSE](LICENSE) untuk detail.
 
----
-
-## 📞 Contact
-
-- **Website**: https://invoice-isp.com
-- **Email**: info@invoice-isp.com
-- **WhatsApp**: +62-xxx-xxxx-xxxx
-- **Address**: Your Company Address
+### **Lisensi Komersial**
+- **White-label License**: $30/tahun untuk menghapus branding
+- **Enterprise Support**: Harga khusus untuk deployment enterprise
+- **Custom Development**: Solusi yang disesuaikan untuk kebutuhan spesifik
 
 ---
 
-<p align="center">
-Made with ❤️ for Internet Service Providers
-</p>
+## 🙏 Ucapan Terima Kasih
+
+- **Tim Invoice Ninja**: Untuk fondasi yang kokoh dan fungsionalitas inti
+- **Komunitas Laravel**: Untuk framework PHP yang luar biasa
+- **Komunitas React**: Untuk framework frontend yang powerful
+- **Kontributor Open Source**: Untuk berbagai library dan tools yang digunakan
