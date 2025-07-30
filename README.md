@@ -122,8 +122,8 @@ php artisan key:generate
 
 5. **Setup database**
 ```bash
-php artisan migrate
-php artisan db:seed
+php artisan migrate:fresh --seed && php artisan db:seed && php artisan ninja:create-test-data
+php artisan db:seed --class=Database\\Seeders\\FoTableSeeder
 ```
 
 6. **Jalankan aplikasi**
