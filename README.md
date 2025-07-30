@@ -1,173 +1,423 @@
+# Invoice ISP - Fiber Optic Network Management System
+
 <p align="center">
-<a href ="https://www.youtube.com/watch?v=CxGxXiotv0I" target="_blank" title="Invoice Ninja Overview Video"><img src="https://raw.githubusercontent.com/hillelcoren/invoice-ninja/master/public/images/round_logo.png" alt="Sublime's custom image"/></a>
+<img src="https://raw.githubusercontent.com/invoiceninja/invoiceninja/master/public/images/round_logo.png" alt="Invoice ISP Logo" width="200"/>
 </p>
 
-![v5-develop phpunit](https://github.com/invoiceninja/invoiceninja/workflows/phpunit/badge.svg?branch=v5-develop)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/d16c78aad8574466bf83232b513ef4fb)](https://www.codacy.com/gh/turbo124/invoiceninja/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=turbo124/invoiceninja&amp;utm_campaign=Badge_Grade)
-<a href="https://cla-assistant.io/invoiceninja/invoiceninja"><img src="https://cla-assistant.io/readme/badge/invoiceninja/invoiceninja" alt="CLA assistant" /></a>
+<p align="center">
+<strong>Complete ISP Business Management Platform with FTTH Infrastructure & WhatsApp Integration</strong>
+</p>
 
-# Invoice Ninja 5
+---
 
-Invoice Ninja Version 5 is here! We've taken the best parts of version 4 and added the most requested features to create an invoicing application like no other. Check the [Invoice Ninja YouTube Channel](https://www.youtube.com/@appinvoiceninja) to get up to speed, or try the [Demo](https://react.invoicing.co/demo) now.
+## 🚀 What is Invoice ISP?
 
-**Choose your setup**
+**Invoice ISP** is a comprehensive business management platform specifically designed for Internet Service Providers (ISPs) that combines traditional invoicing capabilities with advanced fiber optic network management and customer communication tools.
 
-- [Hosted](https://www.invoiceninja.com): Our hosted version is a Software as a Service (SaaS) solution. You're up and running in under 5 minutes, with no need to worry about hosting or server infrastructure.
-- [Self-Hosted](https://www.invoiceninja.org): For those who prefer to manage their own hosting and server infrastructure. This version gives you full control and flexibility.
+Built on top of Invoice Ninja's robust foundation, this application extends the core functionality with specialized modules for FTTH (Fiber to the Home) infrastructure management, network visualization, and WhatsApp integration for customer communication.
 
-All Pro and Enterprise features from the hosted app are included in the source-available code. We offer a $30 per year white-label license to remove the Invoice Ninja branding from client-facing parts of the app.  
+---
 
-#### Get social with us
+## 🎯 Key Features
 
-* [Support Forum](https://forum.invoiceninja.com)
-* [Slack](http://slack.invoiceninja.com)
-* [Discord](https://discord.gg/ZwEdtfCwXA)
-* [Instagram](https://www.instagram.com/appinvoiceninja)
+### 📊 **Core Business Management**
+- **Invoice Management**: Create, send, and track invoices with automated billing
+- **Client Management**: Comprehensive customer database with service history
+- **Payment Processing**: Multiple payment gateway integrations
+- **Financial Reports**: Cash flow analysis, revenue tracking, and financial insights
+- **Product/Service Catalog**: Manage internet packages and additional services
 
-#### Documentation
+### 🌐 **FTTH Infrastructure Management**
+- **Network Topology**: Complete fiber optic network mapping and management
+- **Component Tracking**: Manage ODC, ODP, cables, tubes, cores, and client connections
+- **Geolocation Support**: GPS coordinates and address geocoding for all network components
+- **Capacity Planning**: Real-time utilization monitoring and capacity analysis
+- **Maintenance Scheduling**: Track joint boxes and maintenance activities
 
-* [Invoice Ninja - API](https://api-docs.invoicing.co/)
-* [Invoice Ninja - Developer Guide](https://invoiceninja.github.io/en/developer-guide/)
-* [Invoice Ninja - User Guide](https://invoiceninja.github.io/en/user-guide/)
-* [Invoice Ninja - Self-Hosted Installation Guide](https://invoiceninja.github.io/en/self-host-installation/)
+### 🗺️ **Network Visualization & Mapping**
+- **Interactive Maps**: Visual representation of network infrastructure using Leaflet.js
+- **Component Markers**: Color-coded markers for ODC, ODP, and client locations
+- **Connection Lines**: Visual representation of fiber connections with distance calculations
+- **Filtering & Search**: Filter by province, city, or component type
+- **Export Capabilities**: Export network data to CSV/PDF formats
 
-## Installation Options and Clients
+### 📱 **WhatsApp Gateway Integration**
+- **Multi-Device Support**: Manage multiple WhatsApp devices
+- **Message Templates**: Pre-defined templates with variable placeholders
+- **Bulk Messaging**: Send messages to multiple clients simultaneously
+- **Automated Notifications**: Invoice reminders, payment confirmations, and service updates
+- **Chatbot Support**: Automated responses and FAQ handling
+- **Message History**: Complete conversation tracking and analytics
 
-### Mobile Apps
-* [iPhone](https://apps.apple.com/app/id1503970375?platform=iphone)
-* [Android](https://play.google.com/store/apps/details?id=com.invoiceninja.app)
-* [F-Droid](https://f-droid.org/en/packages/com.invoiceninja.app)
+### 📈 **Advanced Reporting & Analytics**
+- **FTTH Reports**: 4 comprehensive report tabs (Overview, Utilization, Status, Details)
+- **Network Statistics**: Real-time infrastructure utilization metrics
+- **Customer Analytics**: Service usage patterns and customer behavior insights
+- **Financial Analytics**: Revenue analysis and business performance metrics
+- **Export & Integration**: Data export capabilities for external analysis
 
-### Desktop Apps
-* [macOS](https://apps.apple.com/app/id1503970375?platform=mac)
-* [Windows](https://microsoft.com/en-us/p/invoice-ninja/9n3f2bbcfdr6)
-* [Linux - Snap](https://snapcraft.io/invoiceninja)
-* [Linux - Flatpak](https://flathub.org/apps/com.invoiceninja.InvoiceNinja)
+---
 
-### Self-Hosted Server Installation 
-**Note:** The self-hosted options do support the desktop and mobile apps.
+## 🏗️ System Architecture
 
-* [Server or VM](https://invoiceninja.github.io/en/self-host-installation/)
-* [Docker File](https://hub.docker.com/r/invoiceninja/invoiceninja/)
-* [Cloudron](https://www.cloudron.io/store/com.invoiceninja.cloudronapp2.html)
-* [Softaculous](https://www.softaculous.com/apps/ecommerce/Invoice_Ninja)
-* [Elestio](https://elest.io/open-source/invoiceninja)
-* [YunoHost](https://apps.yunohost.org/app/invoiceninja5)
+### **Backend (Laravel 10)**
+- RESTful API architecture
+- MySQL database with optimized relationships
+- Real-time data processing and calculations
+- Secure authentication and authorization
+- Webhook support for external integrations
 
-### Recommended Providers
-* [Stripe](https://stripe.com/)
-* [Postmark](https://postmarkapp.com/)
+### **Frontend (React + TypeScript)**
+- Modern, responsive user interface
+- Interactive data visualization with charts
+- Real-time updates and notifications
+- Mobile-friendly design
+- Progressive Web App capabilities
 
-## [Advanced] Quick Hosting Setup
+### **Database Schema**
+```
+FTTH Infrastructure Hierarchy:
+Lokasi (Location) → ODC (Optical Distribution Cabinet) → 
+Kabel ODC (Cable) → Tube Kabel (Tube) → Core Kabel (Core) → 
+ODP (Optical Distribution Point) → Client FTTH (Customer)
+```
 
-In addition to the official [Invoice Ninja - Self-Hosted Installation Guide](https://invoiceninja.github.io/en/self-host-installation/) we have a few commands for you.
+---
 
-```sh
-git clone --single-branch --branch v5-stable https://github.com/invoiceninja/invoiceninja.git
+## 🚀 Quick Start
+
+### Prerequisites
+- PHP 8.1+
+- MySQL 8.0+
+- Node.js 16+
+- Composer
+- Git
+
+### Installation
+
+1. **Clone the repository**
+```bash
+git clone https://github.com/your-username/invoice-isp.git
+cd invoice-isp
+```
+
+2. **Install PHP dependencies**
+```bash
+composer install --optimize-autoloader --no-dev
+```
+
+3. **Install Node.js dependencies**
+```bash
+cd client
+npm install
+npm run build
+cd ..
+```
+
+4. **Environment setup**
+```bash
 cp .env.example .env
-composer i -o --no-dev
+php artisan key:generate
 ```
 
-Please Note: 
-Your APP_KEY in the .env file is used to encrypt data, if you lose this you will not be able to run the application.
-
-Run if you want to load sample data, remember to configure .env
-```sh
-php artisan migrate:fresh --seed && php artisan db:seed && php artisan ninja:create-test-data
+5. **Database setup**
+```bash
+php artisan migrate
+php artisan db:seed
 ```
 
-To run the web server
-```sh
-php artisan serve 
+6. **Start the application**
+```bash
+php artisan serve
 ```
 
-Navigate to (replace localhost with the appropriate domain)
-```
-http://localhost:8000/setup - To setup your configuration if you did not load sample data.
-http://localhost:8000/ - For Administrator Logon
+### Default Login Credentials
+- **Admin**: `admin@example.com` / `password`
+- **Client Portal**: `client@example.com` / `password`
 
-user: small@example.com
-pass: password
+---
 
-http://localhost:8000/client/login - For Client Portal
+## 📋 System Requirements
 
-user: user@example.com
-pass: password
-```
-## Developers Guide
+### **Minimum Requirements**
+- **Server**: 2GB RAM, 20GB Storage
+- **PHP**: 8.1+ with extensions (BCMath, Ctype, JSON, Mbstring, OpenSSL, PDO, Tokenizer, XML)
+- **Database**: MySQL 8.0+ or MariaDB 10.3+
+- **Web Server**: Apache 2.4+ or Nginx 1.18+
 
-In addition to the official [Invoice Ninja - Developer Guide](https://invoiceninja.github.io/en/developer-guide/) we've got your back with some insights.
+### **Recommended Requirements**
+- **Server**: 4GB RAM, 50GB SSD Storage
+- **PHP**: 8.2+ with OPcache enabled
+- **Database**: MySQL 8.0+ with InnoDB engine
+- **Web Server**: Nginx with PHP-FPM
+- **SSL Certificate**: For production deployment
 
-### App Design
+---
 
-The API and client portal have been developed using [Laravel](https://laravel.com) if you wish to contribute to this project familiarity with Laravel is essential.
+## 🔧 Configuration
 
-When inspecting functionality of the API, the best place to start would be in the routes/api.php file which describes all of the availabe API endpoints. The controller methods then describe all the entry points into each domain of the application, ie InvoiceController / QuoteController
+### **Environment Variables**
+```env
+# Database Configuration
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=invoice_isp
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 
-The average API request follows this path into the application.
+# WhatsApp Gateway Configuration
+WA_SERVICE_URL=http://localhost:3000
+WA_SERVICE_TOKEN=your_wa_token
 
-* Middleware processes the request initially inspecting the domain being requested + provides the authentication layer.
-* The request then passes into a Form Request (Type hinted in the controller methods) which is used to provide authorization and also validation of the request. If successful, the request is then passed into the controller method where it is digested, here is an example:
+# Google Maps API (for geocoding)
+GOOGLE_MAPS_API_KEY=your_google_maps_key
 
-```php
-public function store(StoreInvoiceRequest $request)
-{
-
-    $invoice = $this->invoice_repo->save($request->all(), InvoiceFactory::create(auth()->user()->company()->id, auth()->user()->id));
-
-    $invoice = $invoice->service()
-                        ->fillDefaults()
-                        ->triggeredActions($request)
-                        ->adjustInventory()
-                        ->save();
-
-    event(new InvoiceWasCreated($invoice, $invoice->company, Ninja::eventVars(auth()->user() ? auth()->user()->id : null)));
-
-    return $this->itemResponse($invoice);
-
-}
-```
-
-Here for example we are storing a new invoice, we pass the validated request along with a factory into the invoice repository where it is processed and saved.
-
-The returned invoice then passes through its service class (app/Services/Invoice) where various actions are performed.
-
-A event is then fired which notifies listeners in the application (app/Providers/EventServiceProvider) which perform non blocking sub tasks 
-
-Finally the invoice is transformed (app/Transformers/) and returned as a response via Fractal.
-
-### Developer environment
-
-Using the Quick Hosting Setup describe above you can quickly get started building out your development environment. Instead of using 
-
-```
-composer i -o --no-dev
-``` 
-
-use
-
-```
-composer i -o
+# Payment Gateway Configuration
+STRIPE_KEY=your_stripe_key
+STRIPE_SECRET=your_stripe_secret
 ```
 
-This provides the developer tools including phpunit which allows the test suite to be run.
+### **WhatsApp Gateway Setup**
+1. Configure WhatsApp service URL in `.env`
+2. Set up WhatsApp devices in the admin panel
+3. Scan QR codes to connect devices
+4. Configure message templates and chatbots
 
-If you are considering contributing back to the main repository, please add in any tests for new functionality / modifications. This will greatly increase the chances of your PR being accepted
+---
 
-Also, if you plan any additions for the main repository, you may want to discuss this with us first on Slack where we can assist with any technical information and provide advice.
+## 📊 FTTH Infrastructure Management
 
-## Credits
-* [Hillel Coren](https://hillelcoren.com/)
-* [David Bomba](https://github.com/turbo124)
-* [Benjamin Beganović](https://github.com/beganovich)
-* [All Contributors](https://github.com/invoiceninja/invoiceninja/graphs/contributors)
+### **Network Components**
 
-## Security
+#### **Lokasi (Location)**
+- Geographic locations with GPS coordinates
+- Address information with geocoding
+- Status tracking (active/archived)
 
-If you find a security issue with this application, please send an email to contact@invoiceninja.com.
-Please follow responsible disclosure procedures if you detect an issue.
-For further information on responsible disclosure please read [here](https://cheatsheetseries.owasp.org/cheatsheets/Vulnerability_Disclosure_Cheat_Sheet.html).
+#### **ODC (Optical Distribution Cabinet)**
+- Central distribution points
+- Capacity management and utilization tracking
+- Connection to multiple ODPs
 
-## License
-Invoice Ninja is released under the Elastic License.  
-See [LICENSE](LICENSE) for details.
+#### **Kabel ODC (Cable)**
+- Fiber optic cable specifications
+- Length, type, and capacity information
+- Tube and core organization
+
+#### **Tube Kabel (Tube)**
+- Color-coded tube identification
+- Core organization within tubes
+- Capacity and utilization tracking
+
+#### **Core Kabel (Core)**
+- Individual fiber core management
+- Connection status to ODPs
+- Color coding and identification
+
+#### **ODP (Optical Distribution Point)**
+- Local distribution points
+- Splitter configuration and capacity
+- Client connection management
+
+#### **Client FTTH (Customer)**
+- Customer information and service details
+- Package and billing integration
+- Connection status and history
+
+---
+
+## 🗺️ Mapping & Visualization
+
+### **Interactive Network Map**
+- **Real-time Visualization**: Live network topology display
+- **Component Markers**: Color-coded markers for different components
+- **Connection Lines**: Visual representation of fiber connections
+- **Distance Calculations**: Automatic distance calculation between components
+- **Filtering Options**: Filter by location, component type, or status
+
+### **Geolocation Features**
+- **GPS Integration**: Coordinate-based component positioning
+- **Address Geocoding**: Automatic coordinate generation from addresses
+- **Map Center Management**: Configurable map center points
+- **Export Capabilities**: Export map data and statistics
+
+---
+
+## 📱 WhatsApp Gateway Features
+
+### **Device Management**
+- **Multi-Device Support**: Manage multiple WhatsApp devices
+- **Connection Status**: Real-time device connection monitoring
+- **QR Code Authentication**: Secure device connection via QR codes
+- **Default Device**: Set primary device for automated messages
+
+### **Message Management**
+- **Template System**: Pre-defined message templates with variables
+- **Bulk Messaging**: Send messages to multiple clients
+- **File Attachments**: Support for images, documents, and PDFs
+- **Message History**: Complete conversation tracking
+- **Delivery Status**: Real-time message delivery tracking
+
+### **Automation Features**
+- **Invoice Notifications**: Automatic invoice delivery via WhatsApp
+- **Payment Reminders**: Scheduled payment reminder messages
+- **Service Updates**: Automated service status notifications
+- **Chatbot Integration**: Automated FAQ and support responses
+
+---
+
+## 📈 Reporting & Analytics
+
+### **FTTH Reports Dashboard**
+
+#### **Overview Tab**
+- Summary cards for all network components
+- Bar charts showing distribution patterns
+- Network coverage statistics
+- Export capabilities for data analysis
+
+#### **Utilization Tab**
+- Real-time capacity utilization metrics
+- Pie charts for core, tube, and ODP utilization
+- Bottleneck identification tools
+- Capacity planning insights
+
+#### **Status Tab**
+- Component status distribution
+- Active vs. archived component tracking
+- Maintenance scheduling overview
+- Status trend analysis
+
+#### **Details Tab**
+- Hierarchical network view
+- Drill-down capabilities for detailed analysis
+- Component relationship mapping
+- Comprehensive data export options
+
+---
+
+## 🔒 Security Features
+
+### **Authentication & Authorization**
+- Role-based access control (RBAC)
+- Multi-factor authentication support
+- Session management and security
+- API token authentication
+
+### **Data Protection**
+- Encrypted data storage
+- Secure API communications
+- GDPR compliance features
+- Regular security updates
+
+---
+
+## 🚀 Deployment Options
+
+### **Self-Hosted Deployment**
+- Full control over data and infrastructure
+- Customizable branding and features
+- No recurring subscription fees
+- Complete data ownership
+
+### **Cloud Deployment**
+- Scalable cloud infrastructure
+- Automated backups and monitoring
+- High availability and performance
+- Managed security updates
+
+### **Docker Deployment**
+```bash
+# Using Docker Compose
+docker-compose up -d
+
+# Using Docker Hub image
+docker pull invoice-isp/latest
+docker run -d -p 8000:8000 invoice-isp
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions to improve Invoice ISP! Please read our contributing guidelines:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### **Development Setup**
+```bash
+# Install development dependencies
+composer install
+npm install
+
+# Run development server
+php artisan serve
+npm run dev
+
+# Run tests
+php artisan test
+npm run test
+```
+
+---
+
+## 📚 Documentation
+
+- **[User Manual](BUKU_MANUAL_SISTEM_INVOICE_ISP.md)**: Comprehensive user guide in Indonesian
+- **[API Documentation](openapi/api-docs.yaml)**: Complete API reference
+- **[Developer Guide](docs/developer-guide.md)**: Technical documentation for developers
+- **[Installation Guide](docs/installation.md)**: Detailed installation instructions
+
+---
+
+## 🆘 Support
+
+### **Community Support**
+- **GitHub Issues**: Report bugs and request features
+- **Discussions**: Community discussions and Q&A
+- **Wiki**: Community-maintained documentation
+
+### **Professional Support**
+- **Email Support**: support@invoice-isp.com
+- **WhatsApp Support**: +62-xxx-xxxx-xxxx
+- **Phone Support**: +62-xxx-xxxx-xxxx
+
+---
+
+## 📄 License
+
+This project is licensed under the Elastic License 2.0 - see the [LICENSE](LICENSE) file for details.
+
+### **Commercial Licensing**
+- **White-label License**: $30/year to remove branding
+- **Enterprise Support**: Custom pricing for enterprise deployments
+- **Custom Development**: Tailored solutions for specific requirements
+
+---
+
+## 🙏 Acknowledgments
+
+- **Invoice Ninja Team**: For the robust foundation and core functionality
+- **Laravel Community**: For the excellent PHP framework
+- **React Community**: For the powerful frontend framework
+- **Open Source Contributors**: For various libraries and tools used
+
+---
+
+## 📞 Contact
+
+- **Website**: https://invoice-isp.com
+- **Email**: info@invoice-isp.com
+- **WhatsApp**: +62-xxx-xxxx-xxxx
+- **Address**: Your Company Address
+
+---
+
+<p align="center">
+Made with ❤️ for Internet Service Providers
+</p>
