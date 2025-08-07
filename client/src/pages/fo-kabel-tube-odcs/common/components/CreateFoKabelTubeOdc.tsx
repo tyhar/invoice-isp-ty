@@ -4,12 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import {
-    // InputField,
+    InputField,
     SelectField,
 } from '$app/components/forms';
 
 interface FoKabelTubeOdcCreate {
     kabel_odc_id: number;
+    deskripsi: string;
     warna_tube: string;
 }
 
@@ -66,6 +67,15 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
                         </option>
                     ))}
                 </SelectField>
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={form.deskripsi || ''}
+                    onValueChange={(v) => change('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
+                />
             </Element>
 
             <Element leftSide={t('Warna Tube')} required>

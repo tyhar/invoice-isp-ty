@@ -15,6 +15,7 @@ import { useQueryClient } from 'react-query';
 
 interface FoKabelTubeOdcCreate {
     kabel_odc_id: number;
+    deskripsi: string;
     warna_tube: string;
 }
 
@@ -39,6 +40,7 @@ export default function Create() {
 
     const [form, setForm] = useState<FoKabelTubeOdcCreate>({
         kabel_odc_id: 0,
+        deskripsi: '',
         warna_tube: '',
     });
     const [odcs, setOdcs] = useState<KabelOdcOption[]>([]);

@@ -42,6 +42,7 @@ export default function Create() {
 
     const [form, setForm] = useState<FoKabelOdcCreate>({
         nama_kabel: '',
+        deskripsi: '',
         tipe_kabel: 'singlecore',
         panjang_kabel: 0,
         tube_colors: [],

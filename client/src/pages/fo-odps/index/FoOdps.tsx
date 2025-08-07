@@ -11,6 +11,7 @@ import { useFoOdpBulkActions } from '../common/hooks/useFoOdpBulkActions';
 interface FoOdp {
     id: string;
     nama_odp: string;
+    deskripsi: string;
     lokasi: { id: number; nama_lokasi: string };
     odc?: { id: number; nama_odc: string };
     kabel_core_odc?: {
@@ -44,6 +45,10 @@ export default function FoOdps() {
                     {val}
                 </a>
             ),
+        },
+        {
+            id: 'deskripsi',
+            label: t('deskripsi'),
         },
         {
             id: 'odc',

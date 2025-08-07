@@ -45,6 +45,7 @@ export default function Create() {
         lokasi_longitude: '',
         kabel_odc_id: '', // <-- add this
         nama_odc: '',
+        deskripsi: '',
         tipe_splitter: '1:8',
     };
 
@@ -87,6 +88,7 @@ export default function Create() {
             lokasi_id,
             kabel_odc_id: values.kabel_odc_id,
             nama_odc: values.nama_odc,
+            deskripsi: values.deskripsi,
             tipe_splitter: values.tipe_splitter,
         })
             .then(() => {

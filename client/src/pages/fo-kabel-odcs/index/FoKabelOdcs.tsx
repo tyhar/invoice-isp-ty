@@ -24,6 +24,7 @@ interface FoKabelOdc {
     deleted_at?: string | null;
     odcs: { id: number; nama_odc: string }[];
     tube_colors?: { id: number; warna_tube: string }[];
+    deskripsi: string;
 }
 
 export default function FoKabelOdcs() {
@@ -45,6 +46,10 @@ export default function FoKabelOdcs() {
                     {val}
                 </a>
             ),
+        },
+        {
+            id: 'deskripsi',
+            label: 'Deskripsi',
         },
         {
             id: 'odcs',

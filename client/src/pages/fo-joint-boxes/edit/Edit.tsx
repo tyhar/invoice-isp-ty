@@ -71,6 +71,7 @@ export default function Edit() {
                     lokasi_longitude: '',
                     kabel_odc_id,
                     nama_joint_box: data.nama_joint_box || '',
+                    deskripsi: data.deskripsi || '',
                     status: data.status || 'active', // keep for backend, not for UI
                 });
                 // If current relation is not in options, add it
@@ -101,6 +102,7 @@ export default function Edit() {
             lokasi_id: form.lokasi_id,
             kabel_odc_id: form.kabel_odc_id,
             nama_joint_box: form.nama_joint_box,
+            deskripsi: form.deskripsi,
             status: form.status, // send as loaded, not editable
         })
             .then(() => {

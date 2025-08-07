@@ -17,6 +17,7 @@ class FoOdc extends Model
         'lokasi_id',
         'kabel_odc_id', // now nullable
         'nama_odc',
+        'deskripsi', // <-- add this
         'tipe_splitter',
         'status',    // allow "active" or "archived"
     ];
@@ -24,6 +25,7 @@ class FoOdc extends Model
     protected $casts = [
         'status'     => 'string',
         'deleted_at' => 'datetime',
+        'deskripsi'  => 'string', // <-- add this
     ];
 
     /**
@@ -42,6 +44,4 @@ class FoOdc extends Model
         // kabel_odc_id is now nullable
         return $this->belongsTo(FoKabelOdc::class, 'kabel_odc_id');
     }
-
-    // Removed odps() relationship as per user instruction
 }

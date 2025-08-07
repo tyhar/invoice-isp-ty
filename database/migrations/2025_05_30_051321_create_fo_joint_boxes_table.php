@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('lokasi_id')->constrained('fo_lokasis')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('kabel_odc_id')->constrained('fo_kabel_odcs')->cascadeOnDelete()->cascadeOnUpdate();
             $table->string('nama_joint_box');
+            $table->string('deskripsi')->nullable();
             $table->enum('status', ['active', 'archived'])->default('active');
             $table->softDeletes();
             $table->timestamps();

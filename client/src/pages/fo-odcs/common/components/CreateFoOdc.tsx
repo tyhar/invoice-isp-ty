@@ -16,6 +16,7 @@ export interface FoOdcFormValues {
     lokasi_longitude: string;
     kabel_odc_id: string; // <-- add this
     nama_odc: string;
+    deskripsi: string;
     tipe_splitter: string;
 }
 
@@ -127,6 +128,15 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                     value={values.nama_odc}
                     onValueChange={(v) => onChange('nama_odc', v)}
                     errorMessage={errors?.errors.nama_odc}
+                />
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={values.deskripsi || ''}
+                    onValueChange={(v) => onChange('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
                 />
             </Element>
 

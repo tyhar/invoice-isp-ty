@@ -15,6 +15,7 @@ class FoJointBox extends Model
         'lokasi_id',
         'kabel_odc_id',
         'nama_joint_box',
+        'deskripsi',
         'status',
     ];
 
@@ -23,6 +24,7 @@ class FoJointBox extends Model
         'deleted_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'deskripsi'  => 'string',
     ];
 
     /**

@@ -13,6 +13,7 @@ export interface FoJointBoxForm {
     lokasi_longitude: string;
     kabel_odc_id: string;
     nama_joint_box: string;
+    deskripsi: string;
     // status: 'active' | 'archived'; // REMOVE from form interface
 }
 
@@ -116,6 +117,15 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                     value={form.nama_joint_box}
                     onValueChange={v => handleChange('nama_joint_box', v)}
                     errorMessage={errors?.errors?.nama_joint_box}
+                />
+            </Element>
+
+            <Element leftSide="Deskripsi">
+                <InputField
+                    element="textarea"
+                    value={form.deskripsi || ''}
+                    onValueChange={v => handleChange('deskripsi', v)}
+                    errorMessage={errors?.errors?.deskripsi}
                 />
             </Element>
             <Element leftSide="Kabel ODC" required>

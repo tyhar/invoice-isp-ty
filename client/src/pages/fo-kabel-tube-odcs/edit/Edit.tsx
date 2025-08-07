@@ -14,6 +14,7 @@ import { CreateFoKabelTubeOdc } from '../common/components/CreateFoKabelTubeOdc'
 
 interface FoKabelTubeOdcForm {
     kabel_odc_id: number;
+    deskripsi: string;
     warna_tube: string;
 }
 
@@ -31,6 +32,7 @@ export default function Edit() {
 
     const [form, setForm] = useState<FoKabelTubeOdcForm>({
         kabel_odc_id: 0,
+        deskripsi: '',
         warna_tube: '',
     });
     const [odcs, setOdcs] = useState<KabelOdcOption[]>([]);
@@ -45,6 +47,7 @@ export default function Edit() {
             .then(([resTube, resOdc]: any) => {
                 setForm({
                     kabel_odc_id: resTube.data.data.kabel_odc_id,
+                    deskripsi: resTube.data.data.deskripsi ?? '',
                     warna_tube: resTube.data.data.warna_tube,
                 });
                 setOdcs(

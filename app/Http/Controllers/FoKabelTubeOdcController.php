@@ -56,17 +56,12 @@ class FoKabelTubeOdcController extends Controller
             }
         });
 
-        // 4) Optional text filter on warna_tube
-        // if ($request->filled('filter')) {
-        //     $term = $request->query('filter');
-        //     $query->where('warna_tube', 'LIKE', "%{$term}%");
-        // }
-
-        // 4) Optional text filter on warna_tube or related kabelOdc.nama_kabel
+        // 4) Optional text filter on warna_tube, deskripsi, or related kabelOdc.nama_kabel
         if ($request->filled('filter')) {
             $term = $request->query('filter');
             $query->where(function ($q) use ($term) {
                 $q->where('warna_tube', 'LIKE', "%{$term}%")
+                    ->orWhere('deskripsi', 'LIKE', "%{$term}%")
                     ->orWhereHas('kabelOdc', function ($q2) use ($term) {
                         $q2->where('nama_kabel', 'LIKE', "%{$term}%");
                     });
@@ -116,6 +111,7 @@ class FoKabelTubeOdcController extends Controller
                     'nama_kabel'   => $kabelOdc->nama_kabel,
                 ] : null,
                 'warna_tube'         => $t->warna_tube,
+                'deskripsi'          => $t->deskripsi,
                 'status'             => $t->status,
                 'jumlah_core_in_tube'=> $kabelOdc?->jumlah_core_in_tube ?? null,
                 'kabel_core_odc_ids' => $t->kabelCoreOdcs ? $t->kabelCoreOdcs->pluck('id')->toArray() : [],
@@ -150,6 +146,7 @@ class FoKabelTubeOdcController extends Controller
             'kabel_odc_id'    => 'required|exists:fo_kabel_odcs,id',
             'warna_tube'      => 'required|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
             'status'          => 'sometimes|in:active,archived',
+            'deskripsi'      => 'nullable|string|max:255',
         ]);
 
         if (!isset($data['status'])) {
@@ -169,6 +166,7 @@ class FoKabelTubeOdcController extends Controller
                     'nama_kabel'   => $t->kabelOdc->nama_kabel,
                 ],
                 'warna_tube'         => $t->warna_tube,
+                'deskripsi'          => $t->deskripsi,
                 'status'             => $t->status,
                 'kabel_core_odc_ids' => $t->kabelCoreOdcs->pluck('id')->toArray(),
                 'created_at'         => $t->created_at->toDateTimeString(),
@@ -198,6 +196,7 @@ class FoKabelTubeOdcController extends Controller
                     'nama_kabel'   => $t->kabelOdc->nama_kabel,
                 ],
                 'warna_tube'         => $t->warna_tube,
+                'deskripsi'          => $t->deskripsi,
                 'status'             => $t->status,
                 'jumlah_core_in_tube'=> $t->kabelOdc->jumlah_core_in_tube ?? null,
                 'kabel_core_odc_ids' => $t->kabelCoreOdcs->pluck('id')->toArray(),
@@ -221,6 +220,7 @@ class FoKabelTubeOdcController extends Controller
             'kabel_odc_id'    => 'sometimes|exists:fo_kabel_odcs,id',
             'warna_tube'      => 'sometimes|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
             'status'          => 'sometimes|in:active,archived',
+            'deskripsi'      => 'nullable|string|max:255',
         ]);
 
         $t->update($data);
@@ -236,6 +236,7 @@ class FoKabelTubeOdcController extends Controller
                     'nama_kabel'   => $t->kabelOdc->nama_kabel,
                 ],
                 'warna_tube'         => $t->warna_tube,
+                'deskripsi'          => $t->deskripsi,
                 'status'             => $t->status,
                 'kabel_core_odc_ids' => $t->kabelCoreOdcs->pluck('id')->toArray(),
                 'created_at'         => $t->created_at->toDateTimeString(),

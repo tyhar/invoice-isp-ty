@@ -120,9 +120,12 @@ class FoOdpController extends Controller
             $kabelOdc = $tube?->kabelOdc;
             $odcs = $kabelOdc?->odcs ?? collect();
             $firstOdc = $odcs->first();
+            $odc = $o->odc; // use odc_id relationship
             return [
                 'id' => $o->id,
                 'nama_odp' => $o->nama_odp,
+                'deskripsi' => $o->deskripsi,
+                'odc_id' => $o->odc_id,
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -163,35 +166,35 @@ class FoOdpController extends Controller
                         'deleted_at' => $kabelOdc->deleted_at?->toDateTimeString(),
                     ] : null,
                 ] : null,
-                // Show the first ODC for this KabelOdc (if any)
-                'odc' => $firstOdc ? [
-                    'id' => $firstOdc->id,
-                    'nama_odc' => $firstOdc->nama_odc,
-                    'tipe_splitter' => $firstOdc->tipe_splitter ?? null,
-                    'status' => $firstOdc->status ?? null,
-                    'created_at' => $firstOdc->created_at?->toDateTimeString(),
-                    'updated_at' => $firstOdc->updated_at?->toDateTimeString(),
-                    'deleted_at' => $firstOdc->deleted_at?->toDateTimeString(),
-                    'lokasi' => $firstOdc->lokasi ? [
-                        'id' => $firstOdc->lokasi->id,
-                        'nama_lokasi' => $firstOdc->lokasi->nama_lokasi,
-                        'deskripsi' => $firstOdc->lokasi->deskripsi,
-                        'latitude' => $firstOdc->lokasi->latitude,
-                        'longitude' => $firstOdc->lokasi->longitude,
-                        'status' => $firstOdc->lokasi->status,
+                // Show the ODC for this ODP using the explicit odc_id relationship (not the first ODC from kabelOdc chain)
+                'odc' => $odc ? [
+                    'id' => $odc->id,
+                    'nama_odc' => $odc->nama_odc,
+                    'tipe_splitter' => $odc->tipe_splitter ?? null,
+                    'status' => $odc->status ?? null,
+                    'created_at' => $odc->created_at?->toDateTimeString(),
+                    'updated_at' => $odc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $odc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $odc->lokasi ? [
+                        'id' => $odc->lokasi->id,
+                        'nama_lokasi' => $odc->lokasi->nama_lokasi,
+                        'deskripsi' => $odc->lokasi->deskripsi,
+                        'latitude' => $odc->lokasi->latitude,
+                        'longitude' => $odc->lokasi->longitude,
+                        'status' => $odc->lokasi->status,
                     ] : null,
-                    'kabel_odc' => $firstOdc->kabelOdc ? [
-                        'id' => $firstOdc->kabelOdc->id,
-                        'nama_kabel' => $firstOdc->kabelOdc->nama_kabel,
-                        'tipe_kabel' => $firstOdc->kabelOdc->tipe_kabel,
-                        'panjang_kabel' => $firstOdc->kabelOdc->panjang_kabel,
-                        'jumlah_tube' => $firstOdc->kabelOdc->jumlah_tube,
-                        'jumlah_core_in_tube' => $firstOdc->kabelOdc->jumlah_core_in_tube,
-                        'jumlah_total_core' => $firstOdc->kabelOdc->jumlah_total_core,
-                        'status' => $firstOdc->kabelOdc->status,
-                        'created_at' => $firstOdc->kabelOdc->created_at?->toDateTimeString(),
-                        'updated_at' => $firstOdc->kabelOdc->updated_at?->toDateTimeString(),
-                        'deleted_at' => $firstOdc->kabelOdc->deleted_at?->toDateTimeString(),
+                    'kabel_odc' => $odc->kabelOdc ? [
+                        'id' => $odc->kabelOdc->id,
+                        'nama_kabel' => $odc->kabelOdc->nama_kabel,
+                        'tipe_kabel' => $odc->kabelOdc->tipe_kabel,
+                        'panjang_kabel' => $odc->kabelOdc->panjang_kabel,
+                        'jumlah_tube' => $odc->kabelOdc->jumlah_tube,
+                        'jumlah_core_in_tube' => $odc->kabelOdc->jumlah_core_in_tube,
+                        'jumlah_total_core' => $odc->kabelOdc->jumlah_total_core,
+                        'status' => $odc->kabelOdc->status,
+                        'created_at' => $odc->kabelOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $odc->kabelOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $odc->kabelOdc->deleted_at?->toDateTimeString(),
                     ] : null,
                 ] : null,
                 'client_ftth' => $o->clientFtth ? [
@@ -259,7 +262,9 @@ class FoOdpController extends Controller
         $data = $request->validate([
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'kabel_core_odc_id' => 'nullable|exists:fo_kabel_core_odcs,id',
+            'odc_id' => 'nullable|exists:fo_odcs,id', // <-- add this
             'nama_odp' => 'required|string|max:255|unique:fo_odps,nama_odp',
+            'deskripsi' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
 
@@ -305,6 +310,8 @@ class FoOdpController extends Controller
         $responseData = [
             'id' => $o->id,
             'nama_odp' => $o->nama_odp,
+            'deskripsi' => $o->deskripsi,
+            'odc_id' => $o->odc_id, // <-- add this
             'lokasi' => $o->lokasi ? [
                 'id' => $o->lokasi->id,
                 'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -452,7 +459,8 @@ class FoOdpController extends Controller
             'data' => [
                 'id' => $o->id,
                 'nama_odp' => $o->nama_odp,
-
+                'deskripsi' => $o->deskripsi,
+                'odc_id' => $o->odc_id, // <-- add this
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -503,7 +511,9 @@ class FoOdpController extends Controller
         $data = $request->validate([
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'kabel_core_odc_id' => 'nullable|exists:fo_kabel_core_odcs,id',
+            'odc_id' => 'nullable|exists:fo_odcs,id', // <-- add this
             'nama_odp' => 'nullable|string|max:255|unique:fo_odps,nama_odp,' . $id,
+            'deskripsi' => 'sometimes|nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
 
@@ -546,9 +556,18 @@ class FoOdpController extends Controller
             'data' => [
                 'id' => $odp->id,
                 'nama_odp' => $odp->nama_odp,
+                'deskripsi' => $odp->deskripsi,
+                'odc_id' => $odp->odc_id, // <-- add this
                 'lokasi' => $odp->lokasi ? [
                     'id' => $odp->lokasi->id,
                     'nama_lokasi' => $odp->lokasi->nama_lokasi,
+                    'deskripsi' => $odp->lokasi->deskripsi,
+                    'latitude' => $odp->lokasi->latitude,
+                    'longitude' => $odp->lokasi->longitude,
+                    'status' => $odp->lokasi->status,
+                    'created_at' => $odp->lokasi->created_at?->toDateTimeString(),
+                    'updated_at' => $odp->lokasi->updated_at?->toDateTimeString(),
+                    'deleted_at' => $odp->lokasi->deleted_at?->toDateTimeString(),
                 ] : null,
 
                 // core/tube/odc chain
@@ -566,9 +585,35 @@ class FoOdpController extends Controller
                 ] : null,
 
                 // top-level ODC via tube -> kabelOdc -> odc
-                'odc' => $firstOdc ? [
-                    'id' => $firstOdc->id,
-                    'nama_odc' => $firstOdc->nama_odc,
+                'odc' => $odp->odc ? [
+                    'id' => $odp->odc->id,
+                    'nama_odc' => $odp->odc->nama_odc,
+                    'tipe_splitter' => $odp->odc->tipe_splitter ?? null,
+                    'status' => $odp->odc->status ?? null,
+                    'created_at' => $odp->odc->created_at?->toDateTimeString(),
+                    'updated_at' => $odp->odc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $odp->odc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $odp->odc->lokasi ? [
+                        'id' => $odp->odc->lokasi->id,
+                        'nama_lokasi' => $odp->odc->lokasi->nama_lokasi,
+                        'deskripsi' => $odp->odc->lokasi->deskripsi,
+                        'latitude' => $odp->odc->lokasi->latitude,
+                        'longitude' => $odp->odc->lokasi->longitude,
+                        'status' => $odp->odc->lokasi->status,
+                    ] : null,
+                    'kabel_odc' => $odp->odc->kabelOdc ? [
+                        'id' => $odp->odc->kabelOdc->id,
+                        'nama_kabel' => $odp->odc->kabelOdc->nama_kabel,
+                        'tipe_kabel' => $odp->odc->kabelOdc->tipe_kabel,
+                        'panjang_kabel' => $odp->odc->kabelOdc->panjang_kabel,
+                        'jumlah_tube' => $odp->odc->kabelOdc->jumlah_tube,
+                        'jumlah_core_in_tube' => $odp->odc->kabelOdc->jumlah_core_in_tube,
+                        'jumlah_total_core' => $odp->odc->kabelOdc->jumlah_total_core,
+                        'status' => $odp->odc->kabelOdc->status,
+                        'created_at' => $odp->odc->kabelOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $odp->odc->kabelOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $odp->odc->kabelOdc->deleted_at?->toDateTimeString(),
+                    ] : null,
                 ] : null,
 
                 'client_ftth' => $odp->clientFtth ? [

@@ -17,6 +17,7 @@ class FoKabelOdc extends Model
     protected $fillable = [
         'odc_id',
         'nama_kabel',
+        'deskripsi',
         'tipe_kabel',
         'panjang_kabel',
         'jumlah_tube',
@@ -30,6 +31,7 @@ class FoKabelOdc extends Model
         'jumlah_total_core' => 'integer',
         'status'        => 'string',
         'deleted_at'    => 'datetime',
+        'deskripsi'     => 'string',
     ];
 
     protected static function boot()

@@ -56,11 +56,12 @@ class FoOdcController extends Controller
             }
         });
 
-        // 4) Optional text filtering by nama_odc or tipe_splitter
+        // 4) Optional text filtering by nama_odc, deskripsi, or tipe_splitter
         if ($request->filled('filter')) {
             $term = $request->query('filter');
             $query->where(function ($q) use ($term) {
                 $q->where('nama_odc', 'LIKE', "%{$term}%")
+                    ->orWhere('deskripsi', 'LIKE', "%{$term}%")
                     ->orWhere('tipe_splitter', 'LIKE', "%{$term}%");
             });
         }
@@ -103,6 +104,7 @@ class FoOdcController extends Controller
             return [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
+                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
                 'lokasi' => $lokasi ? [
                     'id' => $lokasi->id,
                     'nama_lokasi' => $lokasi->nama_lokasi,
@@ -115,6 +117,7 @@ class FoOdcController extends Controller
                     'deleted_at' => $lokasi->deleted_at?->toDateTimeString(),
                 ] : null,
                 'nama_odc' => $o->nama_odc,
+                'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
                 'kabel_odc' => $kabelOdc ? [
@@ -161,6 +164,7 @@ class FoOdcController extends Controller
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'kabel_odc_id' => 'nullable|exists:fo_kabel_odcs,id',
             'nama_odc' => 'required|string|max:255|unique:fo_odcs,nama_odc',
+            'deskripsi' => 'nullable|string|max:255',
             'tipe_splitter' => 'required|in:1:2,1:4,1:8,1:16,1:32,1:64,1:128',
             'status' => 'sometimes|in:active,archived',
         ]);
@@ -182,6 +186,7 @@ class FoOdcController extends Controller
             'data' => [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
+                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -194,6 +199,7 @@ class FoOdcController extends Controller
                     'deleted_at' => $o->lokasi->deleted_at?->toDateTimeString(),
                 ] : null,
                 'nama_odc' => $o->nama_odc,
+                'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
                 'kabel_odc' => $o->kabelOdc ? [
@@ -237,6 +243,7 @@ class FoOdcController extends Controller
             'data' => [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
+                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -249,6 +256,7 @@ class FoOdcController extends Controller
                     'deleted_at' => $o->lokasi->deleted_at?->toDateTimeString(),
                 ] : null,
                 'nama_odc' => $o->nama_odc,
+                'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
                 'kabel_odc' => $o->kabelOdc ? [
@@ -285,6 +293,7 @@ class FoOdcController extends Controller
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'kabel_odc_id' => 'nullable|sometimes|exists:fo_kabel_odcs,id',
             'nama_odc' => 'sometimes|string|max:255|unique:fo_odcs,nama_odc,' . $id,
+            'deskripsi' => 'sometimes|nullable|string|max:255',
             'tipe_splitter' => 'sometimes|in:1:2,1:4,1:8,1:16,1:32,1:64,1:128',
             'status' => 'sometimes|in:active,archived',
         ]);
@@ -302,6 +311,7 @@ class FoOdcController extends Controller
             'data' => [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
+                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -314,6 +324,7 @@ class FoOdcController extends Controller
                     'deleted_at' => $o->lokasi->deleted_at?->toDateTimeString(),
                 ] : null,
                 'nama_odc' => $o->nama_odc,
+                'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
                 'kabel_odc' => $o->kabelOdc ? [

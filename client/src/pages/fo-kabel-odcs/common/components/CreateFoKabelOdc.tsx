@@ -8,6 +8,7 @@ import { TubeColorPicker } from './TubeColorPicker';
 
 interface FoKabelOdcCreate {
     nama_kabel: string;
+    deskripsi: string;
     tipe_kabel: 'singlecore' | 'multicore';
     panjang_kabel: number;
     tube_colors: string[]; // now a simple array of color strings
@@ -46,6 +47,15 @@ export function CreateFoKabelOdc(props: Props) {
                     value={form.nama_kabel}
                     onValueChange={(v) => change('nama_kabel', v)}
                     errorMessage={errors?.errors.nama_kabel}
+                />
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={form.deskripsi || ''}
+                    onValueChange={(v) => change('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
                 />
             </Element>
 

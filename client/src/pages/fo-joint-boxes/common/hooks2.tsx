@@ -13,6 +13,7 @@ import { EntityState } from '$app/common/enums/entity-state';
 export interface FoJointBox {
     id: string;
     nama_joint_box: string;
+    deskripsi: string;
     lokasi: {
         id: number;
         nama_lokasi: string;
@@ -70,6 +71,10 @@ export function useFoJointBoxColumns(): DataTableColumns<FoJointBox> {
                     {rec.nama_joint_box}
                 </a>
             ),
+        },
+        {
+            id: 'deskripsi',
+            label: t('Deskripsi'),
         },
         {
             id: 'lokasi',

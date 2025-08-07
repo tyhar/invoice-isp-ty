@@ -17,12 +17,14 @@ class FoKabelCoreOdc extends Model
     protected $fillable = [
         'kabel_tube_odc_id',
         'warna_core',
+        'deskripsi',
         'status',   // 'active' or 'archived'
     ];
 
     protected $casts = [
         'status'     => 'string',
         'deleted_at' => 'datetime',
+        'deskripsi'  => 'string',
     ];
 
     protected static function boot()

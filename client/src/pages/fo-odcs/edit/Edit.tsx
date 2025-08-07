@@ -43,6 +43,7 @@ export default function Edit() {
         lokasi_longitude: '',
         kabel_odc_id: '', // <-- add this
         nama_odc: '',
+        deskripsi: '',
         tipe_splitter: '1:8',
     };
 
@@ -67,6 +68,7 @@ export default function Edit() {
                     lokasi_id: odc.lokasi.id.toString(),
                     kabel_odc_id: odc.kabel_odc?.id?.toString() ?? '',
                     nama_odc: odc.nama_odc,
+                    deskripsi: odc.deskripsi ?? '',
                     tipe_splitter: odc.tipe_splitter,
                 });
                 setLokasis(
@@ -104,6 +106,7 @@ export default function Edit() {
                 lokasi_id,
                 kabel_odc_id: values.kabel_odc_id,
                 nama_odc: values.nama_odc,
+                deskripsi: values.deskripsi,
                 tipe_splitter: values.tipe_splitter,
             })
                 .then(() => {

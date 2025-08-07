@@ -13,6 +13,7 @@ interface FoKabelTubeOdc {
     id: string;
     kabel_odc_id: number;
     kabel_odc: { id: number; nama_kabel: string };
+    deskripsi: string;
     warna_tube:
         | 'biru'
         | 'jingga'
@@ -59,6 +60,10 @@ export default function FoKabelTubeOdcs() {
             id: 'kabel_odc',
             label: 'Kabel ODC',
             format: (_val, record) => record.kabel_odc?.nama_kabel ?? '-',
+        },
+        {
+            id: 'deskripsi',
+            label: 'Deskripsi',
         },
         // { id: 'status', label: 'Status' },
         {

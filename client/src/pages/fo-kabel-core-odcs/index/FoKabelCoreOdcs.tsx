@@ -31,6 +31,7 @@ interface FoKabelCoreOdc {
         id: number;
         nama_kabel: string;
     };
+    deskripsi: string;
     warna_core:
         | 'biru'
         | 'jingga'
@@ -82,6 +83,10 @@ export default function FoKabelCoreOdcs() {
             id: 'kabel_odc',
             label: 'Kabel ODC',
             format: (_val, rec) => rec.kabel_odc?.nama_kabel ?? '-',
+        },
+        {
+            id: 'deskripsi',
+            label: 'Deskripsi',
         },
         // { id: 'status', label: 'Status' },
         {

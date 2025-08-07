@@ -84,6 +84,7 @@ class FoJointBoxController extends Controller
             return [
                 'id' => $j->id,
                 'nama_joint_box' => $j->nama_joint_box,
+                'deskripsi' => $j->deskripsi,
                 'lokasi' => $j->lokasi ? [
                     'id' => $j->lokasi->id,
                     'nama_lokasi' => $j->lokasi->nama_lokasi,
@@ -142,6 +143,7 @@ class FoJointBoxController extends Controller
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'kabel_odc_id' => 'required|exists:fo_kabel_odcs,id',
             'nama_joint_box' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
         if (!isset($data['status'])) {
@@ -156,6 +158,7 @@ class FoJointBoxController extends Controller
                 'lokasi_id' => $j->lokasi_id,
                 'kabel_odc_id' => $j->kabel_odc_id,
                 'nama_joint_box' => $j->nama_joint_box,
+                'deskripsi' => $j->deskripsi,
                 'status' => $j->status,
                 'created_at' => $j->created_at?->toDateTimeString(),
                 'updated_at' => $j->updated_at?->toDateTimeString(),
@@ -196,6 +199,7 @@ class FoJointBoxController extends Controller
                 'kabel_odc' => $j->kabelOdc ? [
                     'id' => $j->kabelOdc->id,
                     'nama_kabel' => $j->kabelOdc->nama_kabel,
+                    'deskripsi' => $j->kabelOdc->deskripsi,
                     'tipe_kabel' => $j->kabelOdc->tipe_kabel,
                     'panjang_kabel' => $j->kabelOdc->panjang_kabel,
                     'jumlah_tube' => $j->kabelOdc->jumlah_tube,
@@ -228,6 +232,7 @@ class FoJointBoxController extends Controller
                     })->toArray(),
                 ] : null,
                 'nama_joint_box' => $j->nama_joint_box,
+                'deskripsi' => $j->deskripsi,
                 'status' => $j->status,
                 'created_at' => $j->created_at?->toDateTimeString(),
                 'updated_at' => $j->updated_at?->toDateTimeString(),
@@ -246,6 +251,7 @@ class FoJointBoxController extends Controller
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'kabel_odc_id' => 'sometimes|exists:fo_kabel_odcs,id',
             'nama_joint_box' => 'sometimes|string|max:255',
+            'deskripsi' => 'sometimes|nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
         $j->update($data);
@@ -257,6 +263,7 @@ class FoJointBoxController extends Controller
                 'lokasi_id' => $j->lokasi_id,
                 'kabel_odc_id' => $j->kabel_odc_id,
                 'nama_joint_box' => $j->nama_joint_box,
+                'deskripsi' => $j->deskripsi,
                 'status' => $j->status,
                 'created_at' => $j->created_at?->toDateTimeString(),
                 'updated_at' => $j->updated_at?->toDateTimeString(),

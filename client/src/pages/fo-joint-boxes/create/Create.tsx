@@ -54,6 +54,7 @@ export default function Create() {
         lokasi_longitude: '',
         kabel_odc_id: '',
         nama_joint_box: '',
+        deskripsi: '',
     });
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
@@ -78,6 +79,7 @@ export default function Create() {
             lokasi_id,
             kabel_odc_id: form.kabel_odc_id,
             nama_joint_box: form.nama_joint_box,
+            deskripsi: form.deskripsi,
             status: 'active', // always set to active
         })
             .then(() => {

@@ -16,10 +16,17 @@ return new class extends Migration
 
             // Foreign key to fo_kabel_core_odcs.id
             $table->foreignId('kabel_core_odc_id')
+                ->nullable()
                 ->constrained('fo_kabel_core_odcs')
                 ->cascadeOnDelete()
-                ->cascadeOnUpdate()
-                ->nullable()->change(); //enable nullable
+                ->cascadeOnUpdate(); // enable nullable
+
+            // Foreign key to fo_odcs.id (nullable, represents the ODC this ODP is connected to)
+            $table->foreignId('odc_id')
+                ->nullable()
+                ->constrained('fo_odcs')
+                ->cascadeOnDelete()
+                ->cascadeOnUpdate();
 
             // Foreign key to fo_lokasis.id
             $table->foreignId('lokasi_id')
@@ -28,7 +35,7 @@ return new class extends Migration
                 ->cascadeOnUpdate();
 
             $table->string('nama_odp');
-
+            $table->string('deskripsi')->nullable();
             // NEW: add "status" column (active/archived)
             $table->enum('status', ['active', 'archived'])->default('active');
 
@@ -44,6 +51,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('fo_odps', function (Blueprint $table) {
+            $table->dropForeign(['odc_id']);
+            $table->dropColumn('odc_id');
+        });
         Schema::dropIfExists('fo_odps');
     }
 };

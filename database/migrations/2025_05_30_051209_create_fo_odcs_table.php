@@ -13,15 +13,13 @@ return new class extends Migration
     {
         Schema::create('fo_odcs', function (Blueprint $table) {
             $table->id();
-            // Foreign key referencing fo_lokasis.id
             $table->foreignId('lokasi_id')->constrained('fo_lokasis')->cascadeOnDelete()->cascadeOnUpdate();
-            // New: Foreign key referencing fo_kabel_odcs.id
             $table->foreignId('kabel_odc_id')->nullable()->constrained('fo_kabel_odcs')->cascadeOnDelete()->cascadeOnUpdate();
+
             $table->string('nama_odc');
+            $table->string('deskripsi')->nullable();
             $table->enum('tipe_splitter', ['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128']);
-            // Add status column (active or archived)
             $table->enum('status', ['active', 'archived'])->default('active');
-            // Soft deletes (adds deleted_at)
             $table->softDeletes();
             $table->timestamps();
         });

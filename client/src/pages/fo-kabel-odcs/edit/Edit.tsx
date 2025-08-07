@@ -14,6 +14,7 @@ import { CreateFoKabelOdc } from '../common/components/CreateFoKabelOdc';
 
 interface FoKabelOdcEdit {
     nama_kabel: string;
+    deskripsi: string;
     tipe_kabel: 'singlecore' | 'multicore';
     panjang_kabel: number;
     tube_colors: string[];
@@ -34,6 +35,7 @@ export default function Edit() {
 
     const [form, setForm] = useState<FoKabelOdcEdit>({
         nama_kabel: '',
+        deskripsi: '',
         tipe_kabel: 'singlecore',
         panjang_kabel: 0,
         tube_colors: [],
@@ -61,6 +63,7 @@ export default function Edit() {
                 const kabel = resKabel.data.data;
                 setForm({
                     nama_kabel: kabel.nama_kabel,
+                    deskripsi: kabel.deskripsi ?? '',
                     tipe_kabel: kabel.tipe_kabel,
                     panjang_kabel: kabel.panjang_kabel,
                     tube_colors: (kabel.tube_colors || []).map(

@@ -27,6 +27,7 @@ export interface FoOdc {
     lokasi_id: number;
     lokasi: { id: number; nama_lokasi: string };
     nama_odc: string;
+    deskripsi: string;
     tipe_splitter: string;
     status: 'active' | 'archived' | string;
     kabel_odc?: { id: number; nama_kabel: string };
@@ -52,6 +53,7 @@ export function useAllFoOdcColumns(): readonly string[] {
     return [
         'lokasi',
         'nama_odc',
+        'deskripsi',
         'tipe_splitter',
         'status',
         'kabel_odc',
@@ -90,6 +92,11 @@ export function useFoOdcColumns() {
                     {val}
                 </a>
             ),
+        },
+        {
+            column: 'deskripsi',
+            id: 'deskripsi',
+            label: t('deskripsi'),
         },
         {
             column: 'tipe_splitter',

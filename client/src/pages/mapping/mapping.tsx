@@ -535,7 +535,36 @@ const MappingPage: React.FC = () => {
   const [coordinateWarning, setCoordinateWarning] = useState(false);
   const [validClients, setValidClients] = useState<any[]>([]);
   const [validOdps, setValidOdps] = useState<any[]>([]);
+  const [showOdcConnections, setShowOdcConnections] = useState(true); // <-- add this
+  const [legendPosition, setLegendPosition] = useState({ x: 16, y: 16 }); // <-- add this
+  const [isDraggingLegend, setIsDraggingLegend] = useState(false); // <-- add this
   const api = "http://localhost:8000";
+
+  // Add global mouse event listeners for dragging
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDraggingLegend) {
+        setLegendPosition(prev => ({
+          x: prev.x + e.movementX,
+          y: prev.y + e.movementY
+        }));
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingLegend(false);
+    };
+
+    if (isDraggingLegend) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingLegend]);
 
   const mapDefaultCenter: [number, number] = [-7.56526, 110.81653];
   const [latInput, setLatInput] = useState('');
@@ -939,6 +968,72 @@ const MappingPage: React.FC = () => {
             <p><b>Jumlah ODC:</b> {jumlahData.odc}</p>
           </div>
         )}
+
+        {/* Draggable Connection Legend */}
+        <div
+          className="absolute z-[999] bg-white rounded shadow-md p-4 w-48 cursor-move select-none"
+          style={{
+            left: `${legendPosition.x}px`,
+            top: `${legendPosition.y}px`
+          }}
+          onMouseDown={(e) => {
+            // Don't start dragging if clicking on interactive elements
+            if ((e.target as HTMLElement).tagName === 'INPUT' ||
+                (e.target as HTMLElement).tagName === 'BUTTON' ||
+                (e.target as HTMLElement).closest('button') ||
+                (e.target as HTMLElement).closest('input')) {
+              return;
+            }
+            setIsDraggingLegend(true);
+            e.preventDefault();
+          }}
+        >
+          <h3 className="text-sm font-semibold mb-2">Koneksi</h3>
+          <div className="space-y-2 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0.5 bg-blue-500"></div>
+              <span>ODC ➝ ODP</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0.5 bg-blue-500"></div>
+              <span>ODP ➝ Client</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-0.5 bg-fuchsia-500 border-t border-dashed border-fuchsia-500"></div>
+              <span>ODC ➝ ODC</span>
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="checkbox"
+                checked={showOdcConnections}
+                onChange={(e) => setShowOdcConnections(e.target.checked)}
+                className="w-3 h-3"
+              />
+              <span>Tampilkan ODC Connections</span>
+            </div>
+            {showOdcConnections && (() => {
+              const odcGroups = new Map<number, any[]>();
+              odcs.forEach(odc => {
+                if (odc.kabel_odc_id) {
+                  if (!odcGroups.has(odc.kabel_odc_id)) {
+                    odcGroups.set(odc.kabel_odc_id, []);
+                  }
+                  odcGroups.get(odc.kabel_odc_id)!.push(odc);
+                }
+              });
+              const connectedGroups = Array.from(odcGroups.values()).filter(group => group.length > 1);
+              const totalConnections = connectedGroups.reduce((sum, group) => sum + (group.length * (group.length - 1)) / 2, 0);
+
+              return (
+                <div className="text-xs text-gray-600 mt-1">
+                  <div>ODC Groups: {connectedGroups.length}</div>
+                  <div>Total Connections: {totalConnections}</div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
         <MapContainer center={selectedCenter || mapDefaultCenter} zoom={13} className="h-full w-full">
           <MapCenterUpdater center={selectedCenter || mapDefaultCenter} />
           <TileLayer
@@ -1170,6 +1265,82 @@ const MappingPage: React.FC = () => {
               </Polyline>
             );
           })}
+
+          {/* ODC to ODC Connections */}
+          {showOdcConnections && (() => {
+            const odcConnections: { from: any; to: any; kabel_odc_id: number; kabel_odc: any }[] = [];
+
+            // Group ODCs by kabel_odc_id
+            const odcGroups = new Map<number, any[]>();
+            odcs.forEach(odc => {
+              if (odc.kabel_odc_id) {
+                if (!odcGroups.has(odc.kabel_odc_id)) {
+                  odcGroups.set(odc.kabel_odc_id, []);
+                }
+                odcGroups.get(odc.kabel_odc_id)!.push(odc);
+              }
+            });
+
+            // Create connections between ODCs in the same group
+            odcGroups.forEach((odcList, kabelOdcId) => {
+              if (odcList.length > 1) {
+                // Create connections between all ODCs in the group
+                for (let i = 0; i < odcList.length; i++) {
+                  for (let j = i + 1; j < odcList.length; j++) {
+                    odcConnections.push({
+                      from: odcList[i],
+                      to: odcList[j],
+                      kabel_odc_id: kabelOdcId,
+                      kabel_odc: odcList[i].kabel_odc // Use the kabel_odc object from the first ODC
+                    });
+                  }
+                }
+              }
+            });
+
+            return odcConnections.map((connection) => {
+              const fromPos = getLatLng(connection.from);
+              const toPos = getLatLng(connection.to);
+
+              if (!fromPos || !toPos) return null;
+
+              if (isNaN(fromPos[0]) || isNaN(fromPos[1]) || isNaN(toPos[0]) || isNaN(toPos[1])) return null;
+
+              const distance = haversineDistance(fromPos, toPos);
+              const arc = createSmoothArc(fromPos, toPos);
+
+              if (!arc || arc.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
+
+              return (
+                <Polyline
+                  key={`line-odc-odc-${connection.from.id}-${connection.to.id}`}
+                  positions={createSmoothArc(fromPos, toPos)}
+                  pathOptions={{
+                    color: 'rgba(255, 0, 255, 0.7)', // Magenta color for ODC-ODC connections
+                    weight: 3,
+                    dashArray: '5, 5', // Dashed line to distinguish from other connections
+                  }}
+                >
+                  <Popup>
+                    <div>
+                      <strong>ODC ➝ ODC</strong><br />
+                      Dari: {connection.from.nama_odc}<br />
+                      Ke: {connection.to.nama_odc}<br />
+                      <span>Kabel ODC ID: {connection.kabel_odc_id}</span><br />
+                      {connection.kabel_odc && (
+                        <>
+                          <span>Nama Kabel: {connection.kabel_odc.nama_kabel}</span><br />
+                          <span>Tipe Kabel: {connection.kabel_odc.tipe_kabel}</span><br />
+                          <span>Panjang: {connection.kabel_odc.panjang_kabel} m</span><br />
+                        </>
+                      )}
+                      <span>Jarak: {distance.toFixed(2)} km</span>
+                    </div>
+                  </Popup>
+                </Polyline>
+              );
+            });
+          })()}
 
           {coordinateWarning && (
             <div style={{ color: 'red', marginTop: '10px' }}>

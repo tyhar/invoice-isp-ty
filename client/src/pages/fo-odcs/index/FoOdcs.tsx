@@ -14,6 +14,7 @@ interface FoOdc {
     lokasi_id: number;
     lokasi: { id: number; nama_lokasi: string };
     nama_odc: string;
+    deskripsi: string | null;
     tipe_splitter: string;
     status: 'active' | 'archived';
     kabel_odc?: { id: number; nama_kabel: string };
@@ -41,6 +42,10 @@ export default function FoOdcs() {
                     {val}
                 </a>
             ),
+        },
+        {
+            id: 'deskripsi',
+            label: 'Deskripsi',
         },
         {
             id: 'lokasi',

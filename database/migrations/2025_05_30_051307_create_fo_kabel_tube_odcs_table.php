@@ -19,7 +19,7 @@ return new class extends Migration
                 ->constrained('fo_kabel_odcs')
                 ->cascadeOnDelete()
                 ->cascadeOnUpdate();
-
+            $table->string('deskripsi')->nullable();
             $table->enum('warna_tube', [
                 'biru',
                 'jingga',

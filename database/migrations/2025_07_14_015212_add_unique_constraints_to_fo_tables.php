@@ -12,6 +12,9 @@ return new class extends Migration {
         });
 
         Schema::table('fo_odps', function (Blueprint $table) {
+            // If you want to allow the same nama_odp for different ODCs, use:
+            // $table->unique(['nama_odp', 'odc_id'], 'unique_nama_odp_per_odc');
+            // Otherwise, keep as is:
             $table->unique('nama_odp', 'unique_nama_odp');
         });
 

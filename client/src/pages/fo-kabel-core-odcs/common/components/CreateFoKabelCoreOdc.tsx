@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { SelectField } from '$app/components/forms';
+import { SelectField, InputField } from '$app/components/forms';
 
 interface FoKabelCoreOdcCreate {
     kabel_tube_odc_id: number;
+    deskripsi: string;
     warna_core: string;
 }
 
@@ -134,6 +135,15 @@ export function CreateFoKabelCoreOdc({
                         Tube is full (maximum {selectedTube.jumlah_core_in_tube} cores per tube).
                     </div>
                 )}
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={form.deskripsi || ''}
+                    onValueChange={(v) => change('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
+                />
             </Element>
 
             {/* Select core color */}

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\FoLokasi;
 use App\Models\FoKabelCoreOdc;
 use App\Models\FoClientFtth;
+use App\Models\FoOdc;
 
 class FoOdp extends Model
 {
@@ -17,13 +18,17 @@ class FoOdp extends Model
     protected $fillable = [
         'lokasi_id',
         'kabel_core_odc_id',
+        'odc_id', // <-- add this
         'nama_odp',
+        'deskripsi', // <-- add this
         'status',   // 'active' or 'archived'
     ];
 
     protected $casts = [
         'status'     => 'string',
         'deleted_at' => 'datetime',
+        'deskripsi'  => 'string', // <-- add this
+        'odc_id'     => 'integer', // <-- add this
     ];
 
     /**
@@ -48,5 +53,13 @@ class FoOdp extends Model
     public function clientFtth()
     {
         return $this->hasOne(FoClientFtth::class, 'odp_id', 'id');
+    }
+
+    /**
+     * Each ODP belongs to one ODC (logical connection).
+     */
+    public function odc()
+    {
+        return $this->belongsTo(FoOdc::class, 'odc_id');
     }
 }

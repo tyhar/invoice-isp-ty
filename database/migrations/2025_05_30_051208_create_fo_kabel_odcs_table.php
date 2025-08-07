@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
 
             $table->string('nama_kabel');
+            $table->string('deskripsi')->nullable();
             $table->enum('tipe_kabel', ['singlecore', 'multicore']);
             $table->decimal('panjang_kabel', 8, 2);
             $table->integer('jumlah_tube')->nullable();

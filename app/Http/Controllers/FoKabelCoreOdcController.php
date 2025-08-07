@@ -58,11 +58,12 @@ class FoKabelCoreOdcController extends Controller
             }
         });
 
-        // 4) Optional text filter on warna_core, tube color, or ODC name
+        // 4) Optional text filter on warna_core, deskripsi, tube color, or ODC name
         if ($request->filled('filter')) {
             $term = $request->query('filter');
             $query->where(function ($q) use ($term) {
                 $q->where('warna_core', 'LIKE', "%{$term}%")
+                    ->orWhere('deskripsi', 'LIKE', "%{$term}%")
                     ->orWhereHas('kabelTubeOdc', function ($q2) use ($term) {
                         $q2->where('warna_tube', 'LIKE', "%{$term}%")
                             ->orWhereHas('kabelOdc', function ($q3) use ($term) {
@@ -115,6 +116,7 @@ class FoKabelCoreOdcController extends Controller
                     'nama_kabel' => $kabelOdc->nama_kabel,
                 ] : null,
                 'warna_core' => $c->warna_core,
+                'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
                 'odp_ids' => $odp ? [$odp->id] : [],
                 'created_at' => $c->created_at?->toDateTimeString(),
@@ -145,6 +147,7 @@ class FoKabelCoreOdcController extends Controller
         $data = $request->validate([
             'kabel_tube_odc_id' => 'required|exists:fo_kabel_tube_odcs,id',
             'warna_core' => 'required|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
+            'deskripsi' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
 
@@ -183,6 +186,7 @@ class FoKabelCoreOdcController extends Controller
                     'nama_kabel' => $c->kabelTubeOdc->kabelOdc->nama_kabel,
                 ],
                 'warna_core' => $c->warna_core,
+                'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
                 'odp_ids' => $c->odp ? [$c->odp->id] : [],
                 'created_at' => $c->created_at->toDateTimeString(),
@@ -214,6 +218,7 @@ class FoKabelCoreOdcController extends Controller
                     'nama_kabel' => $c->kabelTubeOdc->kabelOdc->nama_kabel,
                 ],
                 'warna_core' => $c->warna_core,
+                'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
                 'odp_ids' => $c->odp ? [$c->odp->id] : [],
                 'created_at' => $c->created_at->toDateTimeString(),
@@ -233,6 +238,7 @@ class FoKabelCoreOdcController extends Controller
         $data = $request->validate([
             'kabel_tube_odc_id' => 'sometimes|exists:fo_kabel_tube_odcs,id',
             'warna_core' => 'sometimes|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
+            'deskripsi' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
 
@@ -268,6 +274,7 @@ class FoKabelCoreOdcController extends Controller
                     'nama_kabel' => $c->kabelTubeOdc->kabelOdc->nama_kabel,
                 ],
                 'warna_core' => $c->warna_core,
+                'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
                 'odp_ids' => $c->odp ? [$c->odp->id] : [],
                 'created_at' => $c->created_at->toDateTimeString(),

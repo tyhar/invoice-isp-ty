@@ -16,7 +16,9 @@ export interface FoOdpFormValues {
     kabel_odc_id: string;
     kabel_tube_odc_id: string;
     kabel_core_odc_id: string;
+    odc_id: string; // <-- add this
     nama_odp: string;
+    deskripsi: string;
 }
 
 interface LokasiOption {
@@ -33,11 +35,18 @@ interface CoreOption {
     warna_tube: string;
 }
 
+interface KabelOdcOption {
+    id: number;
+    nama_kabel: string;
+    kabel_tube_odcs: any[];
+    odcs?: { id: number; nama_odc: string }[]; // <-- add this
+}
+
 interface Props {
     values: FoOdpFormValues;
     setValues: React.Dispatch<React.SetStateAction<FoOdpFormValues>>;
     lokasis: LokasiOption[];
-    kabelOdcs: { id: number; nama_kabel: string; kabel_tube_odcs: any[] }[];
+    kabelOdcs: KabelOdcOption[];
     kabelTubes: { id: number; warna_tube: string; kabel_odc_id: number }[]; // New prop
     cores: CoreOption[];
     errors?: ValidationBag;
@@ -70,6 +79,13 @@ export function CreateFoOdp({
             String(c.kabel_odc_id) === values.kabel_odc_id &&
             String(c.kabel_tube_odc_id) === values.kabel_tube_odc_id
     );
+
+    // derive ODC options from selected kabel_odc_id
+    const odcOptions = React.useMemo(() => {
+        if (!values.kabel_odc_id) return [];
+        const kabel = kabelOdcs.find((k) => String(k.id) === values.kabel_odc_id);
+        return kabel?.odcs || [];
+    }, [kabelOdcs, values.kabel_odc_id]);
 
     return (
         <Card
@@ -203,12 +219,37 @@ export function CreateFoOdp({
                 </SelectField>
             </Element>
 
+            <Element leftSide={t('ODC')} required={!!values.kabel_odc_id}>
+                <SelectField
+                    required={!!values.kabel_odc_id}
+                    value={values.odc_id}
+                    onValueChange={(v) => onChange('odc_id', v)}
+                    errorMessage={errors?.errors.odc_id}
+                >
+                    <option value="">{t('select odc')}</option>
+                    {odcOptions.map((odc: any) => (
+                        <option key={odc.id} value={odc.id.toString()}>
+                            {odc.nama_odc}
+                        </option>
+                    ))}
+                </SelectField>
+            </Element>
+
             <Element leftSide={t('Nama ODP')} required>
                 <InputField
                     required
                     value={values.nama_odp}
                     onValueChange={(v) => onChange('nama_odp', v)}
                     errorMessage={errors?.errors.nama_odp}
+                />
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={values.deskripsi || ''}
+                    onValueChange={(v) => onChange('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
                 />
             </Element>
         </Card>

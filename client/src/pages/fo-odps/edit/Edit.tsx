@@ -41,7 +41,9 @@ export default function Edit() {
         kabel_odc_id: '',
         kabel_tube_odc_id: '',
         kabel_core_odc_id: '',
+        odc_id: '', // <-- add this
         nama_odp: '',
+        deskripsi: '',
     };
 
     const [values, setValues] = useState<FoOdpFormValues>(initial);
@@ -73,7 +75,9 @@ export default function Edit() {
                     kabel_odc_id: odp.kabel_core_odc?.kabel_odc?.id?.toString() ?? '',
                     kabel_tube_odc_id: odp.kabel_core_odc?.kabel_tube_odc?.id?.toString() ?? '',
                     kabel_core_odc_id: odp.kabel_core_odc?.id?.toString() ?? '',
+                    odc_id: odp.odc?.id?.toString() ?? '', // <-- add this
                     nama_odp: odp.nama_odp ?? '',
+                    deskripsi: odp.deskripsi ?? '',
                 });
                 setLokasis(
                     lokRes.data.data.map((l: any) => ({
@@ -96,6 +100,7 @@ export default function Edit() {
                         id: k.id,
                         nama_kabel: k.nama_kabel,
                         kabel_tube_odcs: k.kabel_tube_odcs || [],
+                        odcs: k.odcs || [], // <-- add this
                     }))
                 );
                 setKabelTubes(
@@ -124,7 +129,7 @@ export default function Edit() {
         const payload: Record<string, any> = {
             lokasi_id: parseInt(values.lokasi_id, 10),
             nama_odp: values.nama_odp,
-            // always send core ID explicitly, null if unset
+            deskripsi: values.deskripsi,
             kabel_core_odc_id:
                 values.kabel_core_odc_id === ''
                     ? null
@@ -132,6 +137,9 @@ export default function Edit() {
         };
         if (values.kabel_core_odc_id !== '') {
             payload.kabel_core_odc_id = parseInt(values.kabel_core_odc_id, 10);
+        }
+        if (values.odc_id !== '') {
+            payload.odc_id = parseInt(values.odc_id, 10);
         }
 
         const doUpdate = (lokasi_id: number) => {

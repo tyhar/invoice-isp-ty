@@ -39,18 +39,20 @@ export default function Create() {
     { name: t('New FO ODP')!, href: '/fo-odps/create' },
   ];
 
-  const [values, setValues] = useState<FoOdpFormValues>({
-    create_new_lokasi: false,
-    lokasi_id: '',
-    lokasi_name: '',
-    lokasi_deskripsi: '',
-    lokasi_latitude: '',
-    lokasi_longitude: '',
-    kabel_odc_id: '',
-    kabel_tube_odc_id: '',
-    kabel_core_odc_id: '',
-    nama_odp: '',
-  });
+      const [values, setValues] = useState<FoOdpFormValues>({
+        create_new_lokasi: false,
+        lokasi_id: '',
+        lokasi_name: '',
+        lokasi_deskripsi: '',
+        lokasi_latitude: '',
+        lokasi_longitude: '',
+        kabel_odc_id: '',
+        kabel_tube_odc_id: '',
+        kabel_core_odc_id: '',
+        odc_id: '', // <-- add this
+        nama_odp: '',
+        deskripsi: '',
+    });
 
   const [lokasis, setLokasis] = useState<LokasiOption[]>([]);
   const [kabelOdcs, setKabelOdcs] = useState<any[]>([]);
@@ -77,6 +79,7 @@ export default function Create() {
             id: k.id,
             nama_kabel: k.nama_kabel,
             kabel_tube_odcs: k.kabel_tube_odcs || [],
+            odcs: k.odcs || [], // <-- add this
           }))
         );
       })
@@ -120,10 +123,14 @@ export default function Create() {
 
     const payload: Record<string, any> = {
       nama_odp: values.nama_odp,
+      deskripsi: values.deskripsi,
     };
 
     if (values.kabel_core_odc_id !== '') {
       payload.kabel_core_odc_id = parseInt(values.kabel_core_odc_id, 10);
+    }
+    if (values.odc_id !== '') {
+      payload.odc_id = parseInt(values.odc_id, 10);
     }
 
     const postOdp = (lokasiId: number) => {

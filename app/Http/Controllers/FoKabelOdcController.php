@@ -56,21 +56,13 @@ class FoKabelOdcController extends Controller
             }
         });
 
-        // 4) Optional text filtering on nama_kabel or tipe_kabel
-        // if ($request->filled('filter')) {
-        //     $term = $request->query('filter');
-        //     $query->where(function ($q) use ($term) {
-        //         $q->where('nama_kabel', 'LIKE', "%{$term}%")
-        //             ->orWhere('tipe_kabel', 'LIKE', "%{$term}%");
-        //     });
-        // }
-
-        // 4) Optional text filtering on nama_kabel, tipe_kabel, or related odc.nama_odc
+        // 4) Optional text filtering on nama_kabel, tipe_kabel, deskripsi, or related odc.nama_odc
         if ($request->filled('filter')) {
             $term = $request->query('filter');
             $query->where(function ($q) use ($term) {
                 $q->where('nama_kabel', 'LIKE', "%{$term}%")
                     ->orWhere('tipe_kabel', 'LIKE', "%{$term}%")
+                    ->orWhere('deskripsi', 'LIKE', "%{$term}%")
                     ->orWhereHas('odcs', function ($q2) use ($term) {
                         $q2->where('nama_odc', 'LIKE', "%{$term}%");
                     });
@@ -124,6 +116,7 @@ class FoKabelOdcController extends Controller
             return [
                 'id'                   => $k->id,
                 'nama_kabel'           => $k->nama_kabel,
+                'deskripsi'            => $k->deskripsi,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
                 'jumlah_tube'          => $k->jumlah_tube,
@@ -177,6 +170,7 @@ class FoKabelOdcController extends Controller
     {
         $data = $request->validate([
             'nama_kabel'           => 'required|string|max:255',
+            'deskripsi'            => 'nullable|string|max:255',
             'tipe_kabel'           => 'required|in:singlecore,multicore',
             'panjang_kabel'        => 'required|numeric',
             'jumlah_core_in_tube'  => 'nullable|integer',
@@ -200,6 +194,7 @@ class FoKabelOdcController extends Controller
             'data'    => [
                 'id'                   => $k->id,
                 'nama_kabel'           => $k->nama_kabel,
+                'deskripsi'            => $k->deskripsi,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
                 'jumlah_tube'          => $k->jumlah_tube,
@@ -247,6 +242,7 @@ class FoKabelOdcController extends Controller
             'data'   => [
                 'id'                   => $k->id,
                 'nama_kabel'           => $k->nama_kabel,
+                'deskripsi'            => $k->deskripsi,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
                 'jumlah_tube'          => $k->jumlah_tube,
@@ -287,6 +283,7 @@ class FoKabelOdcController extends Controller
         $k = FoKabelOdc::withTrashed()->findOrFail($id);
         $data = $request->validate([
             'nama_kabel'           => 'sometimes|string|max:255',
+            'deskripsi'            => 'sometimes|nullable|string|max:255',
             'tipe_kabel'           => 'sometimes|in:singlecore,multicore',
             'panjang_kabel'        => 'sometimes|numeric',
             'jumlah_core_in_tube'  => 'nullable|integer',
@@ -335,6 +332,7 @@ class FoKabelOdcController extends Controller
             'data'    => [
                 'id'                   => $k->id,
                 'nama_kabel'           => $k->nama_kabel,
+                'deskripsi'            => $k->deskripsi,
                 'tipe_kabel'           => $k->tipe_kabel,
                 'panjang_kabel'        => $k->panjang_kabel,
                 'jumlah_tube'          => $k->jumlah_tube,
@@ -349,6 +347,7 @@ class FoKabelOdcController extends Controller
                     return [
                         'id' => $o->id,
                         'nama_odc' => $o->nama_odc,
+                        'deskripsi' => $o->deskripsi,
                         'tipe_splitter' => $o->tipe_splitter,
                         'status' => $o->status,
                         'created_at' => $o->created_at?->toDateTimeString(),
