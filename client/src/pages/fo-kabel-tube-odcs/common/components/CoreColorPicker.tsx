@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const TUBE_COLORS = [
+const CORE_COLORS = [
   { value: 'biru', label: 'Biru', color: '#2196f3' },
   { value: 'jingga', label: 'Jingga', color: '#ff9800' },
   { value: 'hijau', label: 'Hijau', color: '#4caf50' },
@@ -28,7 +28,7 @@ function getContrastText(bg: string) {
 }
 
 // Helper: create numbered color variant
-function createNumberedColor(baseColor: typeof TUBE_COLORS[0], number: number) {
+function createNumberedColor(baseColor: typeof CORE_COLORS[0], number: number) {
   return {
     value: baseColor.value, // Keep the same value for backend compatibility
     label: `(${number}) ${baseColor.label}`,
@@ -37,14 +37,14 @@ function createNumberedColor(baseColor: typeof TUBE_COLORS[0], number: number) {
   };
 }
 
-interface TubeColorPickerProps {
+interface CoreColorPickerProps {
   value: string[]; // selected color strings (will contain duplicates for numbered variants)
   onChange: (colors: string[]) => void;
   disabledColors?: string[];
-  maxTubes?: number; // optional limit for maximum tubes
+  maxCores?: number;
 }
 
-export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes }: TubeColorPickerProps) {
+export function CoreColorPicker({ value, onChange, disabledColors = [], maxCores }: CoreColorPickerProps) {
   const [showNumberedColorPicker, setShowNumberedColorPicker] = useState(false);
   const [numberedColors, setNumberedColors] = useState<{ color: string; number: number }[]>([]);
 
@@ -75,7 +75,7 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
 
   // Add color
   const addColor = (color: string) => {
-    if (!maxTubes || value.length < maxTubes) {
+    if (!maxCores || value.length < maxCores) {
       onChange([...value, color]);
     }
   };
@@ -91,7 +91,7 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
   };
 
   // Add numbered color
-  const addNumberedColor = (baseColor: typeof TUBE_COLORS[0]) => {
+  const addNumberedColor = (baseColor: typeof CORE_COLORS[0]) => {
     addColor(baseColor.value);
   };
 
@@ -105,11 +105,11 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
 
   // Get all available colors (default + numbered variants)
   const getAllColors = () => {
-    const colors = [...TUBE_COLORS];
+    const colors = [...CORE_COLORS];
 
     // Add numbered variants for colors that have multiple instances
     numberedColors.forEach(({ color, number }) => {
-      const baseColor = TUBE_COLORS.find(c => c.value === color);
+      const baseColor = CORE_COLORS.find(c => c.value === color);
       if (baseColor) {
         colors.push(createNumberedColor(baseColor, number));
       }
@@ -125,7 +125,7 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
       <div className="flex flex-wrap gap-2">
         {allColors.map((c, index) => {
           const selected = isSelected(c.value);
-          const isDisabled = disabledColors.includes(c.value) || (maxTubes && value.length >= maxTubes && !selected);
+          const isDisabled = disabledColors.includes(c.value) || (maxCores && value.length >= maxCores && !selected);
           const isNumbered = 'number' in c;
           const textColor = getContrastText(c.color);
           return (
@@ -153,7 +153,7 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
         })}
 
         {/* Add numbered color button */}
-        {(!maxTubes || value.length < maxTubes) && (
+        {(!maxCores || value.length < maxCores) && (
           <button
             type="button"
             className="px-3 py-1 rounded-full border-2 border-dashed border-gray-400 text-gray-600 hover:border-gray-600 hover:text-gray-800 focus:outline-none transition-colors flex items-center"
@@ -180,7 +180,7 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
         <div className="mt-2 p-3 border border-gray-300 rounded-lg bg-white shadow-lg">
           <div className="text-sm font-medium text-gray-700 mb-2">Select color to add another instance:</div>
           <div className="flex flex-wrap gap-2">
-            {TUBE_COLORS.map((c) => {
+            {CORE_COLORS.map((c) => {
               const currentCount = getColorCount(c.value);
               const textColor = getContrastText(c.color);
               return (
@@ -213,12 +213,12 @@ export function TubeColorPicker({ value, onChange, disabledColors = [], maxTubes
         </div>
       )}
 
-      {maxTubes && (
+      {maxCores && (
         <div className="mt-2 text-sm text-gray-600">
-          Selected: {value.length}/{maxTubes} tubes
-          {value.length >= maxTubes && (
+          Selected: {value.length}/{maxCores} cores
+          {value.length >= maxCores && (
             <span className="ml-2 text-orange-600 font-medium">
-              Maximum tubes reached for this cable
+              Maximum cores reached for this tube
             </span>
           )}
         </div>

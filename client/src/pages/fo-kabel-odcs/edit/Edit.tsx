@@ -11,6 +11,7 @@ import { endpoint } from '$app/common/helpers';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { CreateFoKabelOdc } from '../common/components/CreateFoKabelOdc';
+import { useQueryClient } from 'react-query';
 
 interface FoKabelOdcEdit {
     nama_kabel: string;
@@ -30,6 +31,7 @@ export default function Edit() {
     const [t] = useTranslation();
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
     useTitle('edit_kabel_odc');
 
@@ -103,25 +105,59 @@ export default function Edit() {
 
     const handleSave = (e: FormEvent) => {
         e.preventDefault();
-        if (isBusy) return;
+        if (isBusy || !id) return;
+
         setIsBusy(true);
-        request('PUT', endpoint(`/api/v1/fo-kabel-odcs/${id}`), {
-            ...form,
+        toast.processing();
+
+        // Update the Kabel ODC first
+        const kabelData = {
+            nama_kabel: form.nama_kabel,
+            deskripsi: form.deskripsi,
+            tipe_kabel: form.tipe_kabel,
+            panjang_kabel: form.panjang_kabel,
+            jumlah_core_in_tube: form.jumlah_core_in_tube,
             tube_colors: form.tube_colors,
-        })
-            .then(() => {
-                toast.success('updated kabel odc');
+        };
+
+        request('PUT', endpoint(`/api/v1/fo-kabel-odcs/${id}`), kabelData)
+            .then(async (kabelResponse) => {
+                // Get the updated tubes from the response
+                const updatedTubes = kabelResponse.data.data.tube_colors || [];
+
+                // Update tube descriptions with automatic deskripsi
+                if (updatedTubes.length > 0) {
+                    const colorCounts: { [key: string]: number } = {};
+                    const tubeUpdatePromises = updatedTubes.map((tube: any) => {
+                        // Count occurrences of this color
+                        colorCounts[tube.warna_tube] = (colorCounts[tube.warna_tube] || 0) + 1;
+                        const tubeDeskripsi = `Tube ${tube.warna_tube}(${colorCounts[tube.warna_tube]}) for cable ${form.nama_kabel}`;
+                        return request('PUT', endpoint(`/api/v1/fo-kabel-tube-odcs/${tube.id}`), {
+                            deskripsi: tubeDeskripsi,
+                        });
+                    });
+
+                    await Promise.all(tubeUpdatePromises);
+                }
+
+                toast.success('updated kabel odc with tubes');
+                queryClient.invalidateQueries('fo-kabel-odcs');
+                queryClient.invalidateQueries('fo-kabel-tube-odcs');
                 navigate('/fo-kabel-odcs');
             })
-            .catch((err) => {
-                setErrors(err.response?.data);
+            .catch((error) => {
+                if (error.response?.status === 422) {
+                    setErrors(error.response.data);
+                    toast.dismiss();
+                } else {
+                    toast.error('error refresh page');
+                }
             })
             .finally(() => setIsBusy(false));
     };
 
     const pages = [
         { name: t('FO Kabel ODC')!, href: '/fo-kabel-odcs' },
-
         { name: t('Edit Kabel ODC')!, href: `/fo-kabel-odcs/${id}/edit` },
     ];
 

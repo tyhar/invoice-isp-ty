@@ -201,7 +201,7 @@ class FoKabelOdcController extends Controller
                 'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
                 'jumlah_total_core'    => $k->jumlah_total_core,
                 'status'               => $k->status,
-                'tube_colors'          => $k->kabelTubeOdcs->map(fn($t) => [
+                'tube_colors'          => $k->kabelTubeOdcs->where('status', 'active')->whereNull('deleted_at')->map(fn($t) => [
                     'id' => $t->id,
                     'warna_tube' => $t->warna_tube,
                 ])->toArray(),
@@ -339,7 +339,7 @@ class FoKabelOdcController extends Controller
                 'jumlah_core_in_tube'  => $k->jumlah_core_in_tube,
                 'jumlah_total_core'    => $k->jumlah_total_core,
                 'status'               => $k->status,
-                'tube_colors'          => $k->kabelTubeOdcs->map(fn($t) => [
+                'tube_colors'          => $k->kabelTubeOdcs->where('status', 'active')->whereNull('deleted_at')->map(fn($t) => [
                     'id' => $t->id,
                     'warna_tube' => $t->warna_tube,
                 ])->toArray(),

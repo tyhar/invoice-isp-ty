@@ -24,6 +24,7 @@ interface TubeOdcOption {
     warna_tube: string;
     kabel_odc_id: number;
     nama_kabel: string;
+    deskripsi?: string;
 }
 
 export default function Create() {
@@ -58,6 +59,7 @@ export default function Create() {
                         warna_tube: o.warna_tube,
                         kabel_odc_id: o.kabel_odc.id,
                         nama_kabel: o.kabel_odc.nama_kabel,
+                        deskripsi: o.deskripsi,
                     }))
                 );
             }

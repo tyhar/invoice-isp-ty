@@ -17,11 +17,13 @@ interface FoKabelTubeOdcCreate {
     kabel_odc_id: number;
     deskripsi: string;
     warna_tube: string;
+    core_colors: string[]; // new field for core colors
 }
 
 interface KabelOdcOption {
     id: number;
     nama_kabel: string;
+    jumlah_core_in_tube?: number;
 }
 
 export default function Create() {
@@ -42,6 +44,7 @@ export default function Create() {
         kabel_odc_id: 0,
         deskripsi: '',
         warna_tube: '',
+        core_colors: [], // initialize empty array
     });
     const [odcs, setOdcs] = useState<KabelOdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
@@ -53,6 +56,7 @@ export default function Create() {
                 res.data.data.map((o: any) => ({
                     id: o.id,
                     nama_kabel: o.nama_kabel,
+                    jumlah_core_in_tube: o.jumlah_core_in_tube,
                 }))
             );
         });
@@ -61,13 +65,51 @@ export default function Create() {
     const handleSave = (e: FormEvent) => {
         e.preventDefault();
         if (isBusy) return;
+
+        // Client-side validation for maximum cores
+        const selectedKabelOdc = odcs.find(o => o.id === form.kabel_odc_id);
+        if (selectedKabelOdc?.jumlah_core_in_tube && form.core_colors.length > selectedKabelOdc.jumlah_core_in_tube) {
+            toast.error(`Cannot create more than ${selectedKabelOdc.jumlah_core_in_tube} cores for this tube`);
+            return;
+        }
+
         setIsBusy(true);
 
-        request('POST', endpoint('/api/v1/fo-kabel-tube-odcs'), form)
-            .then(() => {
-                toast.success('created tube odc');
-                navigate('/fo-kabel-tube-odcs');
-                queryClient.invalidateQueries('fo-kabel-tube-odcs');
+        // Create the tube first
+        const tubeData = {
+            kabel_odc_id: form.kabel_odc_id,
+            deskripsi: form.deskripsi,
+            warna_tube: form.warna_tube,
+        };
+
+        request('POST', endpoint('/api/v1/fo-kabel-tube-odcs'), tubeData)
+            .then((tubeResponse) => {
+                const tubeId = tubeResponse.data.data.id;
+
+                // If core colors are selected, create cores
+                if (form.core_colors.length > 0) {
+                    const colorCounts: { [key: string]: number } = {};
+                    const corePromises = form.core_colors.map((color) => {
+                        // Count occurrences of this color
+                        colorCounts[color] = (colorCounts[color] || 0) + 1;
+                        return request('POST', endpoint('/api/v1/fo-kabel-core-odcs'), {
+                            kabel_tube_odc_id: tubeId,
+                            warna_core: color,
+                            deskripsi: `Core ${color}(${colorCounts[color]}) for tube ${form.warna_tube}`,
+                        });
+                    });
+
+                    return Promise.all(corePromises).then(() => {
+                        toast.success('created tube odc with cores');
+                        navigate('/fo-kabel-tube-odcs');
+                        queryClient.invalidateQueries('fo-kabel-tube-odcs');
+                        queryClient.invalidateQueries('fo-kabel-core-odcs');
+                    });
+                } else {
+                    toast.success('created tube odc');
+                    navigate('/fo-kabel-tube-odcs');
+                    queryClient.invalidateQueries('fo-kabel-tube-odcs');
+                }
             })
             .catch((error) => {
                 if (error.response?.status === 422) {

@@ -18,6 +18,7 @@ interface TubeOdcOption {
     nama_kabel: string;
     jumlah_core_in_tube?: number;
     kabel_core_odc_ids?: number[];
+    deskripsi?: string; // Add deskripsi field
 }
 
 interface Props {
@@ -126,7 +127,7 @@ export function CreateFoKabelCoreOdc({
                     <option value="">{t('select warna tube')}</option>
                     {filteredTubes.map((tub) => (
                         <option key={tub.id} value={tub.id}>
-                            {tub.warna_tube}
+                            {tub.warna_tube} - {tub.deskripsi || `Tube ${tub.warna_tube} for cable ${tub.nama_kabel}`}
                         </option>
                     ))}
                 </SelectField>

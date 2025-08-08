@@ -33,13 +33,14 @@ interface CoreOption {
     nama_kabel: string;
     kabel_tube_odc_id: number;
     warna_tube: string;
+    deskripsi?: string; // Add deskripsi field for cores
 }
 
 interface KabelOdcOption {
     id: number;
     nama_kabel: string;
     kabel_tube_odcs: any[];
-    odcs?: { id: number; nama_odc: string }[]; // <-- add this
+    odcs?: { id: number; nama_odc: string }[];
 }
 
 interface Props {
@@ -47,7 +48,7 @@ interface Props {
     setValues: React.Dispatch<React.SetStateAction<FoOdpFormValues>>;
     lokasis: LokasiOption[];
     kabelOdcs: KabelOdcOption[];
-    kabelTubes: { id: number; warna_tube: string; kabel_odc_id: number }[]; // New prop
+    kabelTubes: { id: number; warna_tube: string; kabel_odc_id: number; deskripsi?: string }[]; // Add deskripsi field
     cores: CoreOption[];
     errors?: ValidationBag;
 }
@@ -197,7 +198,7 @@ export function CreateFoOdp({
                     <option value="">{t('select tube odc')}</option>
                     {tubeOptions.map((t) => (
                         <option key={t.id} value={t.id.toString()}>
-                            {t.warna_tube}
+                            {t.warna_tube} - {t.deskripsi || `Tube ${t.warna_tube}`}
                         </option>
                     ))}
                 </SelectField>
@@ -213,7 +214,7 @@ export function CreateFoOdp({
                     <option value="">{t('unassigned core') || '—'}</option>
                     {coreOptions.map((c) => (
                         <option key={c.id} value={c.id.toString()}>
-                            {c.warna_core}
+                            {c.warna_core} - {c.deskripsi || `Core ${c.warna_core} for tube ${c.warna_tube}`}
                         </option>
                     ))}
                 </SelectField>

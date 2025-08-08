@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '$app/components/cards/Card';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Spinner } from '$app/components/Spinner';
 import { request } from '$app/common/helpers/request';
 import { endpoint } from '$app/common/helpers';
@@ -42,8 +42,6 @@ export default function Overview() {
   });
   const [odpsPerOdc, setOdpsPerOdc] = useState<any[]>([]);
   const [clientsPerOdp, setClientsPerOdp] = useState<any[]>([]);
-  const [odpStatusPie, setOdpStatusPie] = useState<any[]>([]);
-  const [jointBoxStatusPie, setJointBoxStatusPie] = useState<any[]>([]);
 
   useEffect(() => {
     setLoading(true);
@@ -55,8 +53,6 @@ export default function Overview() {
         setSummary({ ...data.summary, jointbox: data.summary.jointbox ?? 0 });
         setOdpsPerOdc(data.charts.odpsPerOdc);
         setClientsPerOdp(data.charts.clientsPerOdp);
-        setOdpStatusPie(data.charts.odpStatusPie);
-        setJointBoxStatusPie(data.charts.jointBoxStatus ?? []);
       })
       .catch(() => {
         setError('Failed to load FTTH data.');

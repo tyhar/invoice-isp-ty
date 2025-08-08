@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\FoClientFtth;
 use App\Models\FoOdc;
 use App\Models\FoOdp;
@@ -17,46 +16,63 @@ class FtthStatisticController extends Controller
 {
     public function index(): JsonResponse
     {
-        // Basic counts
-        $lokasiCount = FoLokasi::count();
-        $odcCount = FoOdc::count();
-        $odpCount = FoOdp::count();
-        $kabelOdcCount = FoKabelOdc::count();
-        $kabelCoreOdcCount = FoKabelCoreOdc::count();
-        $kabelTubeOdcCount = FoKabelTubeOdc::count();
-        $clientFtthCount = FoClientFtth::count();
-        $jointBoxCount = FoJointBox::count();
+        // Basic counts (only active and non-deleted)
+        $lokasiCount = FoLokasi::where('status', 'active')->whereNull('deleted_at')->count();
+        $odcCount = FoOdc::where('status', 'active')->whereNull('deleted_at')->count();
+        $odpCount = FoOdp::where('status', 'active')->whereNull('deleted_at')->count();
+        $kabelOdcCount = FoKabelOdc::where('status', 'active')->whereNull('deleted_at')->count();
+        $kabelCoreOdcCount = FoKabelCoreOdc::where('status', 'active')->whereNull('deleted_at')->count();
+        $kabelTubeOdcCount = FoKabelTubeOdc::where('status', 'active')->whereNull('deleted_at')->count();
+        $clientFtthCount = FoClientFtth::where('status', 'active')->whereNull('deleted_at')->count();
+        $jointBoxCount = FoJointBox::where('status', 'active')->whereNull('deleted_at')->count();
 
-        // Calculate total kabel length
-        $totalKabelLength = FoKabelOdc::sum('panjang_kabel');
+        // Calculate total kabel length (only active)
+        $totalKabelLength = FoKabelOdc::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->sum('panjang_kabel');
 
         // Utilization calculations
-        $assignedCores = FoKabelCoreOdc::whereHas('odp')->count();
+        $assignedCores = FoKabelCoreOdc::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->whereHas('odp', function ($query) {
+                $query->where('status', 'active')->whereNull('deleted_at');
+            })->count();
+
         $coreUtilization = $kabelCoreOdcCount > 0 ? round(($assignedCores / $kabelCoreOdcCount) * 100, 2) : 0;
 
         // Tubes with at least one assigned core
-        $usedTubes = FoKabelTubeOdc::whereHas('kabelCoreOdcs.odp')->count();
+        $usedTubes = FoKabelTubeOdc::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->whereHas('kabelCoreOdcs.odp', function ($query) {
+                $query->where('status', 'active')->whereNull('deleted_at');
+            })->count();
+
         $tubeUtilization = $kabelTubeOdcCount > 0 ? round(($usedTubes / $kabelTubeOdcCount) * 100, 2) : 0;
 
         // ODPs with clients
-        $odpsWithClient = FoOdp::whereHas('clientFtth')->count();
+        $odpsWithClient = FoOdp::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->whereHas('clientFtth', function ($query) {
+                $query->where('status', 'active')->whereNull('deleted_at');
+            })->count();
+
         $odpUtilization = $odpCount > 0 ? round(($odpsWithClient / $odpCount) * 100, 2) : 0;
 
-        // Status breakdowns
-        $odcStatusCounts = $this->getStatusCounts(FoOdc::all(), 'status');
-        $odpStatusCounts = $this->getStatusCounts(FoOdp::all(), 'status');
-        $kabelStatusCounts = $this->getStatusCounts(FoKabelOdc::all(), 'status');
-        $lokasiStatusCounts = $this->getStatusCounts(FoLokasi::all(), 'status');
-        $clientStatusCounts = $this->getStatusCounts(FoClientFtth::all(), 'status');
-        $jointBoxStatusCounts = $this->getStatusCounts(FoJointBox::all(), 'status');
+        // Status breakdowns (including soft-deleted for complete picture)
+        $odcStatusCounts = $this->getStatusCounts(FoOdc::withTrashed()->get(), 'status');
+        $odpStatusCounts = $this->getStatusCounts(FoOdp::withTrashed()->get(), 'status');
+        $kabelStatusCounts = $this->getStatusCounts(FoKabelOdc::withTrashed()->get(), 'status');
+        $lokasiStatusCounts = $this->getStatusCounts(FoLokasi::withTrashed()->get(), 'status');
+        $clientStatusCounts = $this->getStatusCounts(FoClientFtth::withTrashed()->get(), 'status');
+        $jointBoxStatusCounts = $this->getStatusCounts(FoJointBox::withTrashed()->get(), 'status');
 
         // Calculate active counts for status summary
-        $activeLokasi = FoLokasi::where('status', 'active')->count();
-        $activeOdc = FoOdc::where('status', 'active')->count();
-        $activeOdp = FoOdp::where('status', 'active')->count();
-        $activeKabel = FoKabelOdc::where('status', 'active')->count();
-        $activeClients = FoClientFtth::where('status', 'active')->count();
-        $activeJointBox = FoJointBox::where('status', 'active')->count();
+        $activeLokasi = FoLokasi::where('status', 'active')->whereNull('deleted_at')->count();
+        $activeOdc = FoOdc::where('status', 'active')->whereNull('deleted_at')->count();
+        $activeOdp = FoOdp::where('status', 'active')->whereNull('deleted_at')->count();
+        $activeKabel = FoKabelOdc::where('status', 'active')->whereNull('deleted_at')->count();
+        $activeClients = FoClientFtth::where('status', 'active')->whereNull('deleted_at')->count();
+        $activeJointBox = FoJointBox::where('status', 'active')->whereNull('deleted_at')->count();
 
         // ODPs per ODC (for bar chart)
         $odpsPerOdc = $this->getOdpsPerOdc();
@@ -136,7 +152,14 @@ class FtthStatisticController extends Controller
                 'kabelStatus' => $kabelStatusCounts,
                 'clientStatus' => $clientStatusCounts,
                 'jointBoxStatus' => $jointBoxStatusCounts,
-                'statusBreakdown' => array_merge($lokasiStatusCounts, $odcStatusCounts, $odpStatusCounts, $kabelStatusCounts, $clientStatusCounts, $jointBoxStatusCounts),
+                'statusBreakdown' => array_merge(
+                    $lokasiStatusCounts,
+                    $odcStatusCounts,
+                    $odpStatusCounts,
+                    $kabelStatusCounts,
+                    $clientStatusCounts,
+                    $jointBoxStatusCounts
+                ),
             ],
             'detailed' => $detailedData,
         ];
@@ -144,47 +167,68 @@ class FtthStatisticController extends Controller
         return response()->json(['data' => $data]);
     }
 
-    private function getStatusCounts($collection, $statusField = 'status')
+    private function getStatusCounts($collection, $statusField = 'status'): array
     {
         $counts = [];
         foreach ($collection as $item) {
             $status = $item->$statusField ?? 'unknown';
             $counts[$status] = ($counts[$status] ?? 0) + 1;
         }
+
         return array_map(function($name, $value) {
             return ['name' => $name, 'value' => $value];
         }, array_keys($counts), array_values($counts));
     }
 
-    private function getOdpsPerOdc()
+    private function getOdpsPerOdc(): array
     {
-        // Use the new KabelOdc->odcs relationship (plural)
-        $odcs = FoKabelOdc::with('odcs')->get();
+        // Get ODCs with their associated ODPs
+        $odcs = FoOdc::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->with(['kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp' => function ($query) {
+                $query->where('status', 'active')->whereNull('deleted_at');
+            }])
+            ->get();
+
         $odpsByOdc = [];
-        foreach ($odcs as $kabelOdc) {
-            $odcName = $kabelOdc->nama_kabel ?? 'Unknown';
+        foreach ($odcs as $odc) {
+            $odcName = $odc->nama_odc ?? 'Unknown';
             $odpCount = 0;
-            foreach ($kabelOdc->odcs as $odc) {
-                // Each ODC can have multiple ODPs via KabelCoreOdc->ODP, but for stats, count ODPs linked to this ODC's KabelOdc
-                $odpCount += FoOdp::whereHas('kabelCoreOdc.kabelTubeOdc.kabelOdc', function($q) use ($kabelOdc) {
-                    $q->where('id', $kabelOdc->id);
-                })->count();
+
+            if ($odc->kabelOdc) {
+                foreach ($odc->kabelOdc->kabelTubeOdcs as $tube) {
+                    foreach ($tube->kabelCoreOdcs as $core) {
+                        if ($core->odp) {
+                            $odpCount++;
+                        }
+                    }
+                }
             }
+
             $odpsByOdc[$odcName] = $odpCount;
         }
+
         return array_map(function($name, $count) {
             return ['name' => $name, 'ODPs' => $count];
         }, array_keys($odpsByOdc), array_values($odpsByOdc));
     }
 
-    private function getClientsPerOdp()
+    private function getClientsPerOdp(): array
     {
-        $clients = FoClientFtth::with('odp')->get();
+        $clients = FoClientFtth::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->with(['odp' => function ($query) {
+                $query->where('status', 'active')->whereNull('deleted_at');
+            }])
+            ->get();
+
         $clientsByOdp = [];
 
         foreach ($clients as $client) {
-            $odpName = $client->odp->nama_odp ?? 'Unknown';
-            $clientsByOdp[$odpName] = ($clientsByOdp[$odpName] ?? 0) + 1;
+            if ($client->odp) {
+                $odpName = $client->odp->nama_odp ?? 'Unknown';
+                $clientsByOdp[$odpName] = ($clientsByOdp[$odpName] ?? 0) + 1;
+            }
         }
 
         return array_map(function($name, $count) {
@@ -192,16 +236,48 @@ class FtthStatisticController extends Controller
         }, array_keys($clientsByOdp), array_values($clientsByOdp));
     }
 
-    private function getDetailedData()
+    private function getDetailedData(): array
     {
         // Eager load all relationships for detailed drill-down using new structure
-        $lokasis = FoLokasi::with([
-            'odcs.kabelOdc',
-            'odps.kabelCoreOdc.kabelTubeOdc.kabelOdc',
-            'odps.clientFtth',
-            'clientFtths.odp',
-            'jointBoxes.kabelOdc',
-        ])->get();
+        $lokasis = FoLokasi::where('status', 'active')
+            ->whereNull('deleted_at')
+            ->with([
+                'odcs' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'odcs.kabelOdc' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'odps' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'odps.kabelCoreOdc' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'odps.kabelCoreOdc.kabelTubeOdc' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'odps.kabelCoreOdc.kabelTubeOdc.kabelOdc' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'odps.clientFtth' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'clientFtths' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'clientFtths.odp' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'jointBoxes' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+                'jointBoxes.kabelOdc' => function ($query) {
+                    $query->where('status', 'active')->whereNull('deleted_at');
+                },
+            ])
+            ->get();
+
         return $lokasis->map(function($lokasi) {
             return [
                 'id' => $lokasi->id,
@@ -240,7 +316,7 @@ class FtthStatisticController extends Controller
                             'deleted_at' => $odc->kabelOdc->deleted_at?->toDateTimeString(),
                         ] : null,
                     ];
-                }),
+                })->toArray(),
                 'odps' => $lokasi->odps->map(function($odp) {
                     $core = $odp->kabelCoreOdc;
                     $tube = $core?->kabelTubeOdc;
@@ -248,6 +324,8 @@ class FtthStatisticController extends Controller
                     return [
                         'id' => $odp->id,
                         'nama_odp' => $odp->nama_odp,
+                        'deskripsi' => $odp->deskripsi,
+                        'odc_id' => $odp->odc_id,
                         'status' => $odp->status,
                         'created_at' => $odp->created_at?->toDateTimeString(),
                         'updated_at' => $odp->updated_at?->toDateTimeString(),
@@ -255,12 +333,29 @@ class FtthStatisticController extends Controller
                         'kabel_core_odc' => $core ? [
                             'id' => $core->id,
                             'warna_core' => $core->warna_core,
+                            'status' => $core->status,
+                            'created_at' => $core->created_at?->toDateTimeString(),
+                            'updated_at' => $core->updated_at?->toDateTimeString(),
+                            'deleted_at' => $core->deleted_at?->toDateTimeString(),
                             'kabel_tube_odc' => $tube ? [
                                 'id' => $tube->id,
                                 'warna_tube' => $tube->warna_tube,
+                                'status' => $tube->status,
+                                'created_at' => $tube->created_at?->toDateTimeString(),
+                                'updated_at' => $tube->updated_at?->toDateTimeString(),
+                                'deleted_at' => $tube->deleted_at?->toDateTimeString(),
                                 'kabel_odc' => $kabelOdc ? [
                                     'id' => $kabelOdc->id,
                                     'nama_kabel' => $kabelOdc->nama_kabel,
+                                    'tipe_kabel' => $kabelOdc->tipe_kabel,
+                                    'panjang_kabel' => $kabelOdc->panjang_kabel,
+                                    'jumlah_tube' => $kabelOdc->jumlah_tube,
+                                    'jumlah_core_in_tube' => $kabelOdc->jumlah_core_in_tube,
+                                    'jumlah_total_core' => $kabelOdc->jumlah_total_core,
+                                    'status' => $kabelOdc->status,
+                                    'created_at' => $kabelOdc->created_at?->toDateTimeString(),
+                                    'updated_at' => $kabelOdc->updated_at?->toDateTimeString(),
+                                    'deleted_at' => $kabelOdc->deleted_at?->toDateTimeString(),
                                 ] : null,
                             ] : null,
                         ] : null,
@@ -274,7 +369,7 @@ class FtthStatisticController extends Controller
                             'deleted_at' => $odp->clientFtth->deleted_at?->toDateTimeString(),
                         ] : null,
                     ];
-                }),
+                })->toArray(),
                 'client_ftths' => $lokasi->clientFtths->map(function($client) {
                     return [
                         'id' => $client->id,
@@ -290,11 +385,12 @@ class FtthStatisticController extends Controller
                             'status' => $client->odp->status,
                         ] : null,
                     ];
-                }),
+                })->toArray(),
                 'jointboxes' => $lokasi->jointBoxes->map(function($jointbox) {
                     return [
                         'id' => $jointbox->id,
                         'nama_joint_box' => $jointbox->nama_joint_box,
+                        'deskripsi' => $jointbox->deskripsi,
                         'status' => $jointbox->status,
                         'created_at' => $jointbox->created_at?->toDateTimeString(),
                         'updated_at' => $jointbox->updated_at?->toDateTimeString(),
@@ -313,8 +409,8 @@ class FtthStatisticController extends Controller
                             'deleted_at' => $jointbox->kabelOdc->deleted_at?->toDateTimeString(),
                         ] : null,
                     ];
-                }),
+                })->toArray(),
             ];
-        });
+        })->toArray();
     }
 }

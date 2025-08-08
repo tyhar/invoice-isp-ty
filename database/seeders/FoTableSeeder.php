@@ -237,9 +237,9 @@ class FoTableSeeder extends Seeder
                 'deskripsi' => 'Cable shared by ODC1 and ODC2',
                 'tipe_kabel' => 'multicore',
                 'panjang_kabel' => 2000.0,
-                'jumlah_tube' => 1,
+                'jumlah_tube' => 2,
                 'jumlah_core_in_tube' => 3,
-                'jumlah_total_core' => 3,
+                'jumlah_total_core' => 6,
                 'status' => 'active',
                 'deleted_at' => null,
                 'created_at' => now(),
@@ -251,9 +251,9 @@ class FoTableSeeder extends Seeder
                 'deskripsi' => 'Cable for ODC3',
                 'tipe_kabel' => 'multicore',
                 'panjang_kabel' => 1500.0,
-                'jumlah_tube' => 1,
-                'jumlah_core_in_tube' => 1,
-                'jumlah_total_core' => 1,
+                'jumlah_tube' => 3,
+                'jumlah_core_in_tube' => 2,
+                'jumlah_total_core' => 6,
                 'status' => 'active',
                 'deleted_at' => null,
                 'created_at' => now(),
@@ -313,13 +313,19 @@ class FoTableSeeder extends Seeder
     {
         $tubeOdcs = [];
         $id = 1;
+
         foreach ($kabelOdcs as $kabelOdc) {
+            $colorCounts = ['biru' => 0, 'jingga' => 0, 'hijau' => 0, 'coklat' => 0, 'abu_abu' => 0, 'putih' => 0, 'merah' => 0, 'hitam' => 0, 'kuning' => 0, 'ungu' => 0, 'merah_muda' => 0, 'aqua' => 0];
+            $colors = ['biru', 'jingga', 'hijau', 'coklat', 'abu_abu', 'putih'];
+
             for ($tubeIndex = 0; $tubeIndex < $kabelOdc['jumlah_tube']; $tubeIndex++) {
+                $warna = $colors[$tubeIndex % count($colors)];
+                $colorCounts[$warna]++;
                 $tubeOdcs[] = [
                     'id' => $id++,
                     'kabel_odc_id' => $kabelOdc['id'],
-                    'deskripsi' => 'Tube ' . ($tubeIndex + 1) . ' for ' . $kabelOdc['nama_kabel'],
-                    'warna_tube' => $tubeIndex === 0 ? 'biru' : 'jingga',
+                    'deskripsi' => "Tube {$warna} ({$colorCounts[$warna]}) for {$kabelOdc['nama_kabel']}",
+                    'warna_tube' => $warna,
                     'status' => 'active',
                     'deleted_at' => null,
                     'created_at' => now(),
@@ -335,13 +341,29 @@ class FoTableSeeder extends Seeder
     {
         $coreOdcs = [];
         $id = 1;
+
+        // Get cable configurations to know how many cores per tube
+        $kabelOdcs = DB::table('fo_kabel_odcs')->get()->keyBy('id');
+
         foreach ($tubeOdcs as $tubeOdc) {
-            for ($coreIndex = 0; $coreIndex < 3; $coreIndex++) {
+            $colorCounts = ['biru' => 0, 'jingga' => 0, 'hijau' => 0, 'coklat' => 0, 'abu_abu' => 0, 'putih' => 0, 'merah' => 0, 'hitam' => 0, 'kuning' => 0, 'ungu' => 0, 'merah_muda' => 0, 'aqua' => 0];
+
+            // Extract the color index from the tube description
+            preg_match('/\((\d+)\)/', $tubeOdc['deskripsi'], $matches);
+            $tubeColorIndex = $matches[1] ?? 1;
+
+            // Get the number of cores for this tube from the cable configuration
+            $kabelOdc = $kabelOdcs[$tubeOdc['kabel_odc_id']];
+            $jumlahCorePerTube = $kabelOdc->jumlah_core_in_tube;
+
+            for ($coreIndex = 0; $coreIndex < $jumlahCorePerTube; $coreIndex++) {
+                $warna = $coreIndex === 0 ? 'biru' : ($coreIndex === 1 ? 'jingga' : 'hijau');
+                $colorCounts[$warna]++;
                 $coreOdcs[] = [
                     'id' => $id++,
                     'kabel_tube_odc_id' => $tubeOdc['id'],
-                    'deskripsi' => 'Core ' . ($coreIndex + 1) . ' for tube ' . $tubeOdc['id'],
-                    'warna_core' => $coreIndex === 0 ? 'biru' : ($coreIndex === 1 ? 'jingga' : 'hijau'),
+                    'deskripsi' => "Core {$warna}({$colorCounts[$warna]}) for tube {$tubeOdc['warna_tube']}({$tubeColorIndex})",
+                    'warna_core' => $warna,
                     'status' => 'active',
                     'deleted_at' => null,
                     'created_at' => now(),

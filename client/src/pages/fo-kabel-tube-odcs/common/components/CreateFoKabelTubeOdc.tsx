@@ -1,5 +1,5 @@
 // client/src/pages/fo-kabel-tube-odcs/common/components/CreateFoKabelTubeOdc.tsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
@@ -7,16 +7,19 @@ import {
     InputField,
     SelectField,
 } from '$app/components/forms';
+import { CoreColorPicker } from './CoreColorPicker';
 
 interface FoKabelTubeOdcCreate {
     kabel_odc_id: number;
     deskripsi: string;
     warna_tube: string;
+    core_colors: string[]; // new field for core colors
 }
 
 interface KabelOdcOption {
     id: number;
     nama_kabel: string;
+    jumlah_core_in_tube?: number;
 }
 
 interface Props {
@@ -43,6 +46,7 @@ const TUBE_COLORS = [
 
 export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
     const [t] = useTranslation();
+    const [selectedKabelOdc, setSelectedKabelOdc] = useState<KabelOdcOption | null>(null);
 
     const change = <K extends keyof FoKabelTubeOdcCreate>(
         field: K,
@@ -50,6 +54,16 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
     ) => {
         setForm((f) => ({ ...f, [field]: value }));
     };
+
+    // Update selected Kabel ODC when kabel_odc_id changes
+    useEffect(() => {
+        if (form.kabel_odc_id) {
+            const selected = odcs.find(o => o.id === form.kabel_odc_id);
+            setSelectedKabelOdc(selected || null);
+        } else {
+            setSelectedKabelOdc(null);
+        }
+    }, [form.kabel_odc_id, odcs]);
 
     return (
         <Card title={t('New Tube ODC')}>
@@ -92,6 +106,24 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
                         </option>
                     ))}
                 </SelectField>
+            </Element>
+
+            <Element leftSide={t('Select Cores')}>
+                <CoreColorPicker
+                    value={form.core_colors}
+                    onChange={(colors) => change('core_colors', colors)}
+                    maxCores={selectedKabelOdc?.jumlah_core_in_tube}
+                />
+                {errors?.errors.core_colors && (
+                    <div className="mt-1 text-xs text-red-600">
+                        {errors.errors.core_colors}
+                    </div>
+                )}
+                {selectedKabelOdc?.jumlah_core_in_tube && (
+                    <div className="mt-1 text-xs text-gray-600">
+                        Maximum cores per tube: {selectedKabelOdc.jumlah_core_in_tube}
+                    </div>
+                )}
             </Element>
         </Card>
     );

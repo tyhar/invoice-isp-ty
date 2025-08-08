@@ -93,6 +93,7 @@ export default function Create() {
             id: t.id,
             warna_tube: t.warna_tube,
             kabel_odc_id: t.kabel_odc_id,
+            deskripsi: t.deskripsi,
           }))
         );
       })
@@ -109,6 +110,7 @@ export default function Create() {
             nama_kabel: c.kabel_odc.nama_kabel,
             kabel_tube_odc_id: c.kabel_tube_odc.id,
             warna_tube: c.kabel_tube_odc.warna_tube,
+            deskripsi: c.deskripsi,
           }))
         );
       })
