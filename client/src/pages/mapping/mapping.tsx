@@ -37,6 +37,9 @@ interface MarkerData {
   kabel_core_odc_id?: string;
   nama_odc?: string;
   kabel_odc_id?: string;
+  // joint box specific
+  nama_joint_box?: string;
+  odc_id?: string;
 }
 
 interface AddMarkerFormProps {
@@ -522,6 +525,7 @@ const MappingPage: React.FC = () => {
   const [clients, setClients] = useState<any[]>([]);
   const [odps, setOdps] = useState<any[]>([]);
   const [odcs, setOdcs] = useState<any[]>([]);
+  const [jointBoxes, setJointBoxes] = useState<any[]>([]);
   const [editData, setEditData] = useState<{ mode: 'client' | 'odp' | 'odc'; data: MarkerData; } | null>(null);
   const [t] = useTranslation();
   const [selectedProvinsi, setSelectedProvinsi] = useState('');
@@ -574,20 +578,22 @@ const MappingPage: React.FC = () => {
 
   const pages: Page[] = [{ name: t('Mapping'), href: '/map' }];
 
-  // GET DATA CLIENT,ODP,ODC DARI API
+  // GET DATA CLIENT,ODP,ODC,JOINT_BOXES DARI API
   const fetchData = async () => {
     const token = localStorage.getItem('X-API-TOKEN');
     const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
-    const [clientRes, odpRes, odcRes] = await Promise.all([
+    const [clientRes, odpRes, odcRes, jointBoxRes] = await Promise.all([
       axios.get(`${api}/api/v1/fo-client-ftths`, headers),
       axios.get(`${api}/api/v1/fo-odps`, headers),
       axios.get(`${api}/api/v1/fo-odcs`, headers),
+      axios.get(`${api}/api/v1/fo-joint-boxes`, headers),
     ]);
 
     setClients(clientRes.data.data);
     setOdps(odpRes.data.data);
     setOdcs(odcRes.data.data);
+    setJointBoxes(jointBoxRes.data.data);
   };
 
 
@@ -807,6 +813,15 @@ const MappingPage: React.FC = () => {
     shadowSize: [41, 41],
   });
 
+  const jointBoxIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
   const getLatLng = (item: any): [number, number] | null => {
     const lokasi = item?.lokasi ?? item;
 
@@ -971,7 +986,7 @@ const MappingPage: React.FC = () => {
 
         {/* Draggable Connection Legend */}
         <div
-          className="absolute z-[999] bg-white rounded shadow-md p-4 w-48 cursor-move select-none"
+          className="absolute z-[999] bg-white rounded shadow-md p-4 w-56 cursor-move select-none"
           style={{
             left: `${legendPosition.x}px`,
             top: `${legendPosition.y}px`
@@ -988,19 +1003,47 @@ const MappingPage: React.FC = () => {
             e.preventDefault();
           }}
         >
-          <h3 className="text-sm font-semibold mb-2">Koneksi</h3>
+          <h3 className="text-sm font-semibold mb-2">Markers & Koneksi</h3>
           <div className="space-y-2 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 bg-blue-500"></div>
-              <span>ODC ➝ ODP</span>
+            {/* Marker Legend */}
+            <div className="mb-2">
+              <div className="text-xs font-medium mb-1">Markers:</div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span>Client</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span>ODP</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+                <span>ODC</span>
+              </div>
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                <span>Joint Box</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 bg-blue-500"></div>
-              <span>ODP ➝ Client</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-0.5 bg-fuchsia-500 border-t border-dashed border-fuchsia-500"></div>
-              <span>ODC ➝ ODC</span>
+
+            {/* Connection Legend */}
+            <div className="border-t pt-2">
+              <div className="text-xs font-medium mb-1">Connection Types:</div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-0.5 bg-blue-500"></div>
+                <span>ODC ➝ ODP</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-0.5 bg-blue-500"></div>
+                <span>ODP ➝ Client</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-4 h-0.5 bg-fuchsia-500 border-t border-dashed border-fuchsia-500"></div>
+                <span>ODC ➝ ODC</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>Joint Boxes act as intermediate connection points</span>
+              </div>
             </div>
             <div className="flex items-center gap-2 mt-2">
               <input
@@ -1031,6 +1074,16 @@ const MappingPage: React.FC = () => {
                 </div>
               );
             })()}
+
+            {/* Joint Box Statistics */}
+            <div className="border-t pt-2 text-xs text-gray-600">
+              <div>Joint Boxes: {jointBoxes.length}</div>
+              <div>Connected ODCs: {jointBoxes.filter(jb => jb.odc).length}</div>
+              <div>Connected ODPs: {jointBoxes.filter(jb => jb.odp).length}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                Note: Joint boxes break up connections and route them through intermediate points
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1196,6 +1249,50 @@ const MappingPage: React.FC = () => {
               );
             })}
 
+          {jointBoxes
+            .map((jointBox) => {
+              const pos = safeParseLatLng(jointBox?.lokasi?.latitude, jointBox?.lokasi?.longitude);
+              if (!pos) return null;
+              return (
+                <Marker key={`jointbox-${jointBox.id}`} position={pos} icon={jointBoxIcon}>
+                  <Popup>
+                    <div className="text-sm">
+                      <strong>Joint Box:</strong> {jointBox.nama_joint_box}<br />
+                      <strong>Lokasi:</strong> {jointBox.lokasi?.nama_lokasi}<br />
+                      <strong>Deskripsi:</strong> {jointBox.deskripsi || '-'}<br />
+                      <strong>Kabel ODC:</strong> {jointBox.kabel_odc?.nama_kabel || '-'}<br />
+                      {jointBox.odc && (
+                        <>
+                          <strong>Connected FROM ODC:</strong> {jointBox.odc.nama_odc}<br />
+                          <strong>ODC Location:</strong> {jointBox.odc.lokasi?.nama_lokasi || '-'}<br />
+                        </>
+                      )}
+                      {jointBox.odp && (
+                        <>
+                          <strong>Connected TO ODP:</strong> {jointBox.odp.nama_odp}<br />
+                          <strong>ODP Location:</strong> {jointBox.odp.lokasi?.nama_lokasi || '-'}<br />
+                        </>
+                      )}
+                      <div className="mt-2 flex gap-2">
+                        <button
+                          className="bg-yellow-400 px-2 py-1 rounded text-xs"
+                          onClick={() => navigate(`/fo-joint-boxes/${jointBox.id}/edit`)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                          onClick={() => handleDelete('jointbox' as any, jointBox.id, jointBox.lokasi.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
+
           {validClients.map((client) => {
             const clientPos = getLatLng(client);
             const odpPos = getLatLng(client.odp);
@@ -1268,7 +1365,7 @@ const MappingPage: React.FC = () => {
 
           {/* ODC to ODC Connections */}
           {showOdcConnections && (() => {
-            const odcConnections: { from: any; to: any; kabel_odc_id: number; kabel_odc: any }[] = [];
+            const odcConnections: { from: any; to: any; kabel_odc_id: number; kabel_odc: any; jointBox?: any }[] = [];
 
             // Group ODCs by kabel_odc_id
             const odcGroups = new Map<number, any[]>();
@@ -1287,11 +1384,18 @@ const MappingPage: React.FC = () => {
                 // Create connections between all ODCs in the group
                 for (let i = 0; i < odcList.length; i++) {
                   for (let j = i + 1; j < odcList.length; j++) {
+                    // Check if there's a joint box that connects these ODCs
+                    const jointBox = jointBoxes.find(jb =>
+                      (jb.odc_id === odcList[i].id && jb.kabel_odc_id === kabelOdcId) ||
+                      (jb.odc_id === odcList[j].id && jb.kabel_odc_id === kabelOdcId)
+                    );
+
                     odcConnections.push({
                       from: odcList[i],
                       to: odcList[j],
                       kabel_odc_id: kabelOdcId,
-                      kabel_odc: odcList[i].kabel_odc // Use the kabel_odc object from the first ODC
+                      kabel_odc: odcList[i].kabel_odc, // Use the kabel_odc object from the first ODC
+                      jointBox: jointBox || undefined
                     });
                   }
                 }
@@ -1306,15 +1410,37 @@ const MappingPage: React.FC = () => {
 
               if (isNaN(fromPos[0]) || isNaN(fromPos[1]) || isNaN(toPos[0]) || isNaN(toPos[1])) return null;
 
-              const distance = haversineDistance(fromPos, toPos);
-              const arc = createSmoothArc(fromPos, toPos);
+              let positions: [number, number][];
+              let distance: number;
 
-              if (!arc || arc.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
+              if (connection.jointBox) {
+                // Route through joint box: ODC → Joint Box → ODC
+                const jointBoxPos = getLatLng(connection.jointBox);
+                if (!jointBoxPos) return null;
+
+                const arc1 = createSmoothArc(fromPos, jointBoxPos);
+                const arc2 = createSmoothArc(jointBoxPos, toPos);
+
+                if (!arc1 || !arc2) return null;
+
+                // Combine the two arcs
+                positions = [...arc1, ...arc2];
+                distance = haversineDistance(fromPos, jointBoxPos) + haversineDistance(jointBoxPos, toPos);
+              } else {
+                // Direct connection: ODC → ODC
+                const arc = createSmoothArc(fromPos, toPos);
+                if (!arc) return null;
+
+                positions = arc;
+                distance = haversineDistance(fromPos, toPos);
+              }
+
+              if (positions.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
 
               return (
                 <Polyline
                   key={`line-odc-odc-${connection.from.id}-${connection.to.id}`}
-                  positions={createSmoothArc(fromPos, toPos)}
+                  positions={positions}
                   pathOptions={{
                     color: 'rgba(255, 0, 255, 0.7)', // Magenta color for ODC-ODC connections
                     weight: 3,
@@ -1326,6 +1452,11 @@ const MappingPage: React.FC = () => {
                       <strong>ODC ➝ ODC</strong><br />
                       Dari: {connection.from.nama_odc}<br />
                       Ke: {connection.to.nama_odc}<br />
+                      {connection.jointBox && (
+                        <>
+                          <span>Via Joint Box: {connection.jointBox.nama_joint_box}</span><br />
+                        </>
+                      )}
                       <span>Kabel ODC ID: {connection.kabel_odc_id}</span><br />
                       {connection.kabel_odc && (
                         <>
@@ -1341,6 +1472,112 @@ const MappingPage: React.FC = () => {
               );
             });
           })()}
+
+          {/* ODC to ODP Connections - Modified to route through joint boxes */}
+          {validOdps.map((odp) => {
+            const odpPos = getLatLng(odp);
+            const odcPos = getLatLng(odp.odc);
+
+            if (!odpPos || !odcPos) return null;
+
+            if (isNaN(odpPos[0]) || isNaN(odpPos[1]) || isNaN(odcPos[0]) || isNaN(odcPos[1])) return null;
+
+            // Check if there's a joint box between this ODC and ODP
+            // Look for joint boxes that connect this ODC to this ODP, or are part of the same cable system
+            const jointBox = jointBoxes.find(jb =>
+              (jb.odc_id === odp.odc?.id && jb.odp_id === odp.id) ||
+              (jb.kabel_odc_id === odp.odc?.kabel_odc_id && jb.odc_id === odp.odc?.id)
+            );
+
+            let positions: [number, number][];
+            let distance: number;
+
+            if (jointBox) {
+              // Route through joint box: ODC → Joint Box → ODP
+              const jointBoxPos = getLatLng(jointBox);
+              if (!jointBoxPos) return null;
+
+              const arc1 = createSmoothArc(odcPos, jointBoxPos);
+              const arc2 = createSmoothArc(jointBoxPos, odpPos);
+
+              if (!arc1 || !arc2) return null;
+
+              // Combine the two arcs
+              positions = [...arc1, ...arc2];
+              distance = haversineDistance(odcPos, jointBoxPos) + haversineDistance(jointBoxPos, odpPos);
+            } else {
+              // Direct connection: ODC → ODP
+              const arc = createSmoothArc(odcPos, odpPos);
+              if (!arc) return null;
+
+              positions = arc;
+              distance = haversineDistance(odcPos, odpPos);
+            }
+
+            if (positions.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
+
+            return (
+              <Polyline
+                key={`line-odc-odp-${odp.id}`}
+                positions={positions}
+                pathOptions={{
+                  color: 'rgba(0, 0, 230, 0.6)',
+                  weight: 2,
+                }}
+              >
+                <Popup>
+                  <div>
+                    <strong>ODC ➝ ODP</strong><br />
+                    Dari: {odp.odc?.nama_odc || 'ODC'}<br />
+                    Ke: {odp.nama_odp}<br />
+                    {jointBox && (
+                      <>
+                        <span>Via Joint Box: {jointBox.nama_joint_box}</span><br />
+                      </>
+                    )}
+                    <span>Jarak: {distance.toFixed(2)} km</span>
+                  </div>
+                </Popup>
+              </Polyline>
+            );
+          })}
+
+          {/* Joint Box Markers - Only markers, no separate connections */}
+          {jointBoxes.map((jointBox) => {
+            const pos = getLatLng(jointBox);
+            if (!pos) return null;
+
+            return (
+              <Marker key={`jointbox-${jointBox.id}`} position={pos} icon={jointBoxIcon}>
+                <Popup>
+                  <div>
+                    <strong>Joint Box:</strong> {jointBox.nama_joint_box}<br />
+                    <b>Lokasi:</b> {jointBox.lokasi?.nama_lokasi}<br />
+                    <b>Deskripsi:</b> {jointBox.deskripsi || '-'}<br />
+                    {jointBox.odc && (
+                      <>
+                        <b>Connected ODC:</b> {jointBox.odc.nama_odc}<br />
+                        <b>ODC Location:</b> {jointBox.odc.lokasi?.nama_lokasi}<br />
+                      </>
+                    )}
+                    {jointBox.odp && (
+                      <>
+                        <b>Connected ODP:</b> {jointBox.odp.nama_odp}<br />
+                        <b>ODP Location:</b> {jointBox.odp.lokasi?.nama_lokasi}<br />
+                      </>
+                    )}
+                    {jointBox.kabel_odc && (
+                      <>
+                        <b>Kabel:</b> {jointBox.kabel_odc.nama_kabel}<br />
+                        <b>Tipe:</b> {jointBox.kabel_odc.tipe_kabel}<br />
+                        <b>Panjang:</b> {jointBox.kabel_odc.panjang_kabel} m<br />
+                      </>
+                    )}
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
 
           {coordinateWarning && (
             <div style={{ color: 'red', marginTop: '10px' }}>

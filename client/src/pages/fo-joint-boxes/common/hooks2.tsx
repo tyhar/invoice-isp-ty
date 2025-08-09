@@ -14,6 +14,8 @@ export interface FoJointBox {
     id: string;
     nama_joint_box: string;
     deskripsi: string;
+    odc_id?: number | null;
+    odp_id?: number | null;
     lokasi: {
         id: number;
         nama_lokasi: string;
@@ -33,6 +35,26 @@ export interface FoJointBox {
         jumlah_core_in_tube?: number;
         jumlah_total_core?: number;
     } | null;
+    odc?: {
+        id: number;
+        nama_odc: string;
+        lokasi?: {
+            id: number;
+            nama_lokasi: string;
+            latitude?: number;
+            longitude?: number;
+        } | null;
+    } | null;
+    odp?: {
+        id: number;
+        nama_odp: string;
+        lokasi?: {
+            id: number;
+            nama_lokasi: string;
+            latitude?: number;
+            longitude?: number;
+        } | null;
+    } | null;
     status: 'active' | 'archived';
     created_at: string;
     updated_at: string;
@@ -45,6 +67,8 @@ export function useAllFoJointBoxColumns(): readonly string[] {
         'nama_joint_box',
         'lokasi',
         'kabel_odc',
+        'odc',
+        'odp',
         'status',
         'created_at',
         'updated_at',
@@ -76,71 +100,91 @@ export function useFoJointBoxColumns(): DataTableColumns<FoJointBox> {
             id: 'deskripsi',
             label: t('Deskripsi'),
         },
-        {
-            id: 'lokasi',
-            label: t('lokasi'),
-            format: (_field, rec) => rec.lokasi?.nama_lokasi ?? '-',
-        },
-        {
-            id: 'lokasi_latitude',
-            label: t('latitude'),
-            format: (_field, rec) => rec.lokasi?.latitude ?? '-',
-        },
-        {
-            id: 'lokasi_longitude',
-            label: t('longitude'),
-            format: (_field, rec) => rec.lokasi?.longitude ?? '-',
-        },
-        {
-            id: 'lokasi_deskripsi',
-            label: t('deskripsi'),
-            format: (_field, rec) => rec.lokasi?.deskripsi ?? '-',
-        },
-        {
-            id: 'lokasi_city',
-            label: t('city'),
-            format: (_field, rec) => rec.lokasi?.city ?? '-',
-        },
-        {
-            id: 'lokasi_province',
-            label: t('province'),
-            format: (_field, rec) => rec.lokasi?.province ?? '-',
-        },
-        {
-            id: 'lokasi_country',
-            label: t('country'),
-            format: (_field, rec) => rec.lokasi?.country ?? '-',
-        },
+        // {
+        //     id: 'lokasi',
+        //     label: t('lokasi'),
+        //     format: (_field, rec) => rec.lokasi?.nama_lokasi ?? '-',
+        // },
+        // {
+        //     id: 'lokasi_latitude',
+        //     label: t('latitude'),
+        //     format: (_field, rec) => rec.lokasi?.latitude ?? '-',
+        // },
+        // {
+        //     id: 'lokasi_longitude',
+        //     label: t('longitude'),
+        //     format: (_field, rec) => rec.lokasi?.longitude ?? '-',
+        // },
+        // {
+        //     id: 'lokasi_deskripsi',
+        //     label: t('deskripsi'),
+        //     format: (_field, rec) => rec.lokasi?.deskripsi ?? '-',
+        // },
+        // {
+        //     id: 'lokasi_city',
+        //     label: t('city'),
+        //     format: (_field, rec) => rec.lokasi?.city ?? '-',
+        // },
+        // {
+        //     id: 'lokasi_province',
+        //     label: t('province'),
+        //     format: (_field, rec) => rec.lokasi?.province ?? '-',
+        // },
+        // {
+        //     id: 'lokasi_country',
+        //     label: t('country'),
+        //     format: (_field, rec) => rec.lokasi?.country ?? '-',
+        // },
         {
             id: 'kabel_odc',
             label: t('kabel odc'),
             format: (_field, rec) => rec.kabel_odc?.nama_kabel ?? '-',
         },
+        // {
+        //     id: 'kabel_odc_tipe',
+        //     label: t('tipe kabel'),
+        //     format: (_field, rec) => rec.kabel_odc?.tipe_kabel ?? '-',
+        // },
+        // {
+        //     id: 'kabel_odc_panjang',
+        //     label: t('panjang kabel'),
+        //     format: (_field, rec) => rec.kabel_odc?.panjang_kabel ?? '-',
+        // },
+        // {
+        //     id: 'kabel_odc_jumlah_tube',
+        //     label: t('jumlah tube'),
+        //     format: (_field, rec) => rec.kabel_odc?.jumlah_tube ?? '-',
+        // },
+        // {
+        //     id: 'kabel_odc_jumlah_core_in_tube',
+        //     label: t('max core in tube'),
+        //     format: (_field, rec) => rec.kabel_odc?.jumlah_core_in_tube ?? '-',
+        // },
+        // {
+        //     id: 'kabel_odc_jumlah_total_core',
+        //     label: t('max total_core'),
+        //     format: (_field, rec) => rec.kabel_odc?.jumlah_total_core ?? '-',
+        // },
         {
-            id: 'kabel_odc_tipe',
-            label: t('tipe kabel'),
-            format: (_field, rec) => rec.kabel_odc?.tipe_kabel ?? '-',
+            id: 'odc',
+            label: t('ODC'),
+            format: (_field, rec) => rec.odc?.nama_odc ?? '-',
         },
+        // {
+        //     id: 'odc_lokasi',
+        //     label: t('ODC Location'),
+        //     format: (_field, rec) => rec.odc?.lokasi?.nama_lokasi ?? '-',
+        // },
         {
-            id: 'kabel_odc_panjang',
-            label: t('panjang kabel'),
-            format: (_field, rec) => rec.kabel_odc?.panjang_kabel ?? '-',
+            id: 'odp',
+            label: t('ODP'),
+            format: (_field, rec) => rec.odp?.nama_odp ?? '-',
         },
-        {
-            id: 'kabel_odc_jumlah_tube',
-            label: t('jumlah tube'),
-            format: (_field, rec) => rec.kabel_odc?.jumlah_tube ?? '-',
-        },
-        {
-            id: 'kabel_odc_jumlah_core_in_tube',
-            label: t('max core in tube'),
-            format: (_field, rec) => rec.kabel_odc?.jumlah_core_in_tube ?? '-',
-        },
-        {
-            id: 'kabel_odc_jumlah_total_core',
-            label: t('max total_core'),
-            format: (_field, rec) => rec.kabel_odc?.jumlah_total_core ?? '-',
-        },
+        // {
+        //     id: 'odp_lokasi',
+        //     label: t('ODP Location'),
+        //     format: (_field, rec) => rec.odp?.lokasi?.nama_lokasi ?? '-',
+        // },
     ];
 
     return columns;

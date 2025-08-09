@@ -11,20 +11,20 @@ class FoTableSeeder extends Seeder
     {
         $companyId = 1; // Default company ID
 
-        $this->command->info('Starting FoTableSeeder - Mapping-Ready, Unique Core, ODC-to-ODC Connections...');
+        $this->command->info('Starting FoTableSeeder (Surakarta, Jawa Tengah) - Mapping-ready with ODC↔ODC + ODC→ODP via Joint Boxes...');
         $this->disableForeignKeys();
         $this->truncateAll();
         $this->enableForeignKeys();
 
-        // 1. Seed Lokasi (locations for ODCs, ODPs, and Clients)
+        // 1. Seed Lokasi (locations for ODCs, ODPs, and Clients) - Surakarta area
         $odcLokasis = $this->seedOdcLokasis();
         $odpLokasis = $this->seedOdpLokasis();
         $clientLokasis = $this->seedClientLokasis();
 
-        // 2. Seed KabelOdcs (2 cables)
+        // 2. Seed KabelOdcs (Solo rings)
         $kabelOdcs = $this->seedKabelOdcs();
 
-        // 3. Seed ODCs (ODC1 and ODC2 share kabel_odc_id=1, ODC3 uses kabel_odc_id=2)
+        // 3. Seed ODCs (two ODCs share the same kabel_odc for ODC↔ODC visualization)
         $odcs = $this->seedOdcs($odcLokasis, $kabelOdcs);
 
         // 4. Seed KabelTubeOdcs (tubes within cables)
@@ -33,13 +33,19 @@ class FoTableSeeder extends Seeder
         // 5. Seed KabelCoreOdcs (fiber cores within tubes)
         $coreOdcs = $this->seedKabelCoreOdcs($tubeOdcs);
 
-        // 6. Seed ODPs (each ODP gets a unique core and unique ODC)
+        // 6. Seed ODPs (each ODP gets a unique core and links back to an ODC)
         $odps = $this->seedOdps($odpLokasis, $coreOdcs, $odcs);
 
         // 7. Seed Client FTTH (each client gets a unique ODP)
         $this->seedClients($clientLokasis, $odps, $companyId);
 
-        $this->command->info('FoTableSeeder completed successfully!');
+        // 8. Seed Joint Box Locations (independent locations around Surakarta)
+        $this->seedJointBoxLokasis();
+
+        // 9. Seed Joint Boxes (connecting ODC↔ODC and ODC→ODP)
+        $this->seedJointBoxes($odcs, $odps, $kabelOdcs);
+
+        $this->command->info('FoTableSeeder completed successfully (Surakarta dataset)!');
     }
 
     protected function disableForeignKeys()
@@ -62,6 +68,7 @@ class FoTableSeeder extends Seeder
                 'fo_kabel_tube_odcs',
                 'fo_kabel_odcs',
                 'fo_odcs',
+                'fo_joint_boxes',
                 'fo_lokasis',
             ] as $table
         ) {
@@ -71,15 +78,16 @@ class FoTableSeeder extends Seeder
 
     protected function seedOdcLokasis(): array
     {
+        // ODC locations around Surakarta
         $lokasis = [
             [
                 'id' => 1,
-                'nama_lokasi' => 'ODC North Jakarta',
-                'deskripsi' => 'ODC 1 Location - North Jakarta',
-                'latitude' => -6.1149,
-                'longitude' => 106.8451,
-                'city' => 'Jakarta Utara',
-                'province' => 'DKI Jakarta',
+                'nama_lokasi' => 'ODC Banjarsari (Utara Solo)',
+                'deskripsi' => 'ODC Banjarsari - Utara Solo',
+                'latitude' => -7.55113,
+                'longitude' => 110.81373,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -89,12 +97,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'nama_lokasi' => 'ODC South Jakarta',
-                'deskripsi' => 'ODC 2 Location - South Jakarta',
-                'latitude' => -6.3033,
-                'longitude' => 106.8150,
-                'city' => 'Jakarta Selatan',
-                'province' => 'DKI Jakarta',
+                'nama_lokasi' => 'ODC Laweyan (Barat Solo)',
+                'deskripsi' => 'ODC Laweyan - Barat Solo',
+                'latitude' => -7.56194,
+                'longitude' => 110.80167,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -104,12 +112,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 3,
-                'nama_lokasi' => 'ODC East Jakarta',
-                'deskripsi' => 'ODC 3 Location - East Jakarta',
-                'latitude' => -6.2265,
-                'longitude' => 106.9005,
-                'city' => 'Jakarta Timur',
-                'province' => 'DKI Jakarta',
+                'nama_lokasi' => 'ODC Jebres (Timur Solo)',
+                'deskripsi' => 'ODC Jebres - Timur Solo',
+                'latitude' => -7.55889,
+                'longitude' => 110.85727,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -124,15 +132,16 @@ class FoTableSeeder extends Seeder
 
     protected function seedOdpLokasis(): array
     {
+        // ODP locations distributed around Surakarta
         $lokasis = [
             [
                 'id' => 4,
-                'nama_lokasi' => 'ODP West Jakarta',
-                'deskripsi' => 'ODP 1 Location - West Jakarta',
-                'latitude' => -6.1658,
-                'longitude' => 106.7778,
-                'city' => 'Jakarta Barat',
-                'province' => 'DKI Jakarta',
+                'nama_lokasi' => 'ODP Manahan',
+                'deskripsi' => 'ODP area Manahan',
+                'latitude' => -7.55084,
+                'longitude' => 110.79889,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -142,12 +151,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 5,
-                'nama_lokasi' => 'ODP South Tangerang',
-                'deskripsi' => 'ODP 2 Location - BSD Area',
-                'latitude' => -6.3054,
-                'longitude' => 106.6520,
-                'city' => 'Tangerang Selatan',
-                'province' => 'Banten',
+                'nama_lokasi' => 'ODP Serengan',
+                'deskripsi' => 'ODP area Serengan',
+                'latitude' => -7.57795,
+                'longitude' => 110.82635,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -157,12 +166,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 6,
-                'nama_lokasi' => 'ODP Bekasi Barat',
-                'deskripsi' => 'ODP 3 Location - Bekasi West Side',
-                'latitude' => -6.2455,
-                'longitude' => 106.9900,
-                'city' => 'Bekasi',
-                'province' => 'Jawa Barat',
+                'nama_lokasi' => 'ODP Pasar Kliwon',
+                'deskripsi' => 'ODP area Pasar Kliwon',
+                'latitude' => -7.57756,
+                'longitude' => 110.84087,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -177,15 +186,16 @@ class FoTableSeeder extends Seeder
 
     protected function seedClientLokasis(): array
     {
+        // Client locations around Surakarta
         $lokasis = [
             [
                 'id' => 7,
-                'nama_lokasi' => 'Client Ancol',
-                'deskripsi' => 'Client 1 Location - Ancol Seaside',
-                'latitude' => -6.1231,
-                'longitude' => 106.8480,
-                'city' => 'Jakarta Utara',
-                'province' => 'DKI Jakarta',
+                'nama_lokasi' => 'Client Kleco',
+                'deskripsi' => 'Client area Kleco',
+                'latitude' => -7.5750,
+                'longitude' => 110.8085,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -195,12 +205,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 8,
-                'nama_lokasi' => 'Client Pondok Indah',
-                'deskripsi' => 'Client 2 Location - South Jakarta Elite Area',
-                'latitude' => -6.2752,
-                'longitude' => 106.7839,
-                'city' => 'Jakarta Selatan',
-                'province' => 'DKI Jakarta',
+                'nama_lokasi' => 'Client Palur',
+                'deskripsi' => 'Client area Palur',
+                'latitude' => -7.5695,
+                'longitude' => 110.8973,
+                'city' => 'Karanganyar',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -210,12 +220,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 9,
-                'nama_lokasi' => 'Client Cibubur',
-                'deskripsi' => 'Client 3 Location - East Side Suburb',
-                'latitude' => -6.3658,
-                'longitude' => 106.8955,
-                'city' => 'Depok',
-                'province' => 'Jawa Barat',
+                'nama_lokasi' => 'Client Colomadu',
+                'deskripsi' => 'Client area Colomadu',
+                'latitude' => -7.5297,
+                'longitude' => 110.7500,
+                'city' => 'Karanganyar',
+                'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
                 'status' => 'active',
@@ -230,13 +240,14 @@ class FoTableSeeder extends Seeder
 
     protected function seedKabelOdcs(): array
     {
+        // Two cables: Solo Ring A shared between ODC1 & ODC2; Solo Ring B for ODC3
         $kabelOdcs = [
             [
                 'id' => 1,
-                'nama_kabel' => 'Main Cable A',
-                'deskripsi' => 'Cable shared by ODC1 and ODC2',
+                'nama_kabel' => 'Solo Ring A',
+                'deskripsi' => 'Cable shared by ODC Banjarsari and ODC Laweyan',
                 'tipe_kabel' => 'multicore',
-                'panjang_kabel' => 2000.0,
+                'panjang_kabel' => 2200.0,
                 'jumlah_tube' => 2,
                 'jumlah_core_in_tube' => 3,
                 'jumlah_total_core' => 6,
@@ -247,12 +258,12 @@ class FoTableSeeder extends Seeder
             ],
             [
                 'id' => 2,
-                'nama_kabel' => 'Main Cable B',
-                'deskripsi' => 'Cable for ODC3',
+                'nama_kabel' => 'Solo Ring B',
+                'deskripsi' => 'Cable dedicated to ODC Jebres',
                 'tipe_kabel' => 'multicore',
-                'panjang_kabel' => 1500.0,
-                'jumlah_tube' => 3,
-                'jumlah_core_in_tube' => 2,
+                'panjang_kabel' => 1600.0,
+                'jumlah_tube' => 2,
+                'jumlah_core_in_tube' => 3,
                 'jumlah_total_core' => 6,
                 'status' => 'active',
                 'deleted_at' => null,
@@ -266,14 +277,14 @@ class FoTableSeeder extends Seeder
 
     protected function seedOdcs(array $odcLokasis, array $kabelOdcs): array
     {
-        // ODC1 and ODC2 share kabel_odc_id=1, ODC3 uses kabel_odc_id=2
+        // ODC1 and ODC2 share kabel_odc_id=1 (Solo Ring A), ODC3 uses kabel_odc_id=2 (Solo Ring B)
         $odcs = [
             [
                 'id' => 1,
                 'lokasi_id' => $odcLokasis[0]['id'],
                 'kabel_odc_id' => $kabelOdcs[0]['id'],
-                'nama_odc' => 'ODC 1',
-                'deskripsi' => 'ODC 1 sharing cable with ODC 2',
+                'nama_odc' => 'ODC Banjarsari',
+                'deskripsi' => 'ODC di kawasan Banjarsari',
                 'tipe_splitter' => '1:8',
                 'status' => 'active',
                 'deleted_at' => null,
@@ -284,8 +295,8 @@ class FoTableSeeder extends Seeder
                 'id' => 2,
                 'lokasi_id' => $odcLokasis[1]['id'],
                 'kabel_odc_id' => $kabelOdcs[0]['id'],
-                'nama_odc' => 'ODC 2',
-                'deskripsi' => 'ODC 2 sharing cable with ODC 1',
+                'nama_odc' => 'ODC Laweyan',
+                'deskripsi' => 'ODC di kawasan Laweyan',
                 'tipe_splitter' => '1:8',
                 'status' => 'active',
                 'deleted_at' => null,
@@ -296,8 +307,8 @@ class FoTableSeeder extends Seeder
                 'id' => 3,
                 'lokasi_id' => $odcLokasis[2]['id'],
                 'kabel_odc_id' => $kabelOdcs[1]['id'],
-                'nama_odc' => 'ODC 3',
-                'deskripsi' => 'ODC 3 with its own cable',
+                'nama_odc' => 'ODC Jebres',
+                'deskripsi' => 'ODC di kawasan Jebres',
                 'tipe_splitter' => '1:8',
                 'status' => 'active',
                 'deleted_at' => null,
@@ -316,7 +327,7 @@ class FoTableSeeder extends Seeder
 
         foreach ($kabelOdcs as $kabelOdc) {
             $colorCounts = ['biru' => 0, 'jingga' => 0, 'hijau' => 0, 'coklat' => 0, 'abu_abu' => 0, 'putih' => 0, 'merah' => 0, 'hitam' => 0, 'kuning' => 0, 'ungu' => 0, 'merah_muda' => 0, 'aqua' => 0];
-            $colors = ['biru', 'jingga', 'hijau', 'coklat', 'abu_abu', 'putih'];
+            $colors = ['biru', 'jingga'];
 
             for ($tubeIndex = 0; $tubeIndex < $kabelOdc['jumlah_tube']; $tubeIndex++) {
                 $warna = $colors[$tubeIndex % count($colors)];
@@ -342,17 +353,15 @@ class FoTableSeeder extends Seeder
         $coreOdcs = [];
         $id = 1;
 
-        // Get cable configurations to know how many cores per tube
+        // Use jumlah_core_in_tube from fo_kabel_odcs
         $kabelOdcs = DB::table('fo_kabel_odcs')->get()->keyBy('id');
 
         foreach ($tubeOdcs as $tubeOdc) {
             $colorCounts = ['biru' => 0, 'jingga' => 0, 'hijau' => 0, 'coklat' => 0, 'abu_abu' => 0, 'putih' => 0, 'merah' => 0, 'hitam' => 0, 'kuning' => 0, 'ungu' => 0, 'merah_muda' => 0, 'aqua' => 0];
 
-            // Extract the color index from the tube description
             preg_match('/\((\d+)\)/', $tubeOdc['deskripsi'], $matches);
             $tubeColorIndex = $matches[1] ?? 1;
 
-            // Get the number of cores for this tube from the cable configuration
             $kabelOdc = $kabelOdcs[$tubeOdc['kabel_odc_id']];
             $jumlahCorePerTube = $kabelOdc->jumlah_core_in_tube;
 
@@ -379,10 +388,13 @@ class FoTableSeeder extends Seeder
     {
         $odps = [];
         $id = 1;
-        // Each ODP gets a unique core and unique ODC
+
+        // Map each ODP to a core and to a related ODC (so ODC→ODP lines appear)
         foreach ($odpLokasis as $index => $lokasi) {
-            $coreOdc = $coreOdcs[$index] ?? null;
-            $odc = $odcs[$index] ?? null;
+            $coreOdc = $coreOdcs[$index] ?? null; // first few cores
+            // Alternate ODCs: first two ODPs to ODC1, last to ODC3
+            $odc = $index < 2 ? $odcs[0] : $odcs[2];
+
             $odps[] = [
                 'id' => $id++,
                 'lokasi_id' => $lokasi['id'],
@@ -405,7 +417,7 @@ class FoTableSeeder extends Seeder
         $clients = [];
         $id = 1;
         foreach ($clientLokasis as $index => $lokasi) {
-            $odp = $odps[$index] ?? null;
+            $odp = $odps[$index] ?? $odps[0];
             $clients[] = [
                 'id' => $id++,
                 'lokasi_id' => $lokasi['id'],
@@ -413,7 +425,7 @@ class FoTableSeeder extends Seeder
                 'client_id' => null,
                 'company_id' => $companyId,
                 'nama_client' => 'Client ' . $lokasi['nama_lokasi'],
-                'alamat' => 'Jl. ' . $lokasi['nama_lokasi'],
+                'alamat' => 'Jl. ' . $lokasi['nama_lokasi'] . ', Surakarta',
                 'status' => 'active',
                 'deleted_at' => null,
                 'created_at' => now(),
@@ -421,5 +433,121 @@ class FoTableSeeder extends Seeder
             ];
         }
         DB::table('fo_client_ftths')->insert($clients);
+    }
+
+    protected function seedJointBoxLokasis(): array
+    {
+        // Joint box locations around Surakarta
+        $lokasis = [
+            [
+                'nama_lokasi' => 'Joint Box Gladag',
+                'deskripsi' => 'Joint box near Gladag (center of Solo)',
+                'latitude' => -7.5733,
+                'longitude' => 110.8236,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
+                'country' => 'Indonesia',
+                'geocoded_at' => now(),
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama_lokasi' => 'Joint Box Gilingan',
+                'deskripsi' => 'Joint box in Gilingan area',
+                'latitude' => -7.5457,
+                'longitude' => 110.8160,
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
+                'country' => 'Indonesia',
+                'geocoded_at' => now(),
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama_lokasi' => 'Joint Box Palur',
+                'deskripsi' => 'Joint box towards Palur (east)',
+                'latitude' => -7.5710,
+                'longitude' => 110.8810,
+                'city' => 'Karanganyar',
+                'province' => 'Jawa Tengah',
+                'country' => 'Indonesia',
+                'geocoded_at' => now(),
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ];
+
+        DB::table('fo_lokasis')->insert($lokasis);
+
+        // Get the inserted records with their auto-generated IDs
+        $insertedLokasis = DB::table('fo_lokasis')
+            ->whereIn('nama_lokasi', array_column($lokasis, 'nama_lokasi'))
+            ->orderBy('id')
+            ->get()
+            ->toArray();
+
+        return $insertedLokasis;
+    }
+
+    protected function seedJointBoxes(array $odcs, array $odps, array $kabelOdcs): void
+    {
+        $jointBoxes = [];
+        $id = 1;
+
+        // Create joint box locations first (returns inserted lokasi rows)
+        $jointBoxLokasis = $this->seedJointBoxLokasis();
+
+        // 1) Joint box for ODC↔ODC: between ODC Banjarsari and ODC Laweyan (shared Solo Ring A)
+        $jointBoxes[] = [
+            'id' => $id++,
+            'lokasi_id' => $jointBoxLokasis[0]->id, // Gladag
+            'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
+            'odc_id' => $odcs[0]['id'], // ODC Banjarsari
+            'odp_id' => null,
+            'nama_joint_box' => 'Joint Box Banjarsari-Laweyan',
+            'deskripsi' => 'Joint box connecting ODC Banjarsari and ODC Laweyan via Solo Ring A',
+            'status' => 'active',
+            'deleted_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        // 2) Joint box for ODC→ODP: ODC Banjarsari to ODP Manahan
+        $jointBoxes[] = [
+            'id' => $id++,
+            'lokasi_id' => $jointBoxLokasis[1]->id, // Gilingan
+            'kabel_odc_id' => $kabelOdcs[0]['id'],
+            'odc_id' => $odcs[0]['id'], // ODC Banjarsari
+            'odp_id' => $odps[0]['id'], // ODP Manahan
+            'nama_joint_box' => 'Joint Box Manahan',
+            'deskripsi' => 'Joint box routing ODC Banjarsari to ODP Manahan',
+            'status' => 'active',
+            'deleted_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        // 3) Joint box for ODC→ODP: ODC Jebres to ODP Pasar Kliwon (east side)
+        $jointBoxes[] = [
+            'id' => $id++,
+            'lokasi_id' => $jointBoxLokasis[2]->id, // Palur
+            'kabel_odc_id' => $kabelOdcs[1]['id'], // Solo Ring B
+            'odc_id' => $odcs[2]['id'], // ODC Jebres
+            'odp_id' => $odps[2]['id'], // ODP Pasar Kliwon
+            'nama_joint_box' => 'Joint Box Pasar Kliwon',
+            'deskripsi' => 'Joint box routing ODC Jebres to ODP Pasar Kliwon',
+            'status' => 'active',
+            'deleted_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        DB::table('fo_joint_boxes')->insert($jointBoxes);
     }
 }

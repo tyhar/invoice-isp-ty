@@ -21,7 +21,10 @@ interface FoJointBoxForm {
     lokasi_latitude: string;
     lokasi_longitude: string;
     kabel_odc_id: string;
+    odc_id: string;
+    odp_id: string;
     nama_joint_box: string;
+    deskripsi: string;
     status: 'active' | 'archived';
 }
 
@@ -33,6 +36,18 @@ interface LokasiOption {
 interface KabelOdcOption {
     id: string;
     nama_kabel: string;
+}
+
+interface OdcOption {
+    id: string;
+    nama_odc: string;
+    lokasi_name?: string;
+}
+
+interface OdpOption {
+    id: string;
+    nama_odp: string;
+    lokasi_name?: string;
 }
 
 export default function Create() {
@@ -53,6 +68,8 @@ export default function Create() {
         lokasi_latitude: '',
         lokasi_longitude: '',
         kabel_odc_id: '',
+        odc_id: '',
+        odp_id: '',
         nama_joint_box: '',
         deskripsi: '',
     });
@@ -60,24 +77,48 @@ export default function Create() {
     const [isBusy, setIsBusy] = useState(false);
     const [lokasis, setLokasis] = useState<LokasiOption[]>([]);
     const [kabelOdcs, setKabelOdcs] = useState<KabelOdcOption[]>([]);
+    const [odcs, setOdcs] = useState<OdcOption[]>([]);
+    const [odpss, setOdpss] = useState<OdpOption[]>([]);
 
     useEffect(() => {
-        request('GET', endpoint('/api/v1/fo-lokasis'))
-            .then((res: any) => {
-                setLokasis(res.data.data.map((l: any) => ({ id: String(l.id), nama_lokasi: l.nama_lokasi })));
-            })
-            .catch(() => toast.error('error refresh page'));
-        request('GET', endpoint('/api/v1/fo-kabel-odcs'))
-            .then((res: any) => {
-                setKabelOdcs(res.data.data.map((k: any) => ({ id: String(k.id), nama_kabel: k.nama_kabel })));
-            })
-            .catch(() => toast.error('error refresh page'));
+        // Fetch all required options
+        Promise.all([
+            request('GET', endpoint('/api/v1/fo-lokasis')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs')),
+            request('GET', endpoint('/api/v1/fo-odcs')),
+            request('GET', endpoint('/api/v1/fo-odps'))
+        ])
+        .then(([lokasiRes, kabelRes, odcRes, odpRes]: any[]) => {
+            setLokasis(lokasiRes.data.data.map((l: any) => ({
+                id: String(l.id),
+                nama_lokasi: l.nama_lokasi
+            })));
+            setKabelOdcs(kabelRes.data.data.map((k: any) => ({
+                id: String(k.id),
+                nama_kabel: k.nama_kabel
+            })));
+            setOdcs(odcRes.data.data.map((o: any) => ({
+                id: String(o.id),
+                nama_odc: o.nama_odc,
+                lokasi_name: o.lokasi?.nama_lokasi,
+                kabel_odc_id: o.kabel_odc_id ? String(o.kabel_odc_id) : undefined,
+            })));
+            setOdpss(odpRes.data.data.map((p: any) => ({
+                id: String(p.id),
+                nama_odp: p.nama_odp,
+                lokasi_name: p.lokasi?.nama_lokasi,
+                odc_id: p.odc_id ? String(p.odc_id) : undefined,
+            })));
+        })
+        .catch(() => toast.error('error refresh page'));
     }, []);
 
     const postJointBox = (lokasi_id: string) => {
         request('POST', endpoint('/api/v1/fo-joint-boxes'), {
             lokasi_id,
             kabel_odc_id: form.kabel_odc_id,
+            odc_id: form.odc_id || null,
+            odp_id: form.odp_id || null,
             nama_joint_box: form.nama_joint_box,
             deskripsi: form.deskripsi,
             status: 'active', // always set to active
@@ -144,6 +185,8 @@ export default function Create() {
                         setErrors={setErrors}
                         lokasis={lokasis}
                         kabelOdcs={kabelOdcs}
+                        odcs={odcs}
+                        odpss={odpss}
                     />
                 </form>
                 {isBusy && <Spinner />}

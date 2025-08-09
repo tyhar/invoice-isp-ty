@@ -5,19 +5,8 @@ import { Default } from '$app/components/layouts/Default';
 import { DataTable2 } from '$app/components/DataTable2';
 import { useFoJointBoxBulkActions } from '../common/hooks/useFoJointBoxBulkActions';
 import { useFoJointBoxActions } from '../common/hooks/useFoJointBoxActions';
-import { useFoJointBoxColumns } from '../common/hooks2';
+import { useFoJointBoxColumns, FoJointBox } from '../common/hooks2';
 import { foJointBoxResource } from '../common/atoms';
-
-interface FoJointBox {
-    id: string;
-    nama_joint_box: string;
-    lokasi: { id: number; nama_lokasi: string } | null;
-    kabel_odc: { id: number; nama_kabel: string } | null;
-    status: 'active' | 'archived';
-    created_at: string;
-    updated_at: string;
-    deleted_at?: string | null;
-}
 
 export default function FoJointBoxes() {
     useTitle('FO Joint Box');

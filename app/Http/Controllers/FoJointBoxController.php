@@ -43,11 +43,12 @@ class FoJointBoxController extends Controller
             }
         });
 
-        // Optional text filtering on nama_joint_box, lokasi.nama_lokasi, lokasi.deskripsi, kabelOdc.nama_kabel
+        // Optional text filtering on nama_joint_box, deskripsi, lokasi.nama_lokasi, lokasi.deskripsi, kabelOdc.nama_kabel
         if ($request->filled('filter')) {
             $term = $request->query('filter');
             $query->where(function ($q) use ($term) {
                 $q->where('nama_joint_box', 'LIKE', "%{$term}%")
+                  ->orWhere('deskripsi', 'LIKE', "%{$term}%")
                   ->orWhereHas('lokasi', function ($q2) use ($term) {
                       $q2->where('nama_lokasi', 'LIKE', "%{$term}%")
                          ->orWhere('deskripsi', 'LIKE', "%{$term}%");
@@ -76,7 +77,7 @@ class FoJointBoxController extends Controller
         }
 
         $paginator = $query
-            ->with(['lokasi', 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs'])
+            ->with(['lokasi', 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs', 'odc.lokasi', 'odp.lokasi'])
             ->paginate($perPage)
             ->appends($request->only(['filter', 'sort', 'per_page', 'status']));
 
@@ -85,6 +86,8 @@ class FoJointBoxController extends Controller
                 'id' => $j->id,
                 'nama_joint_box' => $j->nama_joint_box,
                 'deskripsi' => $j->deskripsi,
+                'odc_id' => $j->odc_id,
+                'odp_id' => $j->odp_id,
                 'lokasi' => $j->lokasi ? [
                     'id' => $j->lokasi->id,
                     'nama_lokasi' => $j->lokasi->nama_lokasi,
@@ -117,6 +120,27 @@ class FoJointBoxController extends Controller
                         ];
                     })->toArray(),
                 ] : null,
+                'odc' => $j->odc ? [
+                    'id' => $j->odc->id,
+                    'nama_odc' => $j->odc->nama_odc,
+                    'tipe_splitter' => $j->odc->tipe_splitter,
+                    'lokasi' => $j->odc->lokasi ? [
+                        'id' => $j->odc->lokasi->id,
+                        'nama_lokasi' => $j->odc->lokasi->nama_lokasi,
+                        'latitude' => $j->odc->lokasi->latitude,
+                        'longitude' => $j->odc->lokasi->longitude,
+                    ] : null,
+                ] : null,
+                'odp' => $j->odp ? [
+                    'id' => $j->odp->id,
+                    'nama_odp' => $j->odp->nama_odp,
+                    'lokasi' => $j->odp->lokasi ? [
+                        'id' => $j->odp->lokasi->id,
+                        'nama_lokasi' => $j->odp->lokasi->nama_lokasi,
+                        'latitude' => $j->odp->lokasi->latitude,
+                        'longitude' => $j->odp->lokasi->longitude,
+                    ] : null,
+                ] : null,
             ];
         }, $paginator->items());
 
@@ -142,6 +166,8 @@ class FoJointBoxController extends Controller
         $data = $request->validate([
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'kabel_odc_id' => 'required|exists:fo_kabel_odcs,id',
+            'odc_id' => 'nullable|exists:fo_odcs,id',
+            'odp_id' => 'nullable|exists:fo_odps,id',
             'nama_joint_box' => 'required|string|max:255',
             'deskripsi' => 'nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
@@ -150,13 +176,15 @@ class FoJointBoxController extends Controller
             $data['status'] = 'active';
         }
         $j = FoJointBox::create($data);
-        $j->load(['lokasi', 'kabelOdc']);
+        $j->load(['lokasi', 'kabelOdc', 'odc.lokasi', 'odp.lokasi']);
         return response()->json([
             'status' => 'success',
             'data' => [
                 'id' => $j->id,
                 'lokasi_id' => $j->lokasi_id,
                 'kabel_odc_id' => $j->kabel_odc_id,
+                'odc_id' => $j->odc_id,
+                'odp_id' => $j->odp_id,
                 'nama_joint_box' => $j->nama_joint_box,
                 'deskripsi' => $j->deskripsi,
                 'status' => $j->status,
@@ -174,7 +202,7 @@ class FoJointBoxController extends Controller
     {
         $j = FoJointBox::withTrashed()->findOrFail($id);
         // Deep eager-load: kabelOdc > kabelTubeOdcs > kabelCoreOdcs
-        $j->load(['lokasi', 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs']);
+        $j->load(['lokasi', 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs', 'odc.lokasi', 'odp.lokasi']);
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -231,6 +259,35 @@ class FoJointBoxController extends Controller
                         ];
                     })->toArray(),
                 ] : null,
+                'odc_id' => $j->odc_id,
+                'odc' => $j->odc ? [
+                    'id' => $j->odc->id,
+                    'nama_odc' => $j->odc->nama_odc,
+                    'deskripsi' => $j->odc->deskripsi,
+                    'tipe_splitter' => $j->odc->tipe_splitter,
+                    'status' => $j->odc->status,
+                    'lokasi' => $j->odc->lokasi ? [
+                        'id' => $j->odc->lokasi->id,
+                        'nama_lokasi' => $j->odc->lokasi->nama_lokasi,
+                    ] : null,
+                    'created_at' => $j->odc->created_at?->toDateTimeString(),
+                    'updated_at' => $j->odc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $j->odc->deleted_at?->toDateTimeString(),
+                ] : null,
+                'odp_id' => $j->odp_id,
+                'odp' => $j->odp ? [
+                    'id' => $j->odp->id,
+                    'nama_odp' => $j->odp->nama_odp,
+                    'deskripsi' => $j->odp->deskripsi,
+                    'status' => $j->odp->status,
+                    'lokasi' => $j->odp->lokasi ? [
+                        'id' => $j->odp->lokasi->id,
+                        'nama_lokasi' => $j->odp->lokasi->nama_lokasi,
+                    ] : null,
+                    'created_at' => $j->odp->created_at?->toDateTimeString(),
+                    'updated_at' => $j->odp->updated_at?->toDateTimeString(),
+                    'deleted_at' => $j->odp->deleted_at?->toDateTimeString(),
+                ] : null,
                 'nama_joint_box' => $j->nama_joint_box,
                 'deskripsi' => $j->deskripsi,
                 'status' => $j->status,
@@ -250,18 +307,22 @@ class FoJointBoxController extends Controller
         $data = $request->validate([
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'kabel_odc_id' => 'sometimes|exists:fo_kabel_odcs,id',
+            'odc_id' => 'nullable|exists:fo_odcs,id',
+            'odp_id' => 'nullable|exists:fo_odps,id',
             'nama_joint_box' => 'sometimes|string|max:255',
             'deskripsi' => 'sometimes|nullable|string|max:255',
             'status' => 'sometimes|in:active,archived',
         ]);
         $j->update($data);
-        $j->refresh()->load(['lokasi', 'kabelOdc']);
+        $j->refresh()->load(['lokasi', 'kabelOdc', 'odc.lokasi', 'odp.lokasi']);
         return response()->json([
             'status' => 'success',
             'data' => [
                 'id' => $j->id,
                 'lokasi_id' => $j->lokasi_id,
                 'kabel_odc_id' => $j->kabel_odc_id,
+                'odc_id' => $j->odc_id,
+                'odp_id' => $j->odp_id,
                 'nama_joint_box' => $j->nama_joint_box,
                 'deskripsi' => $j->deskripsi,
                 'status' => $j->status,

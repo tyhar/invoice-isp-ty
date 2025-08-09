@@ -14,6 +14,8 @@ class FoJointBox extends Model
     protected $fillable = [
         'lokasi_id',
         'kabel_odc_id',
+        'odc_id',
+        'odp_id',
         'nama_joint_box',
         'deskripsi',
         'status',
@@ -25,6 +27,8 @@ class FoJointBox extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deskripsi'  => 'string',
+        'odc_id'     => 'integer',
+        'odp_id'     => 'integer',
     ];
 
     /**
@@ -41,5 +45,21 @@ class FoJointBox extends Model
     public function kabelOdc()
     {
         return $this->belongsTo(FoKabelOdc::class, 'kabel_odc_id');
+    }
+
+    /**
+     * Each JointBox may connect FROM one ODC.
+     */
+    public function odc()
+    {
+        return $this->belongsTo(FoOdc::class, 'odc_id');
+    }
+
+    /**
+     * Each JointBox may connect TO one ODP.
+     */
+    public function odp()
+    {
+        return $this->belongsTo(FoOdp::class, 'odp_id');
     }
 }

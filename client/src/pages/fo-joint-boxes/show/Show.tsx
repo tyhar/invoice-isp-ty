@@ -75,6 +75,47 @@ export default function Show() {
                     ) : (
                         <div className="ml-4">-</div>
                     )}
+                    <hr className="my-2" />
+                    <div className="font-semibold">ODC (Optional Connection FROM)</div>
+                    {data.odc ? (
+                        <div className="ml-4 space-y-1">
+                            <div><b>ID:</b> {data.odc.id}</div>
+                            <div><b>Nama ODC:</b> {data.odc.nama_odc}</div>
+                            <div><b>Tipe Splitter:</b> {data.odc.tipe_splitter ?? '-'}</div>
+                            {data.odc.lokasi && (
+                                <>
+                                    <div className="font-medium mt-2">Lokasi ODC:</div>
+                                    <div className="ml-2 space-y-1">
+                                        <div><b>Nama Lokasi:</b> {data.odc.lokasi.nama_lokasi}</div>
+                                        <div><b>Latitude:</b> {data.odc.lokasi.latitude}</div>
+                                        <div><b>Longitude:</b> {data.odc.lokasi.longitude}</div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="ml-4">-</div>
+                    )}
+                    <hr className="my-2" />
+                    <div className="font-semibold">ODP (Optional Connection TO)</div>
+                    {data.odp ? (
+                        <div className="ml-4 space-y-1">
+                            <div><b>ID:</b> {data.odp.id}</div>
+                            <div><b>Nama ODP:</b> {data.odp.nama_odp}</div>
+                            {data.odp.lokasi && (
+                                <>
+                                    <div className="font-medium mt-2">Lokasi ODP:</div>
+                                    <div className="ml-2 space-y-1">
+                                        <div><b>Nama Lokasi:</b> {data.odp.lokasi.nama_lokasi}</div>
+                                        <div><b>Latitude:</b> {data.odp.lokasi.latitude}</div>
+                                        <div><b>Longitude:</b> {data.odp.lokasi.longitude}</div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="ml-4">-</div>
+                    )}
                 </div>
             </Container>
         </Default>
