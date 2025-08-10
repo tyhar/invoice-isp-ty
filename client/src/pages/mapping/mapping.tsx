@@ -42,6 +42,11 @@ interface MarkerData {
   odc_id?: string;
 }
 
+interface ODC {
+  id: number;
+  nama_odc: string;
+}
+
 interface AddMarkerFormProps {
 
   mode: 'client' | 'odp' | 'odc';
@@ -71,6 +76,8 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
   const [form, setForm] = useState({
     nama_lokasi: initialData?.nama_lokasi || '',
     deskripsi: initialData?.deskripsi || '',
+    deskripsi_odc: mode === 'odc' ? initialData?.deskripsi || '' : '',
+    deskripsi_odp: mode === 'odp' ? initialData?.deskripsi || '' : '',
     nama: initialData?.nama_client || initialData?.nama_odp || initialData?.nama_odc || '',
     alamat: initialData?.alamat || '',
     odp_id: initialData?.odp_id || '',
@@ -80,6 +87,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
     longitude: initialData?.longitude || '',
     client_id: initialData?.client_id || '',
     kabel_odc_id: initialData?.kabel_odc_id || '',
+    odc_id: initialData?.odc_id || '',
   });
 
   const allowMapClick = !position && form.nama_lokasi.trim() === '' && form.nama.trim() === '';
@@ -88,6 +96,7 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
   const [odcCoreList, setOdcCoreList] = useState<any[]>([]);
   const [clientList, setClientList] = useState<any[]>([]);
   const [kabelOdcList, setKabelOdcList] = useState<any[]>([]);
+  const [odcList, setOdcList] = useState<ODC[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
 
 
@@ -105,13 +114,19 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
           setOdpList(odpRes.data.data);
           setClientList(clientRes.data.data);
         } else if (mode === 'odp') {
-          const res = await axios.get(`${api}/api/v1/fo-kabel-core-odcs/no-odp`, headers);
-          setOdcCoreList(res.data.data);
-        } else if (mode === 'odc') {
-          const [res] = await Promise.all([
-            axios.get(`${api}/api/v1/fo-kabel-odcs`, headers),
+          const [coreRes, odcRes] = await Promise.all([
+            axios.get(`${api}/api/v1/fo-kabel-core-odcs`, headers),
+            axios.get(`${api}/api/v1/fo-odcs`, headers),
           ]);
-          setKabelOdcList(res.data.data);
+          setOdcCoreList(coreRes.data.data);
+          setOdcList(odcRes.data.data);
+        } else if (mode === 'odc') {
+          const [kabelRes, odcRes] = await Promise.all([
+            axios.get(`${api}/api/v1/fo-kabel-odcs`, headers),
+            axios.get(`${api}/api/v1/fo-odcs`, headers),
+          ]);
+          setKabelOdcList(kabelRes.data.data);
+          setOdcList(odcRes.data.data);
         }
       } catch (error) {
         console.error(error);
@@ -190,7 +205,9 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             {
               lokasi_id: initialData?.lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
+              odc_id: form.odc_id || null,
               nama_odp: form.nama,
+              deskripsi: form.deskripsi_odp,
             },
             headers
           );
@@ -199,9 +216,11 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             `${api}/api/v1/fo-odcs/${editingId}`,
             {
               lokasi_id: initialData?.lokasi_id,
+              odc_id: form.odc_id || null,
               kabel_odc_id: form.kabel_odc_id,
               nama_odc: form.nama,
               tipe_splitter: form.tipe_splitter,
+              deskripsi: form.deskripsi_odc,
             },
             headers
           );
@@ -240,7 +259,9 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             {
               lokasi_id,
               kabel_core_odc_id: form.kabel_core_odc_id,
+              odc_id: form.odc_id || null,
               nama_odp: form.nama,
+              deskripsi: form.deskripsi_odp,
             },
             headers
           );
@@ -249,9 +270,11 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             `${api}/api/v1/fo-odcs`,
             {
               lokasi_id,
+              odc_id: form.odc_id || null,
               kabel_odc_id: form.kabel_odc_id,
               nama_odc: form.nama,
               tipe_splitter: form.tipe_splitter,
+              deskripsi: form.deskripsi_odc,
             },
             headers
           );
@@ -425,6 +448,16 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
             {mode === 'odp' && (
               <>
                 <div>
+                  <label className="block mb-1">Deskripsi ODP</label>
+                  <input
+                    type="text"
+                    className="w-full border p-1"
+                    placeholder="Deskripsi ODP"
+                    value={form.deskripsi_odp}
+                    onChange={(e) => setForm({ ...form, deskripsi_odp: e.target.value })}
+                  />
+                </div>
+                <div>
                   <label className="block mb-1">Kabel Core ODC</label>
                   <select
                     className="w-full border p-1"
@@ -440,11 +473,38 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
                     ))}
                   </select>
                 </div>
+
+                <div>
+                  <label className="block mb-1">ODC ID (Opsional)</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.odc_id}
+                    onChange={(e) => setForm({ ...form, odc_id: e.target.value })}
+                  >
+                    <option value="">Pilih ODC</option>
+                    {odcList.map((odc) => (
+                      <option key={odc.id} value={odc.id}>
+                        {odc.nama_odc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
               </>
             )}
 
             {mode === 'odc' && (
               <>
+                <div>
+                  <label className="block mb-1">Deskripsi ODC</label>
+                  <input
+                    type="text"
+                    className="w-full border p-1"
+                    placeholder="Deskripsi ODC"
+                    value={form.deskripsi_odc}
+                    onChange={(e) => setForm({ ...form, deskripsi_odc: e.target.value })}
+                  />
+                </div>
                 <div>
                   <label className="block mb-1">Kabel ODC</label>
                   <select
@@ -457,6 +517,22 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
                     {kabelOdcList.map((kabel) => (
                       <option key={kabel.id} value={kabel.id}>
                         {kabel.nama_kabel}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block mb-1">ODC ID (Opsional)</label>
+                  <select
+                    className="w-full border p-1"
+                    value={form.odc_id}
+                    onChange={(e) => setForm({ ...form, odc_id: e.target.value })}
+                  >
+                    <option value="">Pilih ODC</option>
+                    {odcList.map((odc) => (
+                      <option key={odc.id} value={odc.id}>
+                        {odc.nama_odc}
                       </option>
                     ))}
                   </select>
@@ -951,7 +1027,7 @@ const MappingPage: React.FC = () => {
             Set Center Map
           </button>
         </div>
-        <div className="flex gap-4 w-full max-w-2xl">
+        <div className="flex gap-4 w-full max-w-xl">
           <div className="w-1/2">
             <Select
               placeholder="Pilih Provinsi"
@@ -994,9 +1070,9 @@ const MappingPage: React.FC = () => {
           onMouseDown={(e) => {
             // Don't start dragging if clicking on interactive elements
             if ((e.target as HTMLElement).tagName === 'INPUT' ||
-                (e.target as HTMLElement).tagName === 'BUTTON' ||
-                (e.target as HTMLElement).closest('button') ||
-                (e.target as HTMLElement).closest('input')) {
+              (e.target as HTMLElement).tagName === 'BUTTON' ||
+              (e.target as HTMLElement).closest('button') ||
+              (e.target as HTMLElement).closest('input')) {
               return;
             }
             setIsDraggingLegend(true);
@@ -1040,15 +1116,6 @@ const MappingPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <div className="w-4 h-0.5 bg-fuchsia-500 border-t border-dashed border-fuchsia-500"></div>
                 <span>ODC ➝ ODC</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span>• Direct: ODC→ODC (green)</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span>• Joint Box: ODC→JointBox→ODC (orange)</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
-                <span>• Legacy: Same cable group (gray)</span>
               </div>
             </div>
             <div className="flex items-center gap-2 mt-2">
@@ -1176,9 +1243,11 @@ const MappingPage: React.FC = () => {
                   <Popup>
                     <div className="text-sm">
                       <strong>ODP:</strong> {odp.nama_odp}<br />
+                      <strong>Deskripsi:</strong> {odp.deskripsi}<br />
                       <strong>Lokasi:</strong> {odp.lokasi.nama_lokasi}<br />
-                      <strong>Deskripsi:</strong> {odp.lokasi.deskripsi}<br />
                       <strong>Terhubung ke ODC:</strong> {odp.odc?.nama_odc}<br />
+                      <strong>Kabel Core ODC:</strong> {odp.kabel_core_odc?.warna_core}<br />
+                      <strong>Kabel Tube ODC:</strong> {odp.kabel_core_odc?.kabel_tube_odc?.warna_tube}<br />
                       <div className="mt-2 flex gap-2">
                         <button
                           className="bg-yellow-400 px-2 py-1 rounded text-xs"
@@ -1221,8 +1290,14 @@ const MappingPage: React.FC = () => {
                   <Popup>
                     <div className="text-sm">
                       <strong>ODC:</strong> {odc.nama_odc}<br />
+                      <strong>Deskripsi:</strong> {odc.deskripsi}<br />
                       <strong>Lokasi:</strong> {odc.lokasi.nama_lokasi}<br />
-                      <strong>Deskripsi:</strong> {odc.lokasi.deskripsi}<br />
+                      <strong>Kabel ODC:</strong> {odc.kabel_odc?.nama_kabel}<br />
+                      <strong>Tipe Kabel:</strong> {odc.kabel_odc?.tipe_kabel}<br />
+                      <strong>Panjang Kabel:</strong> {odc.kabel_odc?.panjang_kabel} m<br />
+                      <strong>Jumlah Kabel Tube:</strong> {odc.kabel_odc?.jumlah_tube}<br />
+                      <strong>Jumlah Kabel Core di Tube:</strong> {odc.kabel_odc?.jumlah_core_in_tube}<br />
+
                       <div className="mt-2 flex gap-2">
                         <button
                           className="bg-yellow-400 px-2 py-1 rounded text-xs"
@@ -1477,13 +1552,13 @@ const MappingPage: React.FC = () => {
                       Dari: {connection.from.nama_odc}<br />
                       Ke: {connection.to.nama_odc}<br />
                       {connection.isDirect ? (
-                        <span style={{color: 'green'}}>Direct Connection</span>
+                        <span style={{ color: 'green' }}>Direct Connection</span>
                       ) : connection.jointBox ? (
                         <>
-                          <span style={{color: 'orange'}}>Via Joint Box: {connection.jointBox.nama_joint_box}</span><br />
+                          <span style={{ color: 'orange' }}>Via Joint Box: {connection.jointBox.nama_joint_box}</span><br />
                         </>
                       ) : (
-                        <span style={{color: 'gray'}}>Legacy Connection (same cable)</span>
+                        <span style={{ color: 'gray' }}>Legacy Connection (same cable)</span>
                       )}
                       <br />
                       <span>Kabel ODC ID: {connection.kabel_odc_id}</span><br />
@@ -1563,6 +1638,8 @@ const MappingPage: React.FC = () => {
                         <span>Via Joint Box: {jointBox.nama_joint_box}</span><br />
                       </>
                     )}
+                    Kabel Core ODC: {odp.kabel_core_odc?.warna_core}<br />
+                    Kabel Tube ODC: {odp.kabel_core_odc?.kabel_tube_odc?.warna_tube}<br />
                     <span>Jarak: {distance.toFixed(2)} km</span>
                   </div>
                 </Popup>
@@ -1668,6 +1745,19 @@ const MappingPage: React.FC = () => {
             <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
               <div className="bg-white rounded-lg shadow-md p-6 w-[300px]">
                 <h2 className="text-lg font-semibold mb-4">Set Map Center</h2>
+                {/* Info posisi sekarang */}
+                {selectedCenter && (
+                  <div className="mb-3 text-sm text-gray-800 bg-blue-50 border border-blue-200 rounded-md p-3">
+                    <p>
+                      Latitude saat ini:{" "}
+                      <span className="font-semibold text-blue-700">{selectedCenter[0]}</span>
+                    </p>
+                    <p>
+                      Longitude saat ini:{" "}
+                      <span className="font-semibold text-blue-700">{selectedCenter[1]}</span>
+                    </p>
+                  </div>
+                )}
                 <div className="flex flex-col gap-2">
                   <input
                     type="number"
