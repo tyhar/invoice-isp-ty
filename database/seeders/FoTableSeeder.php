@@ -277,12 +277,13 @@ class FoTableSeeder extends Seeder
 
     protected function seedOdcs(array $odcLokasis, array $kabelOdcs): array
     {
-        // ODC1 and ODC2 share kabel_odc_id=1 (Solo Ring A), ODC3 uses kabel_odc_id=2 (Solo Ring B)
+        // First, create ODCs without odc_id to avoid foreign key constraint violations
         $odcs = [
             [
                 'id' => 1,
                 'lokasi_id' => $odcLokasis[0]['id'],
                 'kabel_odc_id' => $kabelOdcs[0]['id'],
+                'odc_id' => null, // Will be updated after all ODCs are created
                 'nama_odc' => 'ODC Banjarsari',
                 'deskripsi' => 'ODC di kawasan Banjarsari',
                 'tipe_splitter' => '1:8',
@@ -295,6 +296,7 @@ class FoTableSeeder extends Seeder
                 'id' => 2,
                 'lokasi_id' => $odcLokasis[1]['id'],
                 'kabel_odc_id' => $kabelOdcs[0]['id'],
+                'odc_id' => null, // Will be updated after all ODCs are created
                 'nama_odc' => 'ODC Laweyan',
                 'deskripsi' => 'ODC di kawasan Laweyan',
                 'tipe_splitter' => '1:8',
@@ -306,7 +308,8 @@ class FoTableSeeder extends Seeder
             [
                 'id' => 3,
                 'lokasi_id' => $odcLokasis[2]['id'],
-                'kabel_odc_id' => $kabelOdcs[1]['id'],
+                'kabel_odc_id' => $kabelOdcs[0]['id'], // Same cable as others for ring topology
+                'odc_id' => null, // Will be updated after all ODCs are created
                 'nama_odc' => 'ODC Jebres',
                 'deskripsi' => 'ODC di kawasan Jebres',
                 'tipe_splitter' => '1:8',
@@ -317,6 +320,15 @@ class FoTableSeeder extends Seeder
             ],
         ];
         DB::table('fo_odcs')->insert($odcs);
+
+        // Now update the odc_id references to create a realistic ring topology
+        // ODC Banjarsari connects to ODC Laweyan (forming the ring)
+        DB::table('fo_odcs')->where('id', 1)->update(['odc_id' => 2]); // ODC Banjarsari → ODC Laweyan
+        // ODC Laweyan connects to ODC Jebres (continuing the ring)
+        DB::table('fo_odcs')->where('id', 2)->update(['odc_id' => 3]); // ODC Laweyan → ODC Jebres
+        // ODC Jebres connects back to ODC Banjarsari (completing the ring)
+        DB::table('fo_odcs')->where('id', 3)->update(['odc_id' => 1]); // ODC Jebres → ODC Banjarsari (ring topology)
+
         return $odcs;
     }
 
@@ -392,8 +404,12 @@ class FoTableSeeder extends Seeder
         // Map each ODP to a core and to a related ODC (so ODC→ODP lines appear)
         foreach ($odpLokasis as $index => $lokasi) {
             $coreOdc = $coreOdcs[$index] ?? null; // first few cores
-            // Alternate ODCs: first two ODPs to ODC1, last to ODC3
-            $odc = $index < 2 ? $odcs[0] : $odcs[2];
+
+            // Realistic ODC assignments based on geographical proximity:
+            // ODP Manahan (index 0) → ODC Banjarsari (closest)
+            // ODP Serengan (index 1) → ODC Laweyan (closest)
+            // ODP Pasar Kliwon (index 2) → ODC Jebres (closest)
+            $odc = $odcs[$index];
 
             $odps[] = [
                 'id' => $id++,
@@ -437,13 +453,14 @@ class FoTableSeeder extends Seeder
 
     protected function seedJointBoxLokasis(): array
     {
-        // Joint box locations around Surakarta
+        // Realistic joint box locations positioned along cable routes
+        // These are positioned between ODCs and ODPs, not randomly far away
         $lokasis = [
             [
-                'nama_lokasi' => 'Joint Box Gladag',
-                'deskripsi' => 'Joint box near Gladag (center of Solo)',
-                'latitude' => -7.5733,
-                'longitude' => 110.8236,
+                'nama_lokasi' => 'Joint Box Banjarsari-Laweyan',
+                'deskripsi' => 'Joint box along Solo Ring A cable route between ODC Banjarsari and ODC Laweyan',
+                'latitude' => -7.5565, // Midpoint between Banjarsari (-7.55113) and Laweyan (-7.56194)
+                'longitude' => 110.8077, // Midpoint between Banjarsari (110.81373) and Laweyan (110.80167)
                 'city' => 'Surakarta',
                 'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
@@ -454,10 +471,10 @@ class FoTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'nama_lokasi' => 'Joint Box Gilingan',
-                'deskripsi' => 'Joint box in Gilingan area',
-                'latitude' => -7.5457,
-                'longitude' => 110.8160,
+                'nama_lokasi' => 'Joint Box Banjarsari-Manahan',
+                'deskripsi' => 'Joint box along cable route from ODC Banjarsari to ODP Manahan',
+                'latitude' => -7.5510, // Close to the route from Banjarsari to Manahan
+                'longitude' => 110.8063, // Between Banjarsari (110.81373) and Manahan (110.79889)
                 'city' => 'Surakarta',
                 'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
@@ -468,11 +485,39 @@ class FoTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'nama_lokasi' => 'Joint Box Palur',
-                'deskripsi' => 'Joint box towards Palur (east)',
-                'latitude' => -7.5710,
-                'longitude' => 110.8810,
-                'city' => 'Karanganyar',
+                'nama_lokasi' => 'Joint Box Jebres-PasarKliwon',
+                'deskripsi' => 'Joint box along cable route from ODC Jebres to ODP Pasar Kliwon',
+                'latitude' => -7.5682, // Between Jebres (-7.55889) and Pasar Kliwon (-7.57756)
+                'longitude' => 110.8491, // Between Jebres (110.85727) and Pasar Kliwon (110.84087)
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
+                'country' => 'Indonesia',
+                'geocoded_at' => now(),
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama_lokasi' => 'Joint Box Laweyan-Serengan',
+                'deskripsi' => 'Joint box along cable route from ODC Laweyan to ODP Serengan',
+                'latitude' => -7.5699, // Between Laweyan (-7.56194) and Serengan (-7.57795)
+                'longitude' => 110.8140, // Between Laweyan (110.80167) and Serengan (110.82635)
+                'city' => 'Surakarta',
+                'province' => 'Jawa Tengah',
+                'country' => 'Indonesia',
+                'geocoded_at' => now(),
+                'status' => 'active',
+                'deleted_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'nama_lokasi' => 'Joint Box Banjarsari-Jebres',
+                'deskripsi' => 'Joint box along Solo Ring A cable route between ODC Banjarsari and ODC Jebres',
+                'latitude' => -7.5550, // Between Banjarsari (-7.55113) and Jebres (-7.55889)
+                'longitude' => 110.8355, // Between Banjarsari (110.81373) and Jebres (110.85727)
+                'city' => 'Surakarta',
                 'province' => 'Jawa Tengah',
                 'country' => 'Indonesia',
                 'geocoded_at' => now(),
@@ -503,15 +548,17 @@ class FoTableSeeder extends Seeder
         // Create joint box locations first (returns inserted lokasi rows)
         $jointBoxLokasis = $this->seedJointBoxLokasis();
 
-        // 1) Joint box for ODC↔ODC: between ODC Banjarsari and ODC Laweyan (shared Solo Ring A)
+        // 1) Joint box for ODC↔ODC: between ODC Banjarsari and ODC Laweyan (Solo Ring A)
+        // This represents a cable splice point along the main ring
         $jointBoxes[] = [
             'id' => $id++,
-            'lokasi_id' => $jointBoxLokasis[0]->id, // Gladag
+            'lokasi_id' => $jointBoxLokasis[0]->id, // Joint Box Banjarsari-Laweyan
             'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
             'odc_id' => $odcs[0]['id'], // ODC Banjarsari
+            'odc_2_id' => $odcs[1]['id'], // ODC Laweyan
             'odp_id' => null,
-            'nama_joint_box' => 'Joint Box Banjarsari-Laweyan',
-            'deskripsi' => 'Joint box connecting ODC Banjarsari and ODC Laweyan via Solo Ring A',
+            'nama_joint_box' => 'JB-Banjarsari-Laweyan',
+            'deskripsi' => 'Cable splice joint box along Solo Ring A between ODC Banjarsari and ODC Laweyan',
             'status' => 'active',
             'deleted_at' => null,
             'created_at' => now(),
@@ -519,29 +566,67 @@ class FoTableSeeder extends Seeder
         ];
 
         // 2) Joint box for ODC→ODP: ODC Banjarsari to ODP Manahan
+        // This represents a distribution point along the feeder cable
         $jointBoxes[] = [
             'id' => $id++,
-            'lokasi_id' => $jointBoxLokasis[1]->id, // Gilingan
-            'kabel_odc_id' => $kabelOdcs[0]['id'],
+            'lokasi_id' => $jointBoxLokasis[1]->id, // Joint Box Banjarsari-Manahan
+            'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
             'odc_id' => $odcs[0]['id'], // ODC Banjarsari
+            'odc_2_id' => null,
             'odp_id' => $odps[0]['id'], // ODP Manahan
-            'nama_joint_box' => 'Joint Box Manahan',
-            'deskripsi' => 'Joint box routing ODC Banjarsari to ODP Manahan',
+            'nama_joint_box' => 'JB-Banjarsari-Manahan',
+            'deskripsi' => 'Distribution joint box routing from ODC Banjarsari to ODP Manahan',
             'status' => 'active',
             'deleted_at' => null,
             'created_at' => now(),
             'updated_at' => now(),
         ];
 
-        // 3) Joint box for ODC→ODP: ODC Jebres to ODP Pasar Kliwon (east side)
+        // 3) Joint box for ODC→ODP: ODC Jebres to ODP Pasar Kliwon
+        // This represents a distribution point along the feeder cable
         $jointBoxes[] = [
             'id' => $id++,
-            'lokasi_id' => $jointBoxLokasis[2]->id, // Palur
-            'kabel_odc_id' => $kabelOdcs[1]['id'], // Solo Ring B
+            'lokasi_id' => $jointBoxLokasis[2]->id, // Joint Box Jebres-PasarKliwon
+            'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
             'odc_id' => $odcs[2]['id'], // ODC Jebres
+            'odc_2_id' => null,
             'odp_id' => $odps[2]['id'], // ODP Pasar Kliwon
-            'nama_joint_box' => 'Joint Box Pasar Kliwon',
-            'deskripsi' => 'Joint box routing ODC Jebres to ODP Pasar Kliwon',
+            'nama_joint_box' => 'JB-Jebres-PasarKliwon',
+            'deskripsi' => 'Distribution joint box routing from ODC Jebres to ODP Pasar Kliwon',
+            'status' => 'active',
+            'deleted_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        // 4) Joint box for ODC→ODP: ODC Laweyan to ODP Serengan
+        // This represents a distribution point along the feeder cable
+        $jointBoxes[] = [
+            'id' => $id++,
+            'lokasi_id' => $jointBoxLokasis[3]->id, // Joint Box Laweyan-Serengan
+            'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
+            'odc_id' => $odcs[1]['id'], // ODC Laweyan
+            'odc_2_id' => null,
+            'odp_id' => $odps[1]['id'], // ODP Serengan
+            'nama_joint_box' => 'JB-Laweyan-Serengan',
+            'deskripsi' => 'Distribution joint box routing from ODC Laweyan to ODP Serengan',
+            'status' => 'active',
+            'deleted_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ];
+
+        // 5) Joint box for ODC↔ODC: between ODC Banjarsari and ODC Jebres (Solo Ring A)
+        // This represents another cable splice point along the main ring
+        $jointBoxes[] = [
+            'id' => $id++,
+            'lokasi_id' => $jointBoxLokasis[4]->id, // Joint Box Banjarsari-Jebres
+            'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
+            'odc_id' => $odcs[0]['id'], // ODC Banjarsari
+            'odc_2_id' => $odcs[2]['id'], // ODC Jebres
+            'odp_id' => null,
+            'nama_joint_box' => 'JB-Banjarsari-Jebres',
+            'deskripsi' => 'Cable splice joint box along Solo Ring A between ODC Banjarsari and ODC Jebres',
             'status' => 'active',
             'deleted_at' => null,
             'created_at' => now(),

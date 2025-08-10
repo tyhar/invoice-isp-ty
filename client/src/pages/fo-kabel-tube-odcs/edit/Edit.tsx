@@ -220,6 +220,7 @@ export default function Edit() {
                         setForm={setForm}
                         errors={errors}
                         odcs={odcs}
+                        mode="edit"
                     />
                 </form>
                 {isBusy && <Spinner />}

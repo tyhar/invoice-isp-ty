@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '$app/components/cards';
 import { Element } from '$app/components/cards';
-import { InputField, SelectField, Checkbox } from '$app/components/forms';
+import { InputField } from '$app/components/forms/InputField';
+import { SelectField } from '$app/components/forms/SelectField';
+import { Checkbox } from '$app/components/forms/Checkbox';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 
 export interface FoJointBoxForm {
@@ -13,6 +15,7 @@ export interface FoJointBoxForm {
     lokasi_longitude: string;
     kabel_odc_id: string;
     odc_id: string;
+    odc_2_id: string;
     odp_id: string;
     nama_joint_box: string;
     deskripsi: string;
@@ -55,6 +58,27 @@ interface Props {
 }
 
 export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, kabelOdcs, odcs, odpss }: Props) {
+    // Determine connection type and checkbox states
+    const [selectedConnectionType, setSelectedConnectionType] = useState<'odc-odc' | 'odc-odp' | ''>('');
+    const [showOdcToOdcFields, setShowOdcToOdcFields] = useState(false);
+    const [showOdcToOdpFields, setShowOdcToOdpFields] = useState(false);
+
+    // Initialize state based on existing form data (for editing)
+    useEffect(() => {
+        // Determine connection type from existing data
+        if (form.odc_2_id) {
+            setSelectedConnectionType('odc-odc');
+            setShowOdcToOdcFields(true);
+        } else if (form.odp_id) {
+            setSelectedConnectionType('odc-odp');
+            setShowOdcToOdpFields(true);
+        } else {
+            setSelectedConnectionType('');
+            setShowOdcToOdcFields(false);
+            setShowOdcToOdpFields(false);
+        }
+    }, [form.odc_2_id, form.odp_id]);
+
     const handleChange = <K extends keyof FoJointBoxForm>(field: K, value: FoJointBoxForm[K]) => {
         setForm(f => ({ ...f, [field]: value }));
         if (setErrors && errors?.errors?.[field]) {
@@ -64,6 +88,55 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                 delete rest[field];
                 return { ...prev, errors: rest };
             });
+        }
+    };
+
+    const handleConnectionTypeChange = (type: 'odc-odc' | 'odc-odp' | '') => {
+        setSelectedConnectionType(type);
+        // Clear all connection fields and checkbox states when changing type
+        setForm(f => ({
+            ...f,
+            odc_id: '',
+            odc_2_id: '',
+            odp_id: ''
+        }));
+        setShowOdcToOdcFields(false);
+        setShowOdcToOdpFields(false);
+    };
+
+    const handleOdcToOdcCheckbox = (checked: boolean) => {
+        setShowOdcToOdcFields(checked);
+        if (checked) {
+            // Enable ODC→ODC fields
+            setForm(f => ({
+                ...f,
+                odc_2_id: '' // Clear so user can select
+            }));
+        } else {
+            // Disable ODC→ODC fields
+            setForm(f => ({
+                ...f,
+                odc_id: '',
+                odc_2_id: ''
+            }));
+        }
+    };
+
+    const handleOdcToOdpCheckbox = (checked: boolean) => {
+        setShowOdcToOdpFields(checked);
+        if (checked) {
+            // Enable ODC→ODP fields
+            setForm(f => ({
+                ...f,
+                odp_id: '' // Clear so user can select
+            }));
+        } else {
+            // Disable ODC→ODP fields
+            setForm(f => ({
+                ...f,
+                odc_id: '',
+                odp_id: ''
+            }));
         }
     };
 
@@ -191,39 +264,143 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                 </SelectField>
             </Element>
 
-            <Element leftSide="ODC (Optional)">
-                <SelectField
-                    value={form.odc_id || ''}
-                    onValueChange={v => {
-                        handleChange('odc_id', v);
-                        // Reset ODP when ODC changes
-                        setForm(f => ({ ...f, odp_id: '' }));
-                    }}
-                    errorMessage={errors?.errors?.odc_id}
-                >
-                    <option value="">Pilih ODC (Optional)</option>
-                    {filteredOdcs.map(o => (
-                        <option key={o.id} value={o.id}>
-                            {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                        </option>
-                    ))}
-                </SelectField>
+            {/* Connection Type Selection */}
+            <Element leftSide="Connection Type">
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            id="odc-odc"
+                            name="connection_type"
+                            value="odc-odc"
+                            checked={selectedConnectionType === 'odc-odc'}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
+                        />
+                        <label htmlFor="odc-odc">ODC → ODC Connection</label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="radio"
+                            id="odc-odp"
+                            name="connection_type"
+                            value="odc-odp"
+                            checked={selectedConnectionType === 'odc-odp'}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
+                        />
+                        <label htmlFor="odc-odp">ODC → ODP Connection</label>
+                    </div>
+                </div>
             </Element>
 
-            <Element leftSide="ODP (Optional)">
-                <SelectField
-                    value={form.odp_id || ''}
-                    onValueChange={v => handleChange('odp_id', v)}
-                    errorMessage={errors?.errors?.odp_id}
-                >
-                    <option value="">Pilih ODP (Optional)</option>
-                    {filteredOdps.map(o => (
-                        <option key={o.id} value={o.id}>
-                            {o.nama_odp}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                        </option>
-                    ))}
-                </SelectField>
-            </Element>
+            {/* Checkboxes that appear based on radio selection */}
+            {selectedConnectionType === 'odc-odc' && (
+                <Element leftSide="Create ODC → ODC Connection">
+                    <Checkbox
+                        checked={showOdcToOdcFields}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOdcToOdcCheckbox(e.target.checked)}
+                    />
+                </Element>
+            )}
+
+            {selectedConnectionType === 'odc-odp' && (
+                <Element leftSide="Create ODC → ODP Connection">
+                    <Checkbox
+                        checked={showOdcToOdpFields}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOdcToOdpCheckbox(e.target.checked)}
+                    />
+                </Element>
+            )}
+
+            {/* ODC→ODC Fields */}
+            {showOdcToOdcFields && (
+                <>
+                    <Element leftSide="Source ODC" required>
+                        <SelectField
+                            required
+                            value={form.odc_id || ''}
+                            onValueChange={v => {
+                                handleChange('odc_id', v);
+                                // Reset dependent selections when source ODC changes
+                                setForm(f => ({ ...f, odp_id: '', odc_2_id: '' }));
+                            }}
+                            errorMessage={errors?.errors?.odc_id}
+                        >
+                            <option value="">Pilih ODC Sumber</option>
+                            {filteredOdcs.map(o => (
+                                <option key={o.id} value={o.id}>
+                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+                    <Element leftSide="Target ODC" required>
+                        <SelectField
+                            required
+                            value={form.odc_2_id}
+                            onValueChange={v => handleChange('odc_2_id', v)}
+                            errorMessage={errors?.errors?.odc_2_id}
+                        >
+                            <option value="">Pilih ODC Target</option>
+                            {filteredOdcs.filter(odc => odc.id !== form.odc_id).map(o => (
+                                <option key={o.id} value={o.id}>
+                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+                </>
+            )}
+
+            {/* ODC→ODP Fields */}
+            {showOdcToOdpFields && (
+                <>
+                    <Element leftSide="Source ODC" required>
+                        <SelectField
+                            required
+                            value={form.odc_id || ''}
+                            onValueChange={v => {
+                                handleChange('odc_id', v);
+                                // Reset dependent selections when source ODC changes
+                                setForm(f => ({ ...f, odp_id: '', odc_2_id: '' }));
+                            }}
+                            errorMessage={errors?.errors?.odc_id}
+                        >
+                            <option value="">Pilih ODC Sumber</option>
+                            {filteredOdcs.map(o => (
+                                <option key={o.id} value={o.id}>
+                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+                    <Element leftSide="Target ODP" required>
+                        <SelectField
+                            required
+                            value={form.odp_id}
+                            onValueChange={v => handleChange('odp_id', v)}
+                            errorMessage={errors?.errors?.odp_id}
+                        >
+                            <option value="">Pilih ODP Target</option>
+                            {filteredOdps.map(o => (
+                                <option key={o.id} value={o.id}>
+                                    {o.nama_odp}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+                </>
+            )}
+
+            {/* Visual feedback for connection types */}
+            {(showOdcToOdcFields || showOdcToOdpFields) && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                    <div className="text-sm text-blue-800">
+                        <strong>Active Connections:</strong>
+                        {showOdcToOdcFields && <div>• ODC → ODC</div>}
+                        {showOdcToOdpFields && <div>• ODC → ODP</div>}
+                    </div>
+                </div>
+            )}
             {/* Status field removed for consistency with other FO modules */}
         </Card>
     );

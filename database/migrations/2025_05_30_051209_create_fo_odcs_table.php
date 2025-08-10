@@ -16,6 +16,9 @@ return new class extends Migration
             $table->foreignId('lokasi_id')->constrained('fo_lokasis')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('kabel_odc_id')->nullable()->constrained('fo_kabel_odcs')->cascadeOnDelete()->cascadeOnUpdate();
 
+            // Direct ODC-to-ODC connection (for ODC chains without joint boxes)
+            $table->foreignId('odc_id')->nullable()->constrained('fo_odcs')->cascadeOnDelete()->cascadeOnUpdate();
+
             $table->string('nama_odc');
             $table->string('deskripsi')->nullable();
             $table->enum('tipe_splitter', ['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128']);

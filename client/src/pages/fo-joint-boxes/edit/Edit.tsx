@@ -10,23 +10,10 @@ import { endpoint } from '$app/common/helpers';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
-import { CreateFoJointBox } from '../common/components/CreateFoJointBox';
+import { CreateFoJointBox, FoJointBoxForm } from '../common/components/CreateFoJointBox';
 import { useQueryClient } from 'react-query';
 
-interface FoJointBoxForm {
-    create_new_lokasi: boolean;
-    lokasi_id: string;
-    lokasi_name: string;
-    lokasi_deskripsi: string;
-    lokasi_latitude: string;
-    lokasi_longitude: string;
-    kabel_odc_id: string;
-    odc_id: string;
-    odp_id: string;
-    nama_joint_box: string;
-    deskripsi: string;
-    status: 'active' | 'archived';
-}
+
 
 interface LokasiOption {
     id: string;
@@ -85,6 +72,7 @@ export default function Edit() {
                 const lokasi_id = data.lokasi?.id ? String(data.lokasi.id) : '';
                 const kabel_odc_id = data.kabel_odc?.id ? String(data.kabel_odc.id) : '';
                 const odc_id = data.odc_id ? String(data.odc_id) : '';
+                const odc_2_id = data.odc_2_id ? String(data.odc_2_id) : '';
                 const odp_id = data.odp_id ? String(data.odp_id) : '';
                 setForm({
                     create_new_lokasi: false, // always false in edit
@@ -95,6 +83,7 @@ export default function Edit() {
                     lokasi_longitude: '',
                     kabel_odc_id,
                     odc_id,
+                    odc_2_id,
                     odp_id,
                     nama_joint_box: data.nama_joint_box || '',
                     deskripsi: data.deskripsi || '',
@@ -147,8 +136,9 @@ export default function Edit() {
         request('PUT', endpoint(`/api/v1/fo-joint-boxes/${id}`), {
             lokasi_id,
             kabel_odc_id: form.kabel_odc_id,
-            odc_id: form.odc_id || null,
-            odp_id: form.odp_id || null,
+            odc_id: form.odc_id === '' ? null : form.odc_id, // Convert empty strings to null for optional fields
+            odc_2_id: form.odc_2_id === '' ? null : form.odc_2_id,
+            odp_id: form.odp_id === '' ? null : form.odp_id,
             nama_joint_box: form.nama_joint_box,
             deskripsi: form.deskripsi,
             status: form.status, // send as loaded, not editable

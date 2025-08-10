@@ -10,23 +10,10 @@ import { request } from '$app/common/helpers/request';
 import { useNavigate } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
-import { CreateFoJointBox } from '../common/components/CreateFoJointBox';
+import { CreateFoJointBox, FoJointBoxForm } from '../common/components/CreateFoJointBox';
 import { useQueryClient } from 'react-query';
 
-interface FoJointBoxForm {
-    create_new_lokasi: boolean;
-    lokasi_id: string;
-    lokasi_name: string;
-    lokasi_deskripsi: string;
-    lokasi_latitude: string;
-    lokasi_longitude: string;
-    kabel_odc_id: string;
-    odc_id: string;
-    odp_id: string;
-    nama_joint_box: string;
-    deskripsi: string;
-    status: 'active' | 'archived';
-}
+
 
 interface LokasiOption {
     id: string;
@@ -60,7 +47,7 @@ export default function Create() {
         { name: t('FO Joint Box')!, href: '/fo-joint-boxes' },
         { name: t('New FO Joint Box')!, href: '/fo-joint-boxes/create' },
     ];
-    const [form, setForm] = useState<Omit<FoJointBoxForm, 'status'>>({
+    const [form, setForm] = useState<FoJointBoxForm>({
         create_new_lokasi: false,
         lokasi_id: '',
         lokasi_name: '',
@@ -69,6 +56,7 @@ export default function Create() {
         lokasi_longitude: '',
         kabel_odc_id: '',
         odc_id: '',
+        odc_2_id: '',
         odp_id: '',
         nama_joint_box: '',
         deskripsi: '',
@@ -117,8 +105,9 @@ export default function Create() {
         request('POST', endpoint('/api/v1/fo-joint-boxes'), {
             lokasi_id,
             kabel_odc_id: form.kabel_odc_id,
-            odc_id: form.odc_id || null,
-            odp_id: form.odp_id || null,
+            odc_id: form.odc_id === '' ? null : form.odc_id, // Convert empty strings to null for optional fields
+            odc_2_id: form.odc_2_id === '' ? null : form.odc_2_id,
+            odp_id: form.odp_id === '' ? null : form.odp_id,
             nama_joint_box: form.nama_joint_box,
             deskripsi: form.deskripsi,
             status: 'active', // always set to active

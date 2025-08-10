@@ -16,10 +16,11 @@ return new class extends Migration
             $table->foreignId('lokasi_id')->constrained('fo_lokasis')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('kabel_odc_id')->constrained('fo_kabel_odcs')->cascadeOnDelete()->cascadeOnUpdate();
 
-            // Optional: specify which ODC this joint box connects FROM
+            // For ODC→ODC connections: specify which two ODCs this joint box connects
             $table->foreignId('odc_id')->nullable()->constrained('fo_odcs')->cascadeOnDelete()->cascadeOnUpdate();
+            $table->foreignId('odc_2_id')->nullable()->constrained('fo_odcs')->cascadeOnDelete()->cascadeOnUpdate();
 
-            // Optional: specify which ODP this joint box connects TO
+            // For ODC→ODP connections: specify which ODP this joint box connects TO
             $table->foreignId('odp_id')->nullable()->constrained('fo_odps')->cascadeOnDelete()->cascadeOnUpdate();
 
             $table->string('nama_joint_box');
@@ -37,8 +38,9 @@ return new class extends Migration
     {
         Schema::table('fo_joint_boxes', function (Blueprint $table) {
             $table->dropForeign(['odc_id']);
+            $table->dropForeign(['odc_2_id']);
             $table->dropForeign(['odp_id']);
-            $table->dropColumn(['odc_id', 'odp_id']);
+            $table->dropColumn(['odc_id', 'odc_2_id', 'odp_id']);
         });
         Schema::dropIfExists('fo_joint_boxes');
     }

@@ -25,6 +25,13 @@ interface KabelOdcOption {
     nama_kabel: string;
 }
 
+interface OdcOption {
+    id: number;
+    nama_odc: string;
+    lokasi_name?: string;
+    kabel_odc_id?: number;
+}
+
 export default function Create() {
     useTitle('New FO ODC');
     const [t] = useTranslation();
@@ -43,7 +50,8 @@ export default function Create() {
         lokasi_deskripsi: '',
         lokasi_latitude: '',
         lokasi_longitude: '',
-        kabel_odc_id: '', // <-- add this
+        kabel_odc_id: '',
+        odc_id: '', // <-- add this for ODC-to-ODC connections
         nama_odc: '',
         deskripsi: '',
         tipe_splitter: '1:8',
@@ -52,29 +60,36 @@ export default function Create() {
     const [values, setValues] = useState<FoOdcFormValues>(initialValues);
     const [lokasis, setLokasis] = useState<LokasiOption[]>([]);
     const [kabelOdcs, setKabelOdcs] = useState<KabelOdcOption[]>([]);
+    const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
 
     // Fetch Lokasi list
     useEffect(() => {
-        request('GET', endpoint('/api/v1/fo-lokasis'))
-            .then((res: any) => {
+        Promise.all([
+            request('GET', endpoint('/api/v1/fo-lokasis')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs')),
+            request('GET', endpoint('/api/v1/fo-odcs')),
+        ])
+            .then(([lokRes, kabelRes, odcRes]: any) => {
                 setLokasis(
-                    res.data.data.map((l: any) => ({
+                    lokRes.data.data.map((l: any) => ({
                         id: l.id,
                         nama_lokasi: l.nama_lokasi,
                     }))
                 );
-            })
-            .catch(() => {
-                toast.error('error refresh page');
-            });
-        request('GET', endpoint('/api/v1/fo-kabel-odcs'))
-            .then((res: any) => {
                 setKabelOdcs(
-                    res.data.data.map((k: any) => ({
+                    kabelRes.data.data.map((k: any) => ({
                         id: k.id,
                         nama_kabel: k.nama_kabel,
+                    }))
+                );
+                setOdcs(
+                    odcRes.data.data.map((o: any) => ({
+                        id: o.id,
+                        nama_odc: o.nama_odc,
+                        lokasi_name: o.lokasi?.nama_lokasi,
+                        kabel_odc_id: o.kabel_odc_id,
                     }))
                 );
             })
@@ -87,6 +102,7 @@ export default function Create() {
         request('POST', endpoint('/api/v1/fo-odcs'), {
             lokasi_id,
             kabel_odc_id: values.kabel_odc_id,
+            odc_id: values.odc_id === '' ? null : values.odc_id, // Convert empty string to null for optional field
             nama_odc: values.nama_odc,
             deskripsi: values.deskripsi,
             tipe_splitter: values.tipe_splitter,
@@ -155,6 +171,7 @@ export default function Create() {
                         setValues={setValues}
                         lokasis={lokasis}
                         kabelOdcs={kabelOdcs}
+                        odcs={odcs}
                         errors={errors}
                     />
                 </form>

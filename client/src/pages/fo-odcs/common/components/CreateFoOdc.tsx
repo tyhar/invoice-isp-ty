@@ -14,7 +14,8 @@ export interface FoOdcFormValues {
     lokasi_deskripsi: string;
     lokasi_latitude: string;
     lokasi_longitude: string;
-    kabel_odc_id: string; // <-- add this
+    kabel_odc_id: string;
+    odc_id: string; // <-- add this for ODC-to-ODC connections
     nama_odc: string;
     deskripsi: string;
     tipe_splitter: string;
@@ -30,18 +31,37 @@ interface KabelOdcOption {
     nama_kabel: string;
 }
 
+interface OdcOption {
+    id: number;
+    nama_odc: string;
+    lokasi_name?: string;
+    kabel_odc_id?: number; // <-- add this for filtering
+}
+
 interface Props {
     values: FoOdcFormValues;
     setValues: React.Dispatch<React.SetStateAction<FoOdcFormValues>>;
     lokasis: LokasiOption[];
     kabelOdcs: KabelOdcOption[];
+    odcs: OdcOption[]; // <-- add this for ODC selection
     errors?: ValidationBag;
 }
 
-export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: Props) {
+export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, errors }: Props) {
     const [t] = useTranslation();
     const onChange = <K extends keyof FoOdcFormValues>(field: K, value: FoOdcFormValues[K]) =>
         setValues((v) => ({ ...v, [field]: value }));
+
+
+
+    // Filter ODCs based on selected Kabel ODC
+    const filteredOdcs = odcs.filter(odc => {
+        // If no Kabel ODC is selected, show all ODCs
+        if (!values.kabel_odc_id) return true;
+
+        // Show ODCs that have the same kabel_odc_id as the selected one
+        return odc.kabel_odc_id?.toString() === values.kabel_odc_id;
+    });
 
     return (
         <Card
@@ -144,12 +164,35 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, errors }: P
                 <SelectField
                     required
                     value={values.kabel_odc_id}
-                    onValueChange={(v) => onChange('kabel_odc_id', v)}
+                    onValueChange={(v) => {
+                        onChange('kabel_odc_id', v);
+                        // Clear selected ODC when Kabel ODC changes
+                        onChange('odc_id', '');
+                    }}
                     errorMessage={errors?.errors.kabel_odc_id}
                 >
                     <option value="">{t('Pilih Kabel ODC')}</option>
                     {kabelOdcs.map((k) => (
                         <option key={k.id} value={k.id}>{k.nama_kabel}</option>
+                    ))}
+                </SelectField>
+            </Element>
+
+            <Element leftSide={t('Connected ODC')}>
+                <SelectField
+                    value={values.odc_id}
+                    onValueChange={(v) => onChange('odc_id', v)}
+                    errorMessage={errors?.errors.odc_id}
+                >
+                    <option value="">
+                        {values.kabel_odc_id && filteredOdcs.length === 0
+                            ? t('No ODCs available for selected Kabel ODC')
+                            : t('Pilih ODC (Optional)')}
+                    </option>
+                    {filteredOdcs.map((o) => (
+                        <option key={o.id} value={o.id}>
+                            {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
+                        </option>
                     ))}
                 </SelectField>
             </Element>

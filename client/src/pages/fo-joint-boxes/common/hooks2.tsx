@@ -15,6 +15,7 @@ export interface FoJointBox {
     nama_joint_box: string;
     deskripsi: string;
     odc_id?: number | null;
+    odc_2_id?: number | null;
     odp_id?: number | null;
     lokasi: {
         id: number;
@@ -36,6 +37,16 @@ export interface FoJointBox {
         jumlah_total_core?: number;
     } | null;
     odc?: {
+        id: number;
+        nama_odc: string;
+        lokasi?: {
+            id: number;
+            nama_lokasi: string;
+            latitude?: number;
+            longitude?: number;
+        } | null;
+    } | null;
+    odc2?: {
         id: number;
         nama_odc: string;
         lokasi?: {
@@ -166,8 +177,17 @@ export function useFoJointBoxColumns(): DataTableColumns<FoJointBox> {
         //     format: (_field, rec) => rec.kabel_odc?.jumlah_total_core ?? '-',
         // },
         {
+            id: 'connection_type',
+            label: t('Connection Type'),
+            format: (_field, rec) => {
+                if (rec.odc_2_id) return 'ODC → ODC';
+                if (rec.odp_id) return 'ODC → ODP';
+                return '-';
+            },
+        },
+        {
             id: 'odc',
-            label: t('ODC'),
+            label: t('Source ODC'),
             format: (_field, rec) => rec.odc?.nama_odc ?? '-',
         },
         // {
@@ -176,9 +196,13 @@ export function useFoJointBoxColumns(): DataTableColumns<FoJointBox> {
         //     format: (_field, rec) => rec.odc?.lokasi?.nama_lokasi ?? '-',
         // },
         {
-            id: 'odp',
-            label: t('ODP'),
-            format: (_field, rec) => rec.odp?.nama_odp ?? '-',
+            id: 'target',
+            label: t('Target'),
+            format: (_field, rec) => {
+                if (rec.odc_2_id) return `ODC: ${rec.odc2?.nama_odc ?? '-'}`;
+                if (rec.odp_id) return `ODP: ${rec.odp?.nama_odp ?? '-'}`;
+                return '-';
+            },
         },
         // {
         //     id: 'odp_lokasi',

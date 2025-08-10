@@ -16,6 +16,7 @@ class FoOdc extends Model
     protected $fillable = [
         'lokasi_id',
         'kabel_odc_id', // now nullable
+        'odc_id', // direct connection to another ODC
         'nama_odc',
         'deskripsi', // <-- add this
         'tipe_splitter',
@@ -26,6 +27,7 @@ class FoOdc extends Model
         'status'     => 'string',
         'deleted_at' => 'datetime',
         'deskripsi'  => 'string', // <-- add this
+        'odc_id'     => 'integer',
     ];
 
     /**
@@ -43,5 +45,21 @@ class FoOdc extends Model
     {
         // kabel_odc_id is now nullable
         return $this->belongsTo(FoKabelOdc::class, 'kabel_odc_id');
+    }
+
+    /**
+     * Each ODC may connect directly to another ODC (for ODC chains).
+     */
+    public function connectedOdc()
+    {
+        return $this->belongsTo(FoOdc::class, 'odc_id');
+    }
+
+    /**
+     * Get all ODCs that connect directly to this ODC.
+     */
+    public function connectedFromOdcs()
+    {
+        return $this->hasMany(FoOdc::class, 'odc_id');
     }
 }

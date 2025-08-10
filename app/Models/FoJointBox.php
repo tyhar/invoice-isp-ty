@@ -15,6 +15,7 @@ class FoJointBox extends Model
         'lokasi_id',
         'kabel_odc_id',
         'odc_id',
+        'odc_2_id',
         'odp_id',
         'nama_joint_box',
         'deskripsi',
@@ -28,6 +29,7 @@ class FoJointBox extends Model
         'updated_at' => 'datetime',
         'deskripsi'  => 'string',
         'odc_id'     => 'integer',
+        'odc_2_id'   => 'integer',
         'odp_id'     => 'integer',
     ];
 
@@ -48,7 +50,7 @@ class FoJointBox extends Model
     }
 
     /**
-     * Each JointBox may connect FROM one ODC.
+     * Each JointBox may connect FROM one ODC (for ODC→ODC or ODC→ODP).
      */
     public function odc()
     {
@@ -56,7 +58,15 @@ class FoJointBox extends Model
     }
 
     /**
-     * Each JointBox may connect TO one ODP.
+     * Each JointBox may connect TO a second ODC (for ODC→ODC connections).
+     */
+    public function odc2()
+    {
+        return $this->belongsTo(FoOdc::class, 'odc_2_id');
+    }
+
+    /**
+     * Each JointBox may connect TO one ODP (for ODC→ODP connections).
      */
     public function odp()
     {

@@ -1,9 +1,9 @@
 // client/src/pages/fo-kabel-odcs/common/components/CreateFoKabelOdc.tsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { InputField, SelectField } from '$app/components/forms';
+import { InputField, SelectField, Checkbox } from '$app/components/forms';
 import { TubeColorPicker } from './TubeColorPicker';
 
 interface FoKabelOdcCreate {
@@ -30,13 +30,40 @@ interface Props {
 
 export function CreateFoKabelOdc(props: Props) {
     const [t] = useTranslation();
-    const { form, setForm, errors } = props;
+    const { form, setForm, errors, mode = 'create' } = props;
+    const [showBatchTubes, setShowBatchTubes] = useState(true); // Default to true for create mode
+
+    // Initialize checkbox state based on mode and existing data
+    useEffect(() => {
+        if (mode === 'edit') {
+            // In edit mode, show the checkbox if there are existing tube colors
+            setShowBatchTubes(form.tube_colors.length > 0);
+        }
+    }, [mode, form.tube_colors.length]);
 
     const change = <K extends keyof FoKabelOdcCreate>(
         field: K,
         value: FoKabelOdcCreate[K]
     ) => {
         setForm((f) => ({ ...f, [field]: value }));
+    };
+
+    const handleBatchTubesChange = (checked: boolean) => {
+        if (!checked && mode === 'edit' && form.tube_colors.length > 0) {
+            // Show confirmation dialog in edit mode when there are existing tubes
+            const confirmed = window.confirm(
+                'Warning: Unchecking "Create Batch Tubes" will remove all existing tube colors. This action cannot be undone. Are you sure you want to continue?'
+            );
+            if (!confirmed) {
+                return; // Don't proceed if user cancels
+            }
+        }
+
+        setShowBatchTubes(checked);
+        if (!checked) {
+            // Clear tube colors when unchecking
+            change('tube_colors', []);
+        }
     };
 
     return (
@@ -87,17 +114,26 @@ export function CreateFoKabelOdc(props: Props) {
                 />
             </Element>
 
-            <Element leftSide={t('Select Tubes')} required>
-                <TubeColorPicker
-                    value={form.tube_colors}
-                    onChange={(colors) => change('tube_colors', colors)}
+            <Element leftSide={t('Create Batch Tubes')}>
+                <Checkbox
+                    checked={showBatchTubes}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBatchTubesChange(e.target.checked)}
                 />
-                {errors?.errors.tube_colors && (
-                    <div className="mt-1 text-xs text-red-600">
-                        {errors.errors.tube_colors}
-                    </div>
-                )}
             </Element>
+
+            {showBatchTubes && (
+                <Element leftSide={t('Tube Colors')} required>
+                    <TubeColorPicker
+                        value={form.tube_colors}
+                        onChange={(colors) => change('tube_colors', colors)}
+                    />
+                    {errors?.errors.tube_colors && (
+                        <div className="mt-1 text-xs text-red-600">
+                            {errors.errors.tube_colors}
+                        </div>
+                    )}
+                </Element>
+            )}
 
             <Element leftSide={t('Jumlah Maximum Core per Tube')} required>
                 <SelectField

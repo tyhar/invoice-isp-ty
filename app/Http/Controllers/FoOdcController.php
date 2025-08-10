@@ -92,7 +92,9 @@ class FoOdcController extends Controller
                 'lokasi',
                 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
                 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company'
+                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+                'connectedOdc.lokasi',
+                'connectedFromOdcs.lokasi'
             ])
             ->paginate($perPage)
             ->appends($request->only(['filter', 'sort', 'per_page', 'status']));
@@ -101,10 +103,12 @@ class FoOdcController extends Controller
         $items = array_map(function ($o) {
             $lokasi = $o->lokasi;
             $kabelOdc = $o->kabelOdc;
+            $connectedOdc = $o->connectedOdc;
             return [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
                 'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
+                'odc_id' => $o->odc_id, // direct connection to another ODC
                 'lokasi' => $lokasi ? [
                     'id' => $lokasi->id,
                     'nama_lokasi' => $lokasi->nama_lokasi,
@@ -133,6 +137,42 @@ class FoOdcController extends Controller
                     'updated_at' => $kabelOdc->updated_at?->toDateTimeString(),
                     'deleted_at' => $kabelOdc->deleted_at?->toDateTimeString(),
                 ] : null,
+                'connected_odc' => $connectedOdc ? [
+                    'id' => $connectedOdc->id,
+                    'nama_odc' => $connectedOdc->nama_odc,
+                    'tipe_splitter' => $connectedOdc->tipe_splitter,
+                    'status' => $connectedOdc->status,
+                    'created_at' => $connectedOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $connectedOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $connectedOdc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $connectedOdc->lokasi ? [
+                        'id' => $connectedOdc->lokasi->id,
+                        'nama_lokasi' => $connectedOdc->lokasi->nama_lokasi,
+                        'deskripsi' => $connectedOdc->lokasi->deskripsi,
+                        'latitude' => $connectedOdc->lokasi->latitude,
+                        'longitude' => $connectedOdc->lokasi->longitude,
+                        'status' => $connectedOdc->lokasi->status,
+                    ] : null,
+                ] : null,
+                'connected_from_odcs' => $o->connectedFromOdcs->map(function ($fromOdc) {
+                    return [
+                        'id' => $fromOdc->id,
+                        'nama_odc' => $fromOdc->nama_odc,
+                        'tipe_splitter' => $fromOdc->tipe_splitter,
+                        'status' => $fromOdc->status,
+                        'created_at' => $fromOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $fromOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $fromOdc->deleted_at?->toDateTimeString(),
+                        'lokasi' => $fromOdc->lokasi ? [
+                            'id' => $fromOdc->lokasi->id,
+                            'nama_lokasi' => $fromOdc->lokasi->nama_lokasi,
+                            'deskripsi' => $fromOdc->lokasi->deskripsi,
+                            'latitude' => $fromOdc->lokasi->latitude,
+                            'longitude' => $fromOdc->lokasi->longitude,
+                            'status' => $fromOdc->lokasi->status,
+                        ] : null,
+                    ];
+                })->toArray(),
                 'created_at' => $o->created_at?->toDateTimeString(),
                 'updated_at' => $o->updated_at?->toDateTimeString(),
                 'deleted_at' => $o->deleted_at?->toDateTimeString(),
@@ -163,6 +203,7 @@ class FoOdcController extends Controller
         $data = $request->validate([
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'kabel_odc_id' => 'nullable|exists:fo_kabel_odcs,id',
+            'odc_id' => 'nullable|exists:fo_odcs,id',
             'nama_odc' => 'required|string|max:255|unique:fo_odcs,nama_odc',
             'deskripsi' => 'nullable|string|max:255',
             'tipe_splitter' => 'required|in:1:2,1:4,1:8,1:16,1:32,1:64,1:128',
@@ -178,7 +219,9 @@ class FoOdcController extends Controller
             'lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company'
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'connectedOdc.lokasi',
+            'connectedFromOdcs.lokasi'
         ]);
 
         return response()->json([
@@ -186,7 +229,8 @@ class FoOdcController extends Controller
             'data' => [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
-                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
+                'kabel_odc_id' => $o->kabel_odc_id,
+                'odc_id' => $o->odc_id,
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -214,8 +258,43 @@ class FoOdcController extends Controller
                     'created_at' => $o->kabelOdc->created_at?->toDateTimeString(),
                     'updated_at' => $o->kabelOdc->updated_at?->toDateTimeString(),
                     'deleted_at' => $o->kabelOdc->deleted_at?->toDateTimeString(),
-                    // You may add kabelTubeOdcs here if needed
                 ] : null,
+                'connected_odc' => $o->connectedOdc ? [
+                    'id' => $o->connectedOdc->id,
+                    'nama_odc' => $o->connectedOdc->nama_odc,
+                    'tipe_splitter' => $o->connectedOdc->tipe_splitter,
+                    'status' => $o->connectedOdc->status,
+                    'created_at' => $o->connectedOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->connectedOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->connectedOdc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $o->connectedOdc->lokasi ? [
+                        'id' => $o->connectedOdc->lokasi->id,
+                        'nama_lokasi' => $o->connectedOdc->lokasi->nama_lokasi,
+                        'deskripsi' => $o->connectedOdc->lokasi->deskripsi,
+                        'latitude' => $o->connectedOdc->lokasi->latitude,
+                        'longitude' => $o->connectedOdc->lokasi->longitude,
+                        'status' => $o->connectedOdc->lokasi->status,
+                    ] : null,
+                ] : null,
+                'connected_from_odcs' => $o->connectedFromOdcs->map(function ($fromOdc) {
+                    return [
+                        'id' => $fromOdc->id,
+                        'nama_odc' => $fromOdc->nama_odc,
+                        'tipe_splitter' => $fromOdc->tipe_splitter,
+                        'status' => $fromOdc->status,
+                        'created_at' => $fromOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $fromOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $fromOdc->deleted_at?->toDateTimeString(),
+                        'lokasi' => $fromOdc->lokasi ? [
+                            'id' => $fromOdc->lokasi->id,
+                            'nama_lokasi' => $fromOdc->lokasi->nama_lokasi,
+                            'deskripsi' => $fromOdc->lokasi->deskripsi,
+                            'latitude' => $fromOdc->lokasi->latitude,
+                            'longitude' => $fromOdc->lokasi->longitude,
+                            'status' => $fromOdc->lokasi->status,
+                        ] : null,
+                    ];
+                })->toArray(),
                 'created_at' => $o->created_at->toDateTimeString(),
                 'updated_at' => $o->updated_at->toDateTimeString(),
             ],
@@ -235,7 +314,9 @@ class FoOdcController extends Controller
             'lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company'
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'connectedOdc.lokasi',
+            'connectedFromOdcs.lokasi'
         ]);
 
         return response()->json([
@@ -243,7 +324,8 @@ class FoOdcController extends Controller
             'data' => [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
-                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
+                'kabel_odc_id' => $o->kabel_odc_id,
+                'odc_id' => $o->odc_id,
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -271,8 +353,43 @@ class FoOdcController extends Controller
                     'created_at' => $o->kabelOdc->created_at?->toDateTimeString(),
                     'updated_at' => $o->kabelOdc->updated_at?->toDateTimeString(),
                     'deleted_at' => $o->kabelOdc->deleted_at?->toDateTimeString(),
-                    // You may add kabelTubeOdcs here if needed
                 ] : null,
+                'connected_odc' => $o->connectedOdc ? [
+                    'id' => $o->connectedOdc->id,
+                    'nama_odc' => $o->connectedOdc->nama_odc,
+                    'tipe_splitter' => $o->connectedOdc->tipe_splitter,
+                    'status' => $o->connectedOdc->status,
+                    'created_at' => $o->connectedOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->connectedOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->connectedOdc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $o->connectedOdc->lokasi ? [
+                        'id' => $o->connectedOdc->lokasi->id,
+                        'nama_lokasi' => $o->connectedOdc->lokasi->nama_lokasi,
+                        'deskripsi' => $o->connectedOdc->lokasi->deskripsi,
+                        'latitude' => $o->connectedOdc->lokasi->latitude,
+                        'longitude' => $o->connectedOdc->lokasi->longitude,
+                        'status' => $o->connectedOdc->lokasi->status,
+                    ] : null,
+                ] : null,
+                'connected_from_odcs' => $o->connectedFromOdcs->map(function ($fromOdc) {
+                    return [
+                        'id' => $fromOdc->id,
+                        'nama_odc' => $fromOdc->nama_odc,
+                        'tipe_splitter' => $fromOdc->tipe_splitter,
+                        'status' => $fromOdc->status,
+                        'created_at' => $fromOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $fromOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $fromOdc->deleted_at?->toDateTimeString(),
+                        'lokasi' => $fromOdc->lokasi ? [
+                            'id' => $fromOdc->lokasi->id,
+                            'nama_lokasi' => $fromOdc->lokasi->nama_lokasi,
+                            'deskripsi' => $fromOdc->lokasi->deskripsi,
+                            'latitude' => $fromOdc->lokasi->latitude,
+                            'longitude' => $fromOdc->lokasi->longitude,
+                            'status' => $fromOdc->lokasi->status,
+                        ] : null,
+                    ];
+                })->toArray(),
                 'created_at' => $o->created_at->toDateTimeString(),
                 'updated_at' => $o->updated_at->toDateTimeString(),
                 'deleted_at' => $o->deleted_at?->toDateTimeString(),
@@ -292,6 +409,7 @@ class FoOdcController extends Controller
         $data = $request->validate([
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'kabel_odc_id' => 'nullable|sometimes|exists:fo_kabel_odcs,id',
+            'odc_id' => 'nullable|sometimes|exists:fo_odcs,id',
             'nama_odc' => 'sometimes|string|max:255|unique:fo_odcs,nama_odc,' . $id,
             'deskripsi' => 'sometimes|nullable|string|max:255',
             'tipe_splitter' => 'sometimes|in:1:2,1:4,1:8,1:16,1:32,1:64,1:128',
@@ -303,7 +421,9 @@ class FoOdcController extends Controller
             'lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company'
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'connectedOdc.lokasi',
+            'connectedFromOdcs.lokasi'
         ]);
 
         return response()->json([
@@ -311,7 +431,8 @@ class FoOdcController extends Controller
             'data' => [
                 'id' => $o->id,
                 'lokasi_id' => $o->lokasi_id,
-                'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
+                'kabel_odc_id' => $o->kabel_odc_id,
+                'odc_id' => $o->odc_id,
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -339,8 +460,43 @@ class FoOdcController extends Controller
                     'created_at' => $o->kabelOdc->created_at?->toDateTimeString(),
                     'updated_at' => $o->kabelOdc->updated_at?->toDateTimeString(),
                     'deleted_at' => $o->kabelOdc->deleted_at?->toDateTimeString(),
-                    // You may add kabelTubeOdcs here if needed
                 ] : null,
+                'connected_odc' => $o->connectedOdc ? [
+                    'id' => $o->connectedOdc->id,
+                    'nama_odc' => $o->connectedOdc->nama_odc,
+                    'tipe_splitter' => $o->connectedOdc->tipe_splitter,
+                    'status' => $o->connectedOdc->status,
+                    'created_at' => $o->connectedOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->connectedOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->connectedOdc->deleted_at?->toDateTimeString(),
+                    'lokasi' => $o->connectedOdc->lokasi ? [
+                        'id' => $o->connectedOdc->lokasi->id,
+                        'nama_lokasi' => $o->connectedOdc->lokasi->nama_lokasi,
+                        'deskripsi' => $o->connectedOdc->lokasi->deskripsi,
+                        'latitude' => $o->connectedOdc->lokasi->latitude,
+                        'longitude' => $o->connectedOdc->lokasi->longitude,
+                        'status' => $o->connectedOdc->lokasi->status,
+                    ] : null,
+                ] : null,
+                'connected_from_odcs' => $o->connectedFromOdcs->map(function ($fromOdc) {
+                    return [
+                        'id' => $fromOdc->id,
+                        'nama_odc' => $fromOdc->nama_odc,
+                        'tipe_splitter' => $fromOdc->tipe_splitter,
+                        'status' => $fromOdc->status,
+                        'created_at' => $fromOdc->created_at?->toDateTimeString(),
+                        'updated_at' => $fromOdc->updated_at?->toDateTimeString(),
+                        'deleted_at' => $fromOdc->deleted_at?->toDateTimeString(),
+                        'lokasi' => $fromOdc->lokasi ? [
+                            'id' => $fromOdc->lokasi->id,
+                            'nama_lokasi' => $fromOdc->lokasi->nama_lokasi,
+                            'deskripsi' => $fromOdc->lokasi->deskripsi,
+                            'latitude' => $fromOdc->lokasi->latitude,
+                            'longitude' => $fromOdc->lokasi->longitude,
+                            'status' => $fromOdc->lokasi->status,
+                        ] : null,
+                    ];
+                })->toArray(),
                 'created_at' => $o->created_at->toDateTimeString(),
                 'updated_at' => $o->updated_at->toDateTimeString(),
             ],

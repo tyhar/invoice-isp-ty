@@ -6,6 +6,7 @@ import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import {
     InputField,
     SelectField,
+    Checkbox,
 } from '$app/components/forms';
 import { CoreColorPicker } from './CoreColorPicker';
 
@@ -27,6 +28,7 @@ interface Props {
     setForm: React.Dispatch<React.SetStateAction<FoKabelTubeOdcCreate>>;
     errors?: ValidationBag;
     odcs: KabelOdcOption[];
+    mode?: 'create' | 'edit';
 }
 
 const TUBE_COLORS = [
@@ -44,15 +46,42 @@ const TUBE_COLORS = [
     'aqua',
 ];
 
-export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
+export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'create' }: Props) {
     const [t] = useTranslation();
     const [selectedKabelOdc, setSelectedKabelOdc] = useState<KabelOdcOption | null>(null);
+    const [showBatchCores, setShowBatchCores] = useState(true); // Default to true for create mode
+
+    // Initialize checkbox state based on mode and existing data
+    useEffect(() => {
+        if (mode === 'edit') {
+            // In edit mode, show the checkbox if there are existing core colors
+            setShowBatchCores(form.core_colors.length > 0);
+        }
+    }, [mode, form.core_colors.length]);
 
     const change = <K extends keyof FoKabelTubeOdcCreate>(
         field: K,
         value: FoKabelTubeOdcCreate[K]
     ) => {
         setForm((f) => ({ ...f, [field]: value }));
+    };
+
+    const handleBatchCoresChange = (checked: boolean) => {
+        if (!checked && mode === 'edit' && form.core_colors.length > 0) {
+            // Show confirmation dialog in edit mode when there are existing cores
+            const confirmed = window.confirm(
+                'Warning: Unchecking "Create Batch Cores" will remove all existing core colors. This action cannot be undone. Are you sure you want to continue?'
+            );
+            if (!confirmed) {
+                return; // Don't proceed if user cancels
+            }
+        }
+
+        setShowBatchCores(checked);
+        if (!checked) {
+            // Clear core colors when unchecking
+            change('core_colors', []);
+        }
     };
 
     // Update selected Kabel ODC when kabel_odc_id changes
@@ -108,23 +137,32 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs }: Props) {
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('Select Cores')}>
-                <CoreColorPicker
-                    value={form.core_colors}
-                    onChange={(colors) => change('core_colors', colors)}
-                    maxCores={selectedKabelOdc?.jumlah_core_in_tube}
+            <Element leftSide={t('Create Batch Cores')}>
+                <Checkbox
+                    checked={showBatchCores}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBatchCoresChange(e.target.checked)}
                 />
-                {errors?.errors.core_colors && (
-                    <div className="mt-1 text-xs text-red-600">
-                        {errors.errors.core_colors}
-                    </div>
-                )}
-                {selectedKabelOdc?.jumlah_core_in_tube && (
-                    <div className="mt-1 text-xs text-gray-600">
-                        Maximum cores per tube: {selectedKabelOdc.jumlah_core_in_tube}
-                    </div>
-                )}
             </Element>
+
+            {showBatchCores && (
+                <Element leftSide={t('Core Colors')}>
+                    <CoreColorPicker
+                        value={form.core_colors}
+                        onChange={(colors) => change('core_colors', colors)}
+                        maxCores={selectedKabelOdc?.jumlah_core_in_tube}
+                    />
+                    {errors?.errors.core_colors && (
+                        <div className="mt-1 text-xs text-red-600">
+                            {errors.errors.core_colors}
+                        </div>
+                    )}
+                    {selectedKabelOdc?.jumlah_core_in_tube && (
+                        <div className="mt-1 text-xs text-gray-600">
+                            Maximum cores per tube: {selectedKabelOdc.jumlah_core_in_tube}
+                        </div>
+                    )}
+                </Element>
+            )}
         </Card>
     );
 }

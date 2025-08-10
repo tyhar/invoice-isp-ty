@@ -26,6 +26,13 @@ interface KabelOdcOption {
     nama_kabel: string;
 }
 
+interface OdcOption {
+    id: number;
+    nama_odc: string;
+    lokasi_name?: string;
+    kabel_odc_id?: number;
+}
+
 export default function Edit() {
     useTitle('Edit FO ODC');
     const [t] = useTranslation();
@@ -41,7 +48,8 @@ export default function Edit() {
         lokasi_deskripsi: '',
         lokasi_latitude: '',
         lokasi_longitude: '',
-        kabel_odc_id: '', // <-- add this
+        kabel_odc_id: '',
+        odc_id: '', // <-- add this for ODC-to-ODC connections
         nama_odc: '',
         deskripsi: '',
         tipe_splitter: '1:8',
@@ -50,6 +58,7 @@ export default function Edit() {
     const [values, setValues] = useState<FoOdcFormValues>(initialValues);
     const [lokasis, setLokasis] = useState<LokasiOption[]>([]);
     const [kabelOdcs, setKabelOdcs] = useState<KabelOdcOption[]>([]);
+    const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -60,13 +69,15 @@ export default function Edit() {
             request('GET', endpoint(`/api/v1/fo-odcs/${id}`)),
             request('GET', endpoint('/api/v1/fo-lokasis')),
             request('GET', endpoint('/api/v1/fo-kabel-odcs')),
+            request('GET', endpoint('/api/v1/fo-odcs')),
         ])
-            .then(([odcRes, lokRes, kabelOdcRes]: any) => {
+            .then(([odcRes, lokRes, kabelOdcRes, odcsRes]: any) => {
                 const odc = odcRes.data.data;
                 setValues({
                     ...initialValues,
                     lokasi_id: odc.lokasi.id.toString(),
                     kabel_odc_id: odc.kabel_odc?.id?.toString() ?? '',
+                    odc_id: odc.odc_id?.toString() ?? '',
                     nama_odc: odc.nama_odc,
                     deskripsi: odc.deskripsi ?? '',
                     tipe_splitter: odc.tipe_splitter,
@@ -81,6 +92,14 @@ export default function Edit() {
                     kabelOdcRes.data.data.map((k: any) => ({
                         id: k.id,
                         nama_kabel: k.nama_kabel,
+                    }))
+                );
+                setOdcs(
+                    odcsRes.data.data.map((o: any) => ({
+                        id: o.id,
+                        nama_odc: o.nama_odc,
+                        lokasi_name: o.lokasi?.nama_lokasi,
+                        kabel_odc_id: o.kabel_odc_id,
                     }))
                 );
             })
@@ -105,6 +124,7 @@ export default function Edit() {
             request('PUT', endpoint(`/api/v1/fo-odcs/${id}`), {
                 lokasi_id,
                 kabel_odc_id: values.kabel_odc_id,
+                odc_id: values.odc_id === '' ? null : values.odc_id, // Convert empty string to null for optional field
                 nama_odc: values.nama_odc,
                 deskripsi: values.deskripsi,
                 tipe_splitter: values.tipe_splitter,
@@ -169,6 +189,7 @@ export default function Edit() {
                         setValues={setValues}
                         lokasis={lokasis}
                         kabelOdcs={kabelOdcs}
+                        odcs={odcs}
                         errors={errors}
                     />
                 </form>
