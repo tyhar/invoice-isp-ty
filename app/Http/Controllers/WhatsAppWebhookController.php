@@ -142,8 +142,16 @@ class WhatsAppWebhookController extends Controller
                 $answer = $this->renderTemplate($matchedChatbot->answer, $data);
             }
         } else {
-            $answer = "Halo, selamat datang. Ini adalah *balasan otomatis* dari sistem kami.\n" .
-                "Ada yang bisa kami bantu?\n\nKetik *menu* untuk melihat pilihan layanan.";
+            $defaultChatbot = $chatbots->first(function ($chatbot) {
+                return strtolower(trim($chatbot->question)) === 'default';
+            });
+
+            if ($defaultChatbot) {
+                $answer = $defaultChatbot->answer;
+            } else {
+                $answer = "Halo, selamat datang. Ini adalah *balasan otomatis* dari sistem kami.\n" .
+                    "Ada yang bisa kami bantu?\n\nKetik *menu* untuk melihat pilihan layanan.";
+            }
         }
 
         $wa->sendMessage([
