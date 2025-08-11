@@ -90,9 +90,9 @@ class FoOdcController extends Controller
         $paginator = $query
             ->with([
                 'lokasi',
-                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+                'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
                 'connectedOdc.lokasi',
                 'connectedFromOdcs.lokasi'
             ])
@@ -217,9 +217,9 @@ class FoOdcController extends Controller
         $o = FoOdc::create($data);
         $o->load([
             'lokasi',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
             'connectedOdc.lokasi',
             'connectedFromOdcs.lokasi'
         ]);
@@ -312,9 +312,9 @@ class FoOdcController extends Controller
         $o = FoOdc::withTrashed()->findOrFail($id);
         $o->load([
             'lokasi',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
             'connectedOdc.lokasi',
             'connectedFromOdcs.lokasi'
         ]);
@@ -419,9 +419,9 @@ class FoOdcController extends Controller
         $o->update($data);
         $o->refresh()->load([
             'lokasi',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+            'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
             'connectedOdc.lokasi',
             'connectedFromOdcs.lokasi'
         ]);

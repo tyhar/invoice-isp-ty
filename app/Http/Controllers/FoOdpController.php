@@ -103,9 +103,9 @@ class FoOdpController extends Controller
             ->with([
                 'lokasi',
                 'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.lokasi',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
                 'clientFtth.lokasi',
                 'clientFtth.client',
                 'clientFtth.company'
@@ -268,19 +268,7 @@ class FoOdpController extends Controller
             'status' => 'sometimes|in:active,archived',
         ]);
 
-        // Check if the kabel_core_odc_id already has an associated FoOdp
-        if (isset($data['kabel_core_odc_id'])) {
-            $exists = FoOdp::where('kabel_core_odc_id', $data['kabel_core_odc_id'])->exists();
-            if ($exists) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'This core is already associated with another ODP.',
-                    'errors' => [
-                        'kabel_core_odc_id' => ['This core is already associated with another ODP.'],
-                    ],
-                ], 422);
-            }
-        }
+        // Note: Multiple ODPs can now be associated with the same core (one-to-many relationship)
 
         $data['status'] = $data['status'] ?? 'active';
 
@@ -291,9 +279,9 @@ class FoOdpController extends Controller
         $o->load([
             'lokasi',
             'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
             'clientFtth.lokasi',
             'clientFtth.client',
             'clientFtth.company'
@@ -517,22 +505,7 @@ class FoOdpController extends Controller
             'status' => 'sometimes|in:active,archived',
         ]);
 
-        // Check core linkage conflict
-        if (array_key_exists('kabel_core_odc_id', $data) && $data['kabel_core_odc_id'] !== null) {
-            $conflict = FoOdp::where('kabel_core_odc_id', $data['kabel_core_odc_id'])
-                ->where('id', '!=', $odp->id)
-                ->exists();
-
-            if ($conflict) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'This core is already associated with another ODP.',
-                    'errors' => [
-                        'kabel_core_odc_id' => ['This core is already associated with another ODP.'],
-                    ],
-                ], 422);
-            }
-        }
+        // Note: Multiple ODPs can now be associated with the same core (one-to-many relationship)
 
         // Perform update (allows unlinking if null)
         $odp->update($data);

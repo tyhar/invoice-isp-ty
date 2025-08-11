@@ -19,7 +19,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('fo_kabel_core_odcs')
                 ->cascadeOnDelete()
-                ->cascadeOnUpdate(); // enable nullable
+                ->cascadeOnUpdate(); // enable nullable - one core can have many ODPs
 
             // Foreign key to fo_odcs.id (nullable, represents the ODC this ODP is connected to)
             $table->foreignId('odc_id')

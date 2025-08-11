@@ -47,9 +47,9 @@ class FoClientFtthController extends Controller
             ->with([
                 'lokasi',
                 'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.lokasi',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.lokasi',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.client',
-                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp.clientFtth.company',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
+                'odp.kabelCoreOdc.kabelTubeOdc.kabelOdc.odcs.kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
                 'client',
                 'client.invoices',
                 'company'

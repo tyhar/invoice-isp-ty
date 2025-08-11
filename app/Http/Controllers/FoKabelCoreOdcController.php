@@ -12,7 +12,7 @@ class FoKabelCoreOdcController extends Controller
 
     public function getKabelWithoutODP()
     {
-        $availableCores = FoKabelCoreOdc::whereDoesntHave('odp')->get();
+        $availableCores = FoKabelCoreOdc::whereDoesntHave('odps')->get();
         return response()->json(['data' => $availableCores]);
     }
 
@@ -93,9 +93,9 @@ class FoKabelCoreOdcController extends Controller
             $perPage = 15;
         }
 
-        // 7) Eager-load relationships (tube + parent ODC + odp) and paginate
+        // 7) Eager-load relationships (tube + parent ODC + odps) and paginate
         $paginator = $query
-            ->with(['kabelTubeOdc.kabelOdc', 'odp'])
+            ->with(['kabelTubeOdc.kabelOdc', 'odps'])
             ->paginate($perPage)
             ->appends($request->only(['filter', 'sort', 'per_page', 'status']));
 
@@ -103,7 +103,7 @@ class FoKabelCoreOdcController extends Controller
         $items = array_map(function ($c) {
             $tube = $c->kabelTubeOdc;
             $kabelOdc = $tube?->kabelOdc;
-            $odp = $c->odp;
+            $odps = $c->odps;
             return [
                 'id' => $c->id,
                 'kabel_tube_odc_id' => $c->kabel_tube_odc_id,
@@ -118,9 +118,9 @@ class FoKabelCoreOdcController extends Controller
                 'warna_core' => $c->warna_core,
                 'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
-                'odp_ids' => $odp ? [$odp->id] : [],
+                'odp_ids' => $c->odps->pluck('id')->toArray(),
                 'created_at' => $c->created_at?->toDateTimeString(),
-                'updated_at' => $c->updated_at?->toDateTimeString(),
+                'updated_at' => $c->updated_at->toDateTimeString(),
                 'deleted_at' => $c->deleted_at?->toDateTimeString(),
             ];
         }, $paginator->items());
@@ -170,7 +170,7 @@ class FoKabelCoreOdcController extends Controller
         }
 
         $c = FoKabelCoreOdc::create($data);
-        $c->load(['kabelTubeOdc.kabelOdc', 'odp']);
+        $c->load(['kabelTubeOdc.kabelOdc', 'odps']);
 
         return response()->json([
             'status' => 'success',
@@ -188,7 +188,7 @@ class FoKabelCoreOdcController extends Controller
                 'warna_core' => $c->warna_core,
                 'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
-                'odp_ids' => $c->odp ? [$c->odp->id] : [],
+                'odp_ids' => $c->odps->pluck('id')->toArray(),
                 'created_at' => $c->created_at->toDateTimeString(),
                 'updated_at' => $c->updated_at->toDateTimeString(),
             ],
@@ -202,7 +202,7 @@ class FoKabelCoreOdcController extends Controller
     public function show($id)
     {
         $c = FoKabelCoreOdc::withTrashed()->findOrFail($id);
-        $c->load(['kabelTubeOdc.kabelOdc', 'odp']);
+        $c->load(['kabelTubeOdc.kabelOdc', 'odps']);
 
         return response()->json([
             'status' => 'success',
@@ -220,7 +220,7 @@ class FoKabelCoreOdcController extends Controller
                 'warna_core' => $c->warna_core,
                 'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
-                'odp_ids' => $c->odp ? [$c->odp->id] : [],
+                'odp_ids' => $c->odps->pluck('id')->toArray(),
                 'created_at' => $c->created_at->toDateTimeString(),
                 'updated_at' => $c->updated_at->toDateTimeString(),
                 'deleted_at' => $c->deleted_at?->toDateTimeString(),
@@ -258,7 +258,7 @@ class FoKabelCoreOdcController extends Controller
         }
 
         $c->update($data);
-        $c->refresh()->load(['kabelTubeOdc.kabelOdc', 'odp']);
+        $c->refresh()->load(['kabelTubeOdc.kabelOdc', 'odps']);
 
         return response()->json([
             'status' => 'success',
@@ -276,7 +276,7 @@ class FoKabelCoreOdcController extends Controller
                 'warna_core' => $c->warna_core,
                 'deskripsi' => $c->deskripsi,
                 'status' => $c->status,
-                'odp_ids' => $c->odp ? [$c->odp->id] : [],
+                'odp_ids' => $c->odps->pluck('id')->toArray(),
                 'created_at' => $c->created_at->toDateTimeString(),
                 'updated_at' => $c->updated_at->toDateTimeString(),
             ],

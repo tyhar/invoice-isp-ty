@@ -34,7 +34,7 @@ class FtthStatisticController extends Controller
         // Utilization calculations
         $assignedCores = FoKabelCoreOdc::where('status', 'active')
             ->whereNull('deleted_at')
-            ->whereHas('odp', function ($query) {
+            ->whereHas('odps', function ($query) {
                 $query->where('status', 'active')->whereNull('deleted_at');
             })->count();
 
@@ -43,7 +43,7 @@ class FtthStatisticController extends Controller
         // Tubes with at least one assigned core
         $usedTubes = FoKabelTubeOdc::where('status', 'active')
             ->whereNull('deleted_at')
-            ->whereHas('kabelCoreOdcs.odp', function ($query) {
+            ->whereHas('kabelCoreOdcs.odps', function ($query) {
                 $query->where('status', 'active')->whereNull('deleted_at');
             })->count();
 
@@ -185,7 +185,7 @@ class FtthStatisticController extends Controller
         // Get ODCs with their associated ODPs
         $odcs = FoOdc::where('status', 'active')
             ->whereNull('deleted_at')
-            ->with(['kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odp' => function ($query) {
+            ->with(['kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps' => function ($query) {
                 $query->where('status', 'active')->whereNull('deleted_at');
             }])
             ->get();
@@ -198,9 +198,7 @@ class FtthStatisticController extends Controller
             if ($odc->kabelOdc) {
                 foreach ($odc->kabelOdc->kabelTubeOdcs as $tube) {
                     foreach ($tube->kabelCoreOdcs as $core) {
-                        if ($core->odp) {
-                            $odpCount++;
-                        }
+                        $odpCount += $core->odps->count();
                     }
                 }
             }

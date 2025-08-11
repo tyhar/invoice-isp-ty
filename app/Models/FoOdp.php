@@ -40,7 +40,7 @@ class FoOdp extends Model
     }
 
     /**
-     * Each ODP belongs to one KabelCoreOdc.
+     * Each ODP belongs to one KabelCoreOdc (many ODPs can belong to one core).
      */
     public function kabelCoreOdc()
     {
