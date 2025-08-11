@@ -616,7 +616,7 @@ const MappingPage: React.FC = () => {
   const [validClients, setValidClients] = useState<any[]>([]);
   const [validOdps, setValidOdps] = useState<any[]>([]);
   const [showOdcConnections, setShowOdcConnections] = useState(true); // <-- add this
-  const [legendPosition, setLegendPosition] = useState({ x: 16, y: 16 }); // <-- add this
+  const [legendPosition, setLegendPosition] = useState({ x: 12, y: 80 }); // <-- add this
   const [isDraggingLegend, setIsDraggingLegend] = useState(false); // <-- add this
   const api = "http://localhost:8000";
 
@@ -1106,18 +1106,18 @@ const MappingPage: React.FC = () => {
             <div className="border-t pt-2">
               <div className="text-xs font-medium mb-1">Connection Types:</div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-0.5 bg-blue-500"></div>
+                <div className="w-6 h-2.5 bg-blue-500"></div>
                 <span>ODC ➝ ODP</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-0.5 bg-blue-500"></div>
+                <div className="w-6 h-2.5 bg-red-500"></div>
                 <span>ODP ➝ Client</span>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-0.5 bg-fuchsia-500 border-t border-dashed border-fuchsia-500"></div>
-                <span>ODC ➝ ODC</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
+                  <span>ODC ➝ ODC</span>
+                </div>
               </div>
-            </div>
             <div className="flex items-center gap-2 mt-2">
               <input
                 type="checkbox"
@@ -1392,8 +1392,16 @@ const MappingPage: React.FC = () => {
                 key={`line-odp-client-${client.id}`}
                 positions={createSmoothArc(odpPos, clientPos)}
                 pathOptions={{
-                  color: 'rgba(0, 0, 230, 0.6)',
+                  color: 'rgba(255, 0, 0, 0.7)',
                   weight: 2,
+                }}
+                eventHandlers={{
+                  mouseover: (e) => {
+                    e.target.setStyle({ weight: 6 });
+                  },
+                  mouseout: (e) => {
+                    e.target.setStyle({ weight: 2 });
+                  }
                 }}
               >
                 <Popup>
@@ -1545,6 +1553,14 @@ const MappingPage: React.FC = () => {
                     weight: 3,
                     dashArray: '5, 5', // Dashed line to distinguish from other connections
                   }}
+                  eventHandlers={{
+                    mouseover: (e) => {
+                      e.target.setStyle({ weight: 8 });
+                    },
+                    mouseout: (e) => {
+                      e.target.setStyle({ weight: 3 });
+                    }
+                  }}
                 >
                   <Popup>
                     <div>
@@ -1626,6 +1642,14 @@ const MappingPage: React.FC = () => {
                 pathOptions={{
                   color: 'rgba(0, 0, 230, 0.6)',
                   weight: 2,
+                }}
+                eventHandlers={{
+                  mouseover: (e) => {
+                    e.target.setStyle({ weight: 6 });
+                  },
+                  mouseout: (e) => {
+                    e.target.setStyle({ weight: 2 });
+                  }
                 }}
               >
                 <Popup>
