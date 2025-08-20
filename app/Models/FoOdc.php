@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\FoLokasi;
 use App\Models\FoKabelOdc;
+use App\Models\FoKabelCoreOdc;
 
 class FoOdc extends Model
 {
@@ -17,6 +18,7 @@ class FoOdc extends Model
         'lokasi_id',
         'kabel_odc_id', // now nullable
         'odc_id', // direct connection to another ODC
+        'kabel_core_odc_id', // core feeding this child ODC (optional)
         'nama_odc',
         'deskripsi', // <-- add this
         'tipe_splitter',
@@ -28,6 +30,7 @@ class FoOdc extends Model
         'deleted_at' => 'datetime',
         'deskripsi'  => 'string', // <-- add this
         'odc_id'     => 'integer',
+        'kabel_core_odc_id' => 'integer',
     ];
 
     /**
@@ -61,5 +64,13 @@ class FoOdc extends Model
     public function connectedFromOdcs()
     {
         return $this->hasMany(FoOdc::class, 'odc_id');
+    }
+
+    /**
+     * The core that feeds this child ODC (optional).
+     */
+    public function kabelCoreOdc()
+    {
+        return $this->belongsTo(FoKabelCoreOdc::class, 'kabel_core_odc_id');
     }
 }

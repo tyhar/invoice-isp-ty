@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('lokasi_id')->constrained('fo_lokasis')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('kabel_odc_id')->constrained('fo_kabel_odcs')->cascadeOnDelete()->cascadeOnUpdate();
 
+            // Core linkage moved to fo_odcs (child ODC) per design
+
             // For ODC→ODC connections: specify which two ODCs this joint box connects
             $table->foreignId('odc_id')->nullable()->constrained('fo_odcs')->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId('odc_2_id')->nullable()->constrained('fo_odcs')->cascadeOnDelete()->cascadeOnUpdate();

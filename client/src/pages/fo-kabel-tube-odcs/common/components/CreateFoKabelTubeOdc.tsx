@@ -51,13 +51,12 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
     const [selectedKabelOdc, setSelectedKabelOdc] = useState<KabelOdcOption | null>(null);
     const [showBatchCores, setShowBatchCores] = useState(true); // Default to true for create mode
 
-    // Initialize checkbox state based on mode and existing data
+    // Initialize checkbox state for edit mode: default to checked so users see the batch UI
     useEffect(() => {
         if (mode === 'edit') {
-            // In edit mode, show the checkbox if there are existing core colors
-            setShowBatchCores(form.core_colors.length > 0);
+            setShowBatchCores(true);
         }
-    }, [mode, form.core_colors.length]);
+    }, [mode]);
 
     const change = <K extends keyof FoKabelTubeOdcCreate>(
         field: K,

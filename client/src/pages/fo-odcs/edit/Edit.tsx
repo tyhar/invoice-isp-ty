@@ -33,6 +33,22 @@ interface OdcOption {
     kabel_odc_id?: number;
 }
 
+interface CoreOption {
+    id: number;
+    warna_core: string;
+    kabel_odc_id: number;
+    nama_kabel: string;
+    kabel_tube_odc_id: number;
+    warna_tube: string;
+}
+
+interface TubeOption {
+    id: number;
+    warna_tube: string;
+    kabel_odc_id: number;
+    deskripsi?: string;
+}
+
 export default function Edit() {
     useTitle('Edit FO ODC');
     const [t] = useTranslation();
@@ -50,6 +66,9 @@ export default function Edit() {
         lokasi_longitude: '',
         kabel_odc_id: '',
         odc_id: '', // <-- add this for ODC-to-ODC connections
+        kabel_core_odc_id: '',
+        kabel_tube_odc_id: '',
+        odc_connection_enabled: false,
         nama_odc: '',
         deskripsi: '',
         tipe_splitter: '1:8',
@@ -62,6 +81,8 @@ export default function Edit() {
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [cores, setCores] = useState<CoreOption[]>([]);
+    const [kabelTubes, setKabelTubes] = useState<TubeOption[]>([]);
 
     // Fetch existing ODC and Lokasi list
     useEffect(() => {
@@ -70,14 +91,19 @@ export default function Edit() {
             request('GET', endpoint('/api/v1/fo-lokasis')),
             request('GET', endpoint('/api/v1/fo-kabel-odcs')),
             request('GET', endpoint('/api/v1/fo-odcs')),
+            request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=1000')),
+            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000')),
         ])
-            .then(([odcRes, lokRes, kabelOdcRes, odcsRes]: any) => {
+            .then(([odcRes, lokRes, kabelOdcRes, odcsRes, coreRes, tubeRes]: any) => {
                 const odc = odcRes.data.data;
                 setValues({
                     ...initialValues,
                     lokasi_id: odc.lokasi.id.toString(),
                     kabel_odc_id: odc.kabel_odc?.id?.toString() ?? '',
                     odc_id: odc.odc_id?.toString() ?? '',
+                    kabel_core_odc_id: odc.kabel_core_odc?.id?.toString() ?? '',
+                    kabel_tube_odc_id: odc.kabel_core_odc?.kabel_tube_odc?.id?.toString() ?? '',
+                    odc_connection_enabled: Boolean(odc.odc_id || odc.kabel_core_odc?.id),
                     nama_odc: odc.nama_odc,
                     deskripsi: odc.deskripsi ?? '',
                     tipe_splitter: odc.tipe_splitter,
@@ -100,6 +126,24 @@ export default function Edit() {
                         nama_odc: o.nama_odc,
                         lokasi_name: o.lokasi?.nama_lokasi,
                         kabel_odc_id: o.kabel_odc_id,
+                    }))
+                );
+                setCores(
+                    coreRes.data.data.map((c: any) => ({
+                        id: c.id,
+                        warna_core: c.warna_core,
+                        kabel_odc_id: c.kabel_odc.id,
+                        nama_kabel: c.kabel_odc.nama_kabel,
+                        kabel_tube_odc_id: c.kabel_tube_odc.id,
+                        warna_tube: c.kabel_tube_odc.warna_tube,
+                    }))
+                );
+                setKabelTubes(
+                    tubeRes.data.data.map((t: any) => ({
+                        id: t.id,
+                        warna_tube: t.warna_tube,
+                        kabel_odc_id: t.kabel_odc.id,
+                        deskripsi: t.deskripsi,
                     }))
                 );
             })
@@ -125,6 +169,7 @@ export default function Edit() {
                 lokasi_id,
                 kabel_odc_id: values.kabel_odc_id,
                 odc_id: values.odc_id === '' ? null : values.odc_id, // Convert empty string to null for optional field
+                kabel_core_odc_id: values.kabel_core_odc_id === '' ? null : parseInt(values.kabel_core_odc_id, 10),
                 nama_odc: values.nama_odc,
                 deskripsi: values.deskripsi,
                 tipe_splitter: values.tipe_splitter,
@@ -190,6 +235,8 @@ export default function Edit() {
                         lokasis={lokasis}
                         kabelOdcs={kabelOdcs}
                         odcs={odcs}
+                        cores={cores}
+                        kabelTubes={kabelTubes}
                         errors={errors}
                     />
                 </form>

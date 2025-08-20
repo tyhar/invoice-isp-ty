@@ -337,6 +337,15 @@ export function Default(props: Props) {
             },
         },
         {
+            name: t('WA Gateway'),
+            href: '/wa-gateway',
+            icon: BiLogoWhatsapp,
+            current: location.pathname.startsWith('/wa-gateway'),
+            visible:
+                enabled(ModuleBitmask.RecurringExpenses) &&
+                hasPermission('view_wa_gateway'),
+        },
+        {
             name: t('Mapping'),
             href: '/mapping',
             icon: LuMapPin,
@@ -353,17 +362,6 @@ export function Default(props: Props) {
                 visible: hasPermission('create_vendor'),
             },
         },
-        {
-            name: t('WA Gateway'),
-            href: '/wa-gateway',
-            icon: BiLogoWhatsapp,
-            current: location.pathname.startsWith('/wa-gateway'),
-            visible:
-                enabled(ModuleBitmask.RecurringExpenses) &&
-                hasPermission('view_wa_gateway'),
-        },
-
-        // ===== DI SINI DITAMBAHKAN PARENT “FIBER OPTIK” dengan dua children =====
         {
             name: t('FIBER OPTIK'),
             href: '', // kosong karena hanya toggle

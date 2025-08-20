@@ -16,6 +16,9 @@ export interface FoOdcFormValues {
     lokasi_longitude: string;
     kabel_odc_id: string;
     odc_id: string; // <-- add this for ODC-to-ODC connections
+    kabel_core_odc_id: string; // <-- optional core feeding this child ODC
+    kabel_tube_odc_id: string; // <-- used only for filtering cores (not saved)
+    odc_connection_enabled: boolean; // <-- toggle to show optional connection fields
     nama_odc: string;
     deskripsi: string;
     tipe_splitter: string;
@@ -38,16 +41,34 @@ interface OdcOption {
     kabel_odc_id?: number; // <-- add this for filtering
 }
 
+interface CoreOption {
+    id: number;
+    warna_core: string;
+    kabel_odc_id: number;
+    nama_kabel: string;
+    kabel_tube_odc_id: number;
+    warna_tube: string;
+}
+
+interface TubeOption {
+    id: number;
+    warna_tube: string;
+    kabel_odc_id: number;
+    deskripsi?: string;
+}
+
 interface Props {
     values: FoOdcFormValues;
     setValues: React.Dispatch<React.SetStateAction<FoOdcFormValues>>;
     lokasis: LokasiOption[];
     kabelOdcs: KabelOdcOption[];
     odcs: OdcOption[]; // <-- add this for ODC selection
+    cores: CoreOption[]; // <-- available cores to select (optional)
+    kabelTubes: TubeOption[]; // <-- available tubes for filtering cores
     errors?: ValidationBag;
 }
 
-export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, errors }: Props) {
+export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores, kabelTubes, errors }: Props) {
     const [t] = useTranslation();
     const onChange = <K extends keyof FoOdcFormValues>(field: K, value: FoOdcFormValues[K]) =>
         setValues((v) => ({ ...v, [field]: value }));
@@ -62,6 +83,16 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, error
         // Show ODCs that have the same kabel_odc_id as the selected one
         return odc.kabel_odc_id?.toString() === values.kabel_odc_id;
     });
+
+    // Filter cores based on selected Kabel ODC (optional linkage)
+    const filteredCores = cores.filter(c => {
+        if (values.kabel_odc_id && String(c.kabel_odc_id) !== values.kabel_odc_id) return false;
+        if (values.kabel_tube_odc_id && String(c.kabel_tube_odc_id) !== values.kabel_tube_odc_id) return false;
+        return true;
+    });
+
+    // Filter tubes based on selected Kabel ODC
+    const filteredTubes = kabelTubes.filter(t => String(t.kabel_odc_id) === values.kabel_odc_id);
 
     return (
         <Card
@@ -168,6 +199,10 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, error
                         onChange('kabel_odc_id', v);
                         // Clear selected ODC when Kabel ODC changes
                         onChange('odc_id', '');
+                        // Clear selected Core when Kabel ODC changes
+                        onChange('kabel_core_odc_id', '');
+                        // Clear selected Tube when Kabel ODC changes
+                        onChange('kabel_tube_odc_id', '');
                     }}
                     errorMessage={errors?.errors.kabel_odc_id}
                 >
@@ -178,24 +213,92 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, error
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('Connected ODC')}>
-                <SelectField
-                    value={values.odc_id}
-                    onValueChange={(v) => onChange('odc_id', v)}
-                    errorMessage={errors?.errors.odc_id}
-                >
-                    <option value="">
-                        {values.kabel_odc_id && filteredOdcs.length === 0
-                            ? t('No ODCs available for selected Kabel ODC')
-                            : t('Pilih ODC (Optional)')}
-                    </option>
-                    {filteredOdcs.map((o) => (
-                        <option key={o.id} value={o.id}>
-                            {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                        </option>
-                    ))}
-                </SelectField>
+            {/* Toggle for ODC->ODC optional connection fields */}
+            <Element leftSide={t('ODC->ODC connection')}>
+                <Checkbox
+                    checked={values.odc_connection_enabled}
+                    onChange={(e: { target: { checked: boolean } }) => {
+                        const next = e.target.checked;
+                        if (!next) {
+                            const hasExisting = Boolean(values.odc_id || values.kabel_core_odc_id || values.kabel_tube_odc_id);
+                            if (hasExisting) {
+                                const confirmClear = window.confirm(
+                                    t('Disable ODC->ODC connection? This will clear selected Connected ODC, Tube, and Core.') as string
+                                );
+                                if (!confirmClear) {
+                                    return; // keep current state
+                                }
+                            }
+                            onChange('odc_connection_enabled', false);
+                            onChange('odc_id', '');
+                            onChange('kabel_core_odc_id', '');
+                            onChange('kabel_tube_odc_id', '');
+                        } else {
+                            onChange('odc_connection_enabled', true);
+                        }
+                    }}
+                />
             </Element>
+
+            {values.odc_connection_enabled && (
+                <>
+                    <Element leftSide={t('Kabel Tube ODC')}>
+                        <SelectField
+                            value={values.kabel_tube_odc_id}
+                            onValueChange={(v) => {
+                                onChange('kabel_tube_odc_id', v);
+                                // Reset core when tube changes
+                                onChange('kabel_core_odc_id', '');
+                            }}
+                            errorMessage={errors?.errors.kabel_tube_odc_id}
+                        >
+                            <option value="">{t('Pilih Tube (Opsional)')}</option>
+                            {filteredTubes.map((t) => (
+                                <option key={t.id} value={t.id.toString()}>
+                                    {t.warna_tube} {t.deskripsi ? `- ${t.deskripsi}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+
+                    {/* Optional: Core that feeds this child ODC */}
+                    <Element leftSide={t('Kabel Core ODC')}>
+                        <SelectField
+                            value={values.kabel_core_odc_id}
+                            onValueChange={(v) => onChange('kabel_core_odc_id', v)}
+                            errorMessage={errors?.errors.kabel_core_odc_id}
+                        >
+                            <option value="">{t('Pilih Core (Opsional)')}</option>
+                            {filteredCores.map((c) => (
+                                <option key={c.id} value={c.id.toString()}>
+                                    {c.warna_core} {c.warna_tube ? `- Tube ${c.warna_tube}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+
+                    <Element leftSide={t('Connected ODC')}>
+                        <SelectField
+                            value={values.odc_id}
+                            onValueChange={(v) => onChange('odc_id', v)}
+                            errorMessage={errors?.errors.odc_id}
+                        >
+                            <option value="">
+                                {values.kabel_odc_id && filteredOdcs.length === 0
+                                    ? t('No ODCs available for selected Kabel ODC')
+                                    : t('Pilih ODC (Optional)')}
+                            </option>
+                            {filteredOdcs.map((o) => (
+                                <option key={o.id} value={o.id}>
+                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
+                                </option>
+                            ))}
+                        </SelectField>
+                    </Element>
+                </>
+            )}
+
+
 
             <Element leftSide={t('Tipe splitter')} required>
                 <SelectField

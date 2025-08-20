@@ -90,6 +90,7 @@ class FoOdcController extends Controller
         $paginator = $query
             ->with([
                 'lokasi',
+                'kabelCoreOdc.kabelTubeOdc.kabelOdc',
                 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
                 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
                 'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
@@ -109,6 +110,22 @@ class FoOdcController extends Controller
                 'lokasi_id' => $o->lokasi_id,
                 'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
                 'odc_id' => $o->odc_id, // direct connection to another ODC
+                'kabel_core_odc' => $o->kabelCoreOdc ? [
+                    'id' => $o->kabelCoreOdc->id,
+                    'warna_core' => $o->kabelCoreOdc->warna_core,
+                    'status' => $o->kabelCoreOdc->status,
+                    'created_at' => $o->kabelCoreOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->kabelCoreOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->kabelCoreOdc->deleted_at?->toDateTimeString(),
+                    'kabel_tube_odc' => $o->kabelCoreOdc->kabelTubeOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->id,
+                        'warna_tube' => $o->kabelCoreOdc->kabelTubeOdc->warna_tube,
+                    ] : null,
+                    'kabel_odc' => $o->kabelCoreOdc->kabelTubeOdc?->kabelOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->id,
+                        'nama_kabel' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->nama_kabel,
+                    ] : null,
+                ] : null,
                 'lokasi' => $lokasi ? [
                     'id' => $lokasi->id,
                     'nama_lokasi' => $lokasi->nama_lokasi,
@@ -204,6 +221,7 @@ class FoOdcController extends Controller
             'lokasi_id' => 'required|exists:fo_lokasis,id',
             'kabel_odc_id' => 'nullable|exists:fo_kabel_odcs,id',
             'odc_id' => 'nullable|exists:fo_odcs,id',
+            'kabel_core_odc_id' => 'nullable|exists:fo_kabel_core_odcs,id',
             'nama_odc' => 'required|string|max:255|unique:fo_odcs,nama_odc',
             'deskripsi' => 'nullable|string|max:255',
             'tipe_splitter' => 'required|in:1:2,1:4,1:8,1:16,1:32,1:64,1:128',
@@ -217,6 +235,7 @@ class FoOdcController extends Controller
         $o = FoOdc::create($data);
         $o->load([
             'lokasi',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
@@ -246,6 +265,22 @@ class FoOdcController extends Controller
                 'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
+                'kabel_core_odc' => $o->kabelCoreOdc ? [
+                    'id' => $o->kabelCoreOdc->id,
+                    'warna_core' => $o->kabelCoreOdc->warna_core,
+                    'status' => $o->kabelCoreOdc->status,
+                    'created_at' => $o->kabelCoreOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->kabelCoreOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->kabelCoreOdc->deleted_at?->toDateTimeString(),
+                    'kabel_tube_odc' => $o->kabelCoreOdc->kabelTubeOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->id,
+                        'warna_tube' => $o->kabelCoreOdc->kabelTubeOdc->warna_tube,
+                    ] : null,
+                    'kabel_odc' => $o->kabelCoreOdc->kabelTubeOdc?->kabelOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->id,
+                        'nama_kabel' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->nama_kabel,
+                    ] : null,
+                ] : null,
                 'kabel_odc' => $o->kabelOdc ? [
                     'id' => $o->kabelOdc->id,
                     'nama_kabel' => $o->kabelOdc->nama_kabel,
@@ -312,6 +347,7 @@ class FoOdcController extends Controller
         $o = FoOdc::withTrashed()->findOrFail($id);
         $o->load([
             'lokasi',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
@@ -341,6 +377,22 @@ class FoOdcController extends Controller
                 'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
+                'kabel_core_odc' => $o->kabelCoreOdc ? [
+                    'id' => $o->kabelCoreOdc->id,
+                    'warna_core' => $o->kabelCoreOdc->warna_core,
+                    'status' => $o->kabelCoreOdc->status,
+                    'created_at' => $o->kabelCoreOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->kabelCoreOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->kabelCoreOdc->deleted_at?->toDateTimeString(),
+                    'kabel_tube_odc' => $o->kabelCoreOdc->kabelTubeOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->id,
+                        'warna_tube' => $o->kabelCoreOdc->kabelTubeOdc->warna_tube,
+                    ] : null,
+                    'kabel_odc' => $o->kabelCoreOdc->kabelTubeOdc?->kabelOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->id,
+                        'nama_kabel' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->nama_kabel,
+                    ] : null,
+                ] : null,
                 'kabel_odc' => $o->kabelOdc ? [
                     'id' => $o->kabelOdc->id,
                     'nama_kabel' => $o->kabelOdc->nama_kabel,
@@ -410,6 +462,7 @@ class FoOdcController extends Controller
             'lokasi_id' => 'sometimes|exists:fo_lokasis,id',
             'kabel_odc_id' => 'nullable|sometimes|exists:fo_kabel_odcs,id',
             'odc_id' => 'nullable|sometimes|exists:fo_odcs,id',
+            'kabel_core_odc_id' => 'nullable|sometimes|exists:fo_kabel_core_odcs,id',
             'nama_odc' => 'sometimes|string|max:255|unique:fo_odcs,nama_odc,' . $id,
             'deskripsi' => 'sometimes|nullable|string|max:255',
             'tipe_splitter' => 'sometimes|in:1:2,1:4,1:8,1:16,1:32,1:64,1:128',
@@ -419,6 +472,7 @@ class FoOdcController extends Controller
         $o->update($data);
         $o->refresh()->load([
             'lokasi',
+            'kabelCoreOdc.kabelTubeOdc.kabelOdc',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.lokasi',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.client',
             'kabelOdc.kabelTubeOdcs.kabelCoreOdcs.odps.clientFtth.company',
@@ -448,6 +502,22 @@ class FoOdcController extends Controller
                 'deskripsi' => $o->deskripsi,
                 'tipe_splitter' => $o->tipe_splitter,
                 'status' => $o->status,
+                'kabel_core_odc' => $o->kabelCoreOdc ? [
+                    'id' => $o->kabelCoreOdc->id,
+                    'warna_core' => $o->kabelCoreOdc->warna_core,
+                    'status' => $o->kabelCoreOdc->status,
+                    'created_at' => $o->kabelCoreOdc->created_at?->toDateTimeString(),
+                    'updated_at' => $o->kabelCoreOdc->updated_at?->toDateTimeString(),
+                    'deleted_at' => $o->kabelCoreOdc->deleted_at?->toDateTimeString(),
+                    'kabel_tube_odc' => $o->kabelCoreOdc->kabelTubeOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->id,
+                        'warna_tube' => $o->kabelCoreOdc->kabelTubeOdc->warna_tube,
+                    ] : null,
+                    'kabel_odc' => $o->kabelCoreOdc->kabelTubeOdc?->kabelOdc ? [
+                        'id' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->id,
+                        'nama_kabel' => $o->kabelCoreOdc->kabelTubeOdc->kabelOdc->nama_kabel,
+                    ] : null,
+                ] : null,
                 'kabel_odc' => $o->kabelOdc ? [
                     'id' => $o->kabelOdc->id,
                     'nama_kabel' => $o->kabelOdc->nama_kabel,

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Models\FoKabelTubeOdc;
 use App\Models\FoKabelOdc;
 use App\Models\FoOdp;
+use App\Models\FoOdc;
 
 class FoKabelCoreOdc extends Model
 {
@@ -91,5 +92,13 @@ class FoKabelCoreOdc extends Model
     {
         $parent = $this->kabelTubeOdc()->withTrashed()->first();
         return $parent && !$parent->trashed() && $parent->status === 'active';
+    }
+
+    /**
+     * Child ODCs fed by this core (optional, one core can feed many child ODCs).
+     */
+    public function childOdcs()
+    {
+        return $this->hasMany(FoOdc::class, 'kabel_core_odc_id', 'id');
     }
 }

@@ -40,10 +40,10 @@ class FoTableSeeder extends Seeder
         $this->seedClients($clientLokasis, $odps, $companyId);
 
         // 8. Seed Joint Box Locations (independent locations around Surakarta)
-        $this->seedJointBoxLokasis();
+        $jointBoxLokasis = $this->seedJointBoxLokasis();
 
         // 9. Seed Joint Boxes (connecting ODC↔ODC and ODC→ODP)
-        $this->seedJointBoxes($odcs, $odps, $kabelOdcs);
+        $this->seedJointBoxes($odcs, $odps, $kabelOdcs, $jointBoxLokasis);
 
         $this->command->info('FoTableSeeder completed successfully (Surakarta dataset)!');
     }
@@ -540,17 +540,17 @@ class FoTableSeeder extends Seeder
         return $insertedLokasis;
     }
 
-    protected function seedJointBoxes(array $odcs, array $odps, array $kabelOdcs): void
+    protected function seedJointBoxes(array $odcs, array $odps, array $kabelOdcs, array $jointBoxLokasis): void
     {
         $jointBoxes = [];
         $id = 1;
 
-        // Create joint box locations first (returns inserted lokasi rows)
-        $jointBoxLokasis = $this->seedJointBoxLokasis();
+        // Avoid duplicate joint boxes by composite uniqueness in-memory
+        $existingKeys = [];
 
         // 1) Joint box for ODC↔ODC: between ODC Banjarsari and ODC Laweyan (Solo Ring A)
         // This represents a cable splice point along the main ring
-        $jointBoxes[] = [
+        $jb1 = [
             'id' => $id++,
             'lokasi_id' => $jointBoxLokasis[0]->id, // Joint Box Banjarsari-Laweyan
             'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
@@ -564,10 +564,15 @@ class FoTableSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ];
+        $key1 = implode('|', [$jb1['lokasi_id'], $jb1['kabel_odc_id'], $jb1['odc_id'], $jb1['odc_2_id'] ?? 0, $jb1['odp_id'] ?? 0]);
+        if (!isset($existingKeys[$key1])) {
+            $existingKeys[$key1] = true;
+            $jointBoxes[] = $jb1;
+        }
 
         // 2) Joint box for ODC→ODP: ODC Banjarsari to ODP Manahan
         // This represents a distribution point along the feeder cable
-        $jointBoxes[] = [
+        $jb2 = [
             'id' => $id++,
             'lokasi_id' => $jointBoxLokasis[1]->id, // Joint Box Banjarsari-Manahan
             'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
@@ -581,10 +586,15 @@ class FoTableSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ];
+        $key2 = implode('|', [$jb2['lokasi_id'], $jb2['kabel_odc_id'], $jb2['odc_id'], $jb2['odc_2_id'] ?? 0, $jb2['odp_id'] ?? 0]);
+        if (!isset($existingKeys[$key2])) {
+            $existingKeys[$key2] = true;
+            $jointBoxes[] = $jb2;
+        }
 
         // 3) Joint box for ODC→ODP: ODC Jebres to ODP Pasar Kliwon
         // This represents a distribution point along the feeder cable
-        $jointBoxes[] = [
+        $jb3 = [
             'id' => $id++,
             'lokasi_id' => $jointBoxLokasis[2]->id, // Joint Box Jebres-PasarKliwon
             'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
@@ -598,10 +608,15 @@ class FoTableSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ];
+        $key3 = implode('|', [$jb3['lokasi_id'], $jb3['kabel_odc_id'], $jb3['odc_id'], $jb3['odc_2_id'] ?? 0, $jb3['odp_id'] ?? 0]);
+        if (!isset($existingKeys[$key3])) {
+            $existingKeys[$key3] = true;
+            $jointBoxes[] = $jb3;
+        }
 
         // 4) Joint box for ODC→ODP: ODC Laweyan to ODP Serengan
         // This represents a distribution point along the feeder cable
-        $jointBoxes[] = [
+        $jb4 = [
             'id' => $id++,
             'lokasi_id' => $jointBoxLokasis[3]->id, // Joint Box Laweyan-Serengan
             'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
@@ -615,10 +630,15 @@ class FoTableSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ];
+        $key4 = implode('|', [$jb4['lokasi_id'], $jb4['kabel_odc_id'], $jb4['odc_id'], $jb4['odc_2_id'] ?? 0, $jb4['odp_id'] ?? 0]);
+        if (!isset($existingKeys[$key4])) {
+            $existingKeys[$key4] = true;
+            $jointBoxes[] = $jb4;
+        }
 
         // 5) Joint box for ODC↔ODC: between ODC Banjarsari and ODC Jebres (Solo Ring A)
         // This represents another cable splice point along the main ring
-        $jointBoxes[] = [
+        $jb5 = [
             'id' => $id++,
             'lokasi_id' => $jointBoxLokasis[4]->id, // Joint Box Banjarsari-Jebres
             'kabel_odc_id' => $kabelOdcs[0]['id'], // Solo Ring A
@@ -632,7 +652,14 @@ class FoTableSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ];
+        $key5 = implode('|', [$jb5['lokasi_id'], $jb5['kabel_odc_id'], $jb5['odc_id'], $jb5['odc_2_id'] ?? 0, $jb5['odp_id'] ?? 0]);
+        if (!isset($existingKeys[$key5])) {
+            $existingKeys[$key5] = true;
+            $jointBoxes[] = $jb5;
+        }
 
-        DB::table('fo_joint_boxes')->insert($jointBoxes);
+        if (!empty($jointBoxes)) {
+            DB::table('fo_joint_boxes')->insert($jointBoxes);
+        }
     }
 }

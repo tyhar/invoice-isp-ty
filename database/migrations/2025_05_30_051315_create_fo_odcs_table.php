@@ -19,6 +19,9 @@ return new class extends Migration
             // Direct ODC-to-ODC connection (for ODC chains without joint boxes)
             $table->foreignId('odc_id')->nullable()->constrained('fo_odcs')->cascadeOnDelete()->cascadeOnUpdate();
 
+            // Optional: core used to feed this child ODC from its parent ODC (one core per child ODC)
+            $table->foreignId('kabel_core_odc_id')->nullable()->constrained('fo_kabel_core_odcs')->cascadeOnDelete()->cascadeOnUpdate();
+
             $table->string('nama_odc');
             $table->string('deskripsi')->nullable();
             $table->enum('tipe_splitter', ['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128']);
