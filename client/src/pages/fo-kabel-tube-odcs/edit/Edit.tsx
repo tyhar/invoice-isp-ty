@@ -32,7 +32,7 @@ export default function Edit() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    useTitle('edit_tube_odc');
+    useTitle('Edit Tube Kabel');
 
     const [form, setForm] = useState<FoKabelTubeOdcForm>({
         kabel_odc_id: 0,
@@ -182,7 +182,7 @@ export default function Edit() {
                 return Promise.all([...deletePromises, ...createPromises]);
             })
             .then(() => {
-                toast.success('updated tube odc with cores');
+                toast.success('updated tube kabel with cores');
                 queryClient.invalidateQueries('fo-kabel-tube-odcs');
                 queryClient.invalidateQueries('fo-kabel-core-odcs');
             })
@@ -198,8 +198,8 @@ export default function Edit() {
     };
 
     const pages = [
-        { name: t('FO Kabel Tube ODC')!, href: '/fo-kabel-tube-odcs' },
-        { name: t('Edit Tube ODC')!, href: `/fo-kabel-tube-odcs/${id}/edit` },
+        { name: t('Tube Kabel')!, href: '/fo-kabel-tube-odcs' },
+        { name: t('Edit Tube Kabel')!, href: `/fo-kabel-tube-odcs/${id}/edit` },
     ];
 
     if (!form.kabel_odc_id && !form.warna_tube) {
@@ -208,7 +208,7 @@ export default function Edit() {
 
     return (
         <Default
-            title={t('Edit Tube ODC')!}
+            title={t('Edit Tube Kabel')!}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

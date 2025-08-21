@@ -10,54 +10,67 @@ class FilterLokasiController extends Controller
 {
     public function index(Request $request)
     {
-        // Primary source: precomputed filter_lokasi table
-        $lokasi = FilterLokasi::select(
-            'latitude',
-            'longitude',
-            'negara',
-            'provinsi',
-            'kota',
-            'jalan',
-            'desa',
-            'kodepos'
-        )->get();
+        // 1) Base: derive unique province/city from fo_lokasis (always include all cities)
+        $base = DB::table('fo_lokasis')
+            ->whereNull('fo_lokasis.deleted_at')
+            ->whereNotNull('fo_lokasis.province')
+            ->whereNotNull('fo_lokasis.city')
+            ->select(
+                DB::raw('MIN(fo_lokasis.latitude) as latitude'),
+                DB::raw('MIN(fo_lokasis.longitude) as longitude'),
+                DB::raw('fo_lokasis.province as provinsi'),
+                DB::raw('fo_lokasis.city as kota')
+            )
+            ->groupBy('fo_lokasis.province', 'fo_lokasis.city')
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'latitude' => $row->latitude,
+                    'longitude' => $row->longitude,
+                    'negara' => null,
+                    'provinsi' => $row->provinsi,
+                    'kota' => $row->kota,
+                    'jalan' => null,
+                    'desa' => null,
+                    'kodepos' => null,
+                ];
+            });
 
-        // Fallback: derive unique province/city from fo_lokasis when filter_lokasi is empty
-        if ($lokasi->isEmpty()) {
-            $derived = DB::table('fo_lokasis')
-                ->whereNull('fo_lokasis.deleted_at')
-                ->whereNotNull('fo_lokasis.province')
-                ->whereNotNull('fo_lokasis.city')
-                ->select(
-                    DB::raw('MIN(fo_lokasis.latitude) as latitude'),
-                    DB::raw('MIN(fo_lokasis.longitude) as longitude'),
-                    DB::raw('fo_lokasis.province as provinsi'),
-                    DB::raw('fo_lokasis.city as kota')
-                )
-                ->groupBy('fo_lokasis.province', 'fo_lokasis.city')
-                ->get()
-                ->map(function ($row) {
-                    return [
-                        'latitude' => $row->latitude,
-                        'longitude' => $row->longitude,
-                        'negara' => null,
-                        'provinsi' => $row->provinsi,
-                        'kota' => $row->kota,
-                        'jalan' => null,
-                        'desa' => null,
-                        'kodepos' => null,
-                    ];
-                });
-
-            return response()->json([
-                'status' => 'success',
-                'data' => $derived,
-            ]);
+        // Build a map of base entries keyed by normalized provinsi|kota
+        $baseMap = [];
+        foreach ($base as $row) {
+            if (!empty($row['provinsi']) && !empty($row['kota'])) {
+                $key = strtolower(trim($row['provinsi'])) . '|' . strtolower(trim($row['kota']));
+                $baseMap[$key] = $row;
+            }
         }
+
+        // 2) Optional curated overlay from filter_lokasi: overlay coordinates and extra fields
+        $curated = FilterLokasi::select('latitude','longitude','negara','provinsi','kota','jalan','desa','kodepos')->get();
+        foreach ($curated as $c) {
+            if (!$c->provinsi || !$c->kota) {
+                continue; // skip incomplete keys
+            }
+            $key = strtolower(trim($c->provinsi)) . '|' . strtolower(trim($c->kota));
+            $payload = [
+                'latitude' => $c->latitude,
+                'longitude' => $c->longitude,
+                'negara' => $c->negara,
+                'provinsi' => $c->provinsi,
+                'kota' => $c->kota,
+                'jalan' => $c->jalan,
+                'desa' => $c->desa,
+                'kodepos' => $c->kodepos,
+            ];
+            // Overlay if exists, otherwise add as new entry
+            $baseMap[$key] = array_merge($baseMap[$key] ?? [], $payload);
+        }
+
+        $merged = array_values($baseMap);
 
         return response()->json([
             'status' => 'success',
-            'data' => $lokasi
+            'data' => $merged,
         ]);
     }
 

@@ -164,6 +164,34 @@ export function Permissions(props: Props) {
         />
       </Element>
 
+      {/* Consolidated Fiber Optics permission */}
+      <Element
+        leftSide={t('Fiber Optics Management')}
+        leftSideHelp={t('Allow user to access the Fiber Optics Management module')}
+      >
+        <Toggle
+          checked={isPermissionChecked('manage_fiberoptics')}
+          onValueChange={(value) =>
+            handlePermissionChange('manage_fiberoptics', value as boolean)
+          }
+          cypressRef="manage_fiberoptics"
+        />
+      </Element>
+
+      {/* Consolidated Mapping permission */}
+      <Element
+        leftSide={t('Mapping Management')}
+        leftSideHelp={t('Allow user to access the Mapping Management module')}
+      >
+        <Toggle
+          checked={isPermissionChecked('manage_mapping')}
+          onValueChange={(value) =>
+            handlePermissionChange('manage_mapping', value as boolean)
+          }
+          cypressRef="manage_mapping"
+        />
+      </Element>
+
       <Element>
         <div className="grid grid-cols-3 md:grid-cols-6">
           <div className="col-1">{t('create')}</div>

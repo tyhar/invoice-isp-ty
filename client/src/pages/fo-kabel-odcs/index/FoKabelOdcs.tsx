@@ -28,10 +28,10 @@ interface FoKabelOdc {
 }
 
 export default function FoKabelOdcs() {
-    useTitle('FO Kabel ODC');
+    useTitle('Kabel');
 
     const [t] = useTranslation();
-    const pages: Page[] = [{ name: t('FO Kabel ODC'), href: '/fo-kabel-odcs' }];
+    const pages: Page[] = [{ name: t('Kabel'), href: '/fo-kabel-odcs' }];
 
     const columns: DataTableColumns<FoKabelOdc> = [
         // { id: 'id', label: 'ID' },
@@ -108,9 +108,9 @@ export default function FoKabelOdcs() {
     ];
 
     return (
-        <Default title={t('FO Kabel ODC')} breadcrumbs={pages}>
+        <Default title={t('Kabel')} breadcrumbs={pages}>
             <DataTable2<FoKabelOdc>
-                resource="FO Kabel ODC"
+                resource="Kabel"
                 columns={columns}
                 endpoint="/api/v1/fo-kabel-odcs"
                 linkToCreate="/fo-kabel-odcs/create"

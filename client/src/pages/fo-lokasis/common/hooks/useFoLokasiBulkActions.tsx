@@ -52,6 +52,8 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
             }
 
             const idsToGeocode = resourcesToGeocode.map((res: any) => res.id);
+            // Show processing notification while the bulk geocode request runs
+            toast.processing();
             const geocodeResponse = await request(
                 'POST',
                 endpoint('/api/v1/fo-lokasis/bulk-geocode'),
@@ -61,6 +63,7 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
             );
 
             if (geocodeResponse.data.status === 'success') {
+                toast.dismiss();
                 const { success, failed } = geocodeResponse.data.data;
 
                 if (success > 0) {
@@ -76,10 +79,12 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
                 // Refresh the page to show updated data
                 window.location.reload();
             } else {
+                toast.dismiss();
                 toast.error('Failed to geocode locations');
             }
         } catch (error) {
             console.error('Bulk geocoding error:', error);
+            toast.dismiss();
             toast.error('Failed to geocode locations. Please try again.');
         }
     };

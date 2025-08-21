@@ -352,18 +352,16 @@ export function Default(props: Props) {
             current: location.pathname.startsWith('/mapping'),
             visible:
                 enabled(ModuleBitmask.Vendors) &&
-                (hasPermission('view_vendor') ||
-                    hasPermission('create_vendor') ||
-                    hasPermission('edit_vendor')),
+                hasPermission('manage_mapping'),
             rightButton: {
                 icon: PlusCircle,
-                to: '/vendors/create',
-                label: t('new_vendor'),
-                visible: hasPermission('create_vendor'),
+                to: '/mapping',
+                label: t('mapping'),
+                visible: hasPermission('manage_mapping'),
             },
         },
         {
-            name: t('FIBER OPTIK'),
+            name: t('Fiber Optics'),
             href: '', // kosong karena hanya toggle
             icon: Radio,
             current:
@@ -375,10 +373,7 @@ export function Default(props: Props) {
                 location.pathname.startsWith('/fo-odps') ||
                 location.pathname.startsWith('/fo-client-ftths') ||
                 location.pathname.startsWith('/fo-reports'),
-            visible:
-                hasPermission('view_product') ||
-                hasPermission('create_product') ||
-                hasPermission('edit_product'),
+            visible: hasPermission('manage_fiberoptics'),
             children: [
                 {
                     name: t('Lokasi'),
@@ -386,18 +381,16 @@ export function Default(props: Props) {
                     icon: Radio,
                     current: location.pathname.startsWith('/fo-lokasis'),
                     visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
+                        hasPermission('manage_fiberoptics'),
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-lokasis/create',
                         label: t('new_fo_lokasi'),
-                        visible: hasPermission('create_product'),
+                        visible: hasPermission('manage_fiberoptics'),
                     },
                 },
                 {
-                    name: t('KABEL'),
+                    name: t('Manajemen Kabel'),
                     href: '', // kosong karena hanya toggle
                     icon: Radio,
                     current:
@@ -405,61 +398,53 @@ export function Default(props: Props) {
                         location.pathname.startsWith('/fo-kabel-tube-odcs') ||
                         location.pathname.startsWith('/fo-kabel-core-odcs'),
                     visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
+                        hasPermission('manage_fiberoptics'),
                     children: [
                         {
-                            name: t('Kabel ODC'),
+                            name: t('Kabel'),
                             href: '/fo-kabel-odcs',
                             icon: Radio,
                             current:
                                 location.pathname.startsWith('/fo-kabel-odcs'),
                             visible:
-                                hasPermission('view_product') ||
-                                hasPermission('create_product') ||
-                                hasPermission('edit_product'),
+                                hasPermission('manage_fiberoptics'),
                             rightButton: {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-odcs/create',
                                 label: t('new_product'),
-                                visible: hasPermission('create_product'),
+                                visible: hasPermission('manage_fiberoptics'),
                             },
                         },
                         {
-                            name: t('Tube Kabel ODC'),
+                            name: t('Tube Kabel'),
                             href: '/fo-kabel-tube-odcs',
                             icon: Radio,
                             current: location.pathname.startsWith(
                                 '/fo-kabel-tube-odcs'
                             ),
                             visible:
-                                hasPermission('view_product') ||
-                                hasPermission('create_product') ||
-                                hasPermission('edit_product'),
+                                hasPermission('manage_fiberoptics'),
                             rightButton: {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-tube-odcs/create',
                                 label: t('new_product'),
-                                visible: hasPermission('create_product'),
+                                visible: hasPermission('manage_fiberoptics'),
                             },
                         },
                         {
-                            name: t('Core Kabel ODC'),
+                            name: t('Core Kabel'),
                             href: '/fo-kabel-core-odcs',
                             icon: Radio,
                             current: location.pathname.startsWith(
                                 '/fo-kabel-core-odcs'
                             ),
                             visible:
-                                hasPermission('view_product') ||
-                                hasPermission('create_product') ||
-                                hasPermission('edit_product'),
+                                hasPermission('manage_fiberoptics'),
                             rightButton: {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-core-odcs/create',
                                 label: t('new_product'),
-                                visible: hasPermission('create_product'),
+                                visible: hasPermission('manage_fiberoptics'),
                             },
                         },
                     ],
@@ -470,14 +455,12 @@ export function Default(props: Props) {
                     icon: Radio,
                     current: location.pathname.startsWith('/fo-odcs'),
                     visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
+                        hasPermission('manage_fiberoptics'),
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-odcs/create',
                         label: t('new_fo_odc'),
-                        visible: hasPermission('create_product'),
+                        visible: hasPermission('manage_fiberoptics'),
                     },
                 },
                 {
@@ -486,14 +469,12 @@ export function Default(props: Props) {
                     icon: Radio,
                     current: location.pathname.startsWith('/fo-odps'),
                     visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
+                        hasPermission('manage_fiberoptics'),
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-odps/create',
                         label: t('new_product'),
-                        visible: hasPermission('create_product'),
+                        visible: hasPermission('manage_fiberoptics'),
                     },
                 },
                 {
@@ -502,14 +483,12 @@ export function Default(props: Props) {
                     icon: Radio,
                     current: location.pathname.startsWith('/fo-client-ftths'),
                     visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
+                        hasPermission('manage_fiberoptics'),
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-client-ftths/create',
                         label: t('new_product'),
-                        visible: hasPermission('create_product'),
+                        visible: hasPermission('manage_fiberoptics'),
                     },
                 },
                 {
@@ -517,15 +496,12 @@ export function Default(props: Props) {
                     href: '/fo-joint-boxes',
                     icon: Radio,
                     current: location.pathname.startsWith('/fo-joint-boxes'),
-                    visible:
-                        hasPermission('view_product') ||
-                        hasPermission('create_product') ||
-                        hasPermission('edit_product'),
+                    visible: hasPermission('manage_fiberoptics'),
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-joint-boxes/create',
                         label: t('new_joint_box'),
-                        visible: hasPermission('create_product'),
+                        visible: hasPermission('manage_fiberoptics'),
                     },
                 },
                 {

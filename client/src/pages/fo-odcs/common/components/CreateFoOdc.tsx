@@ -191,7 +191,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                 />
             </Element>
 
-            <Element leftSide={t('Kabel ODC')} required>
+            <Element leftSide={t('Kabel')} required>
                 <SelectField
                     required
                     value={values.kabel_odc_id}
@@ -206,7 +206,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                     }}
                     errorMessage={errors?.errors.kabel_odc_id}
                 >
-                    <option value="">{t('Pilih Kabel ODC')}</option>
+                    <option value="">{t('Pilih Kabel')}</option>
                     {kabelOdcs.map((k) => (
                         <option key={k.id} value={k.id}>{k.nama_kabel}</option>
                     ))}
@@ -242,7 +242,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
 
             {values.odc_connection_enabled && (
                 <>
-                    <Element leftSide={t('Kabel Tube ODC')}>
+                    <Element leftSide={t('Kabel Tube')}>
                         <SelectField
                             value={values.kabel_tube_odc_id}
                             onValueChange={(v) => {
@@ -262,7 +262,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                     </Element>
 
                     {/* Optional: Core that feeds this child ODC */}
-                    <Element leftSide={t('Kabel Core ODC')}>
+                    <Element leftSide={t('Kabel Core')}>
                         <SelectField
                             value={values.kabel_core_odc_id}
                             onValueChange={(v) => onChange('kabel_core_odc_id', v)}
@@ -285,7 +285,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                         >
                             <option value="">
                                 {values.kabel_odc_id && filteredOdcs.length === 0
-                                    ? t('No ODCs available for selected Kabel ODC')
+                                    ? t('No ODCs available for selected Kabel')
                                     : t('Pilih ODC (Optional)')}
                             </option>
                             {filteredOdcs.map((o) => (

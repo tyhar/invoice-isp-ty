@@ -33,7 +33,7 @@ export default function Edit() {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
-    useTitle('edit_kabel_odc');
+    useTitle('edit_kabel');
 
     const [form, setForm] = useState<FoKabelOdcEdit>({
         nama_kabel: '',
@@ -51,7 +51,7 @@ export default function Edit() {
 
     useEffect(() => {
         if (!id) {
-            setLoadError('Invalid Kabel ODC ID.');
+            setLoadError('Invalid Kabel ID.');
             setLoading(false);
             return;
         }
@@ -81,7 +81,7 @@ export default function Edit() {
                 );
             })
             .catch(() => {
-                setLoadError('Failed to load Kabel ODC data.');
+                setLoadError('Failed to load Kabel data.');
             })
             .finally(() => setLoading(false));
     }, [id, navigate]);
@@ -97,7 +97,7 @@ export default function Edit() {
                     className="px-4 py-2 mt-2 text-white bg-blue-600 rounded shadow"
                     onClick={() => navigate('/fo-kabel-odcs')}
                 >
-                    {t('Back to Kabel ODC List')}
+                    {t('Back to Kabel List')}
                 </button>
             </div>
         );
@@ -110,7 +110,7 @@ export default function Edit() {
         setIsBusy(true);
         toast.processing();
 
-        // Update the Kabel ODC first
+        // Update the Kabel first
         const kabelData = {
             nama_kabel: form.nama_kabel,
             deskripsi: form.deskripsi,
@@ -140,7 +140,7 @@ export default function Edit() {
                     await Promise.all(tubeUpdatePromises);
                 }
 
-                toast.success('updated kabel odc with tubes');
+                toast.success('updated kabel with tubes');
                 queryClient.invalidateQueries('fo-kabel-odcs');
                 queryClient.invalidateQueries('fo-kabel-tube-odcs');
                 navigate('/fo-kabel-odcs');
@@ -157,13 +157,13 @@ export default function Edit() {
     };
 
     const pages = [
-        { name: t('FO Kabel ODC')!, href: '/fo-kabel-odcs' },
-        { name: t('Edit Kabel ODC')!, href: `/fo-kabel-odcs/${id}/edit` },
+        { name: t('Kabel')!, href: '/fo-kabel-odcs' },
+        { name: t('Edit Kabel')!, href: `/fo-kabel-odcs/${id}/edit` },
     ];
 
     return (
         <Default
-            title={t('Edit Kabel ODC')!}
+            title={t('Edit Kabel')!}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

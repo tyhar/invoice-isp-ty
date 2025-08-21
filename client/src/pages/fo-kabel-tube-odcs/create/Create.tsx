@@ -27,15 +27,15 @@ interface KabelOdcOption {
 }
 
 export default function Create() {
-    useTitle('New FO Kabel Tube ODC');
+    useTitle('New Tube Kabel');
     const [t] = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const pages = [
-        { name: t('FO Kabel Tube ODC')!, href: '/fo-kabel-tube-odcs' },
+        { name: t('Tube Kabel')!, href: '/fo-kabel-tube-odcs' },
         {
-            name: t('New FO Kabel Tube ODC')!,
+            name: t('New Tube Kabel')!,
             href: '/fo-kabel-tube-odcs/create',
         },
     ];
@@ -124,7 +124,7 @@ export default function Create() {
 
     return (
         <Default
-            title={t('New FO Kabel Tube ODC')}
+            title={t('New Tube Kabel')}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

@@ -164,7 +164,7 @@ export function CreateFoOdp({
                 </Element>
             )}
 
-            <Element leftSide={t('Kabel ODC')} required>
+            <Element leftSide={t('Kabel')} required>
                 <SelectField
                     required
                     value={values.kabel_odc_id}
@@ -185,7 +185,7 @@ export function CreateFoOdp({
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('Kabel Tube ODC')} required>
+            <Element leftSide={t('Kabel Tube')} required>
                 <SelectField
                     required
                     value={values.kabel_tube_odc_id}

@@ -688,7 +688,7 @@ function JointBoxCard({ jointbox }: { jointbox: any }) {
           <div className="text-xs text-gray-500">Deleted: {jointbox.deleted_at || '-'}</div>
           {jointbox.kabel_odc && (
             <div className="mt-2 p-2 bg-gray-50 rounded border border-gray-200">
-              <div className="font-semibold text-gray-700 mb-1">Kabel ODC</div>
+              <div className="font-semibold text-gray-700 mb-1">Kabel</div>
               <div className="text-xs text-gray-500">Nama Kabel: {jointbox.kabel_odc.nama_kabel}</div>
               <div className="text-xs text-gray-500">Tipe Kabel: {jointbox.kabel_odc.tipe_kabel}</div>
               <div className="text-xs text-gray-500">Panjang Kabel: {jointbox.kabel_odc.panjang_kabel}</div>

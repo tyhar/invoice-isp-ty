@@ -57,7 +57,7 @@ export default function Show() {
                         <div className="ml-4">-</div>
                     )}
                     <hr className="my-2" />
-                    <div className="font-semibold">Kabel ODC</div>
+                    <div className="font-semibold">Kabel</div>
                     {data.kabel_odc ? (
                         <div className="ml-4 space-y-1">
                             <div><b>ID:</b> {data.kabel_odc.id}</div>

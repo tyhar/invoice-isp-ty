@@ -67,7 +67,7 @@ export function CreateFoKabelOdc(props: Props) {
     };
 
     return (
-        <Card title={t('New Kabel ODC')}>
+        <Card title={t('New Kabel')}>
             <Element leftSide={t('Nama Kabel')} required>
                 <InputField
                     required

@@ -28,14 +28,14 @@ interface OdcOption {
 }
 
 export default function Create() {
-    useTitle('New FO Kabel ODC');
+    useTitle('New Kabel');
     const [t] = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const pages = [
-        { name: t('FO Kabel ODC')!, href: '/fo-kabel-odcs' },
-        { name: t('New FO Kabel ODC')!, href: '/fo-kabel-odcs/create' },
+        { name: t('Kabel')!, href: '/fo-kabel-odcs' },
+        { name: t('New Kabel')!, href: '/fo-kabel-odcs/create' },
     ];
 
     const [form, setForm] = useState<FoKabelOdcCreate>({
@@ -66,7 +66,7 @@ export default function Create() {
         if (isBusy) return;
         setIsBusy(true);
 
-        // Create the Kabel ODC first
+        // Create the Kabel first
         const kabelData = {
             nama_kabel: form.nama_kabel,
             deskripsi: form.deskripsi,
@@ -96,7 +96,7 @@ export default function Create() {
                     await Promise.all(tubeUpdatePromises);
                 }
 
-                toast.success('created kabel odc with tubes');
+                toast.success('created kabel with tubes');
                 await queryClient.invalidateQueries('fo-kabel-odcs');
                 await queryClient.invalidateQueries('fo-kabel-tube-odcs');
                 navigate('/fo-kabel-odcs');
@@ -109,7 +109,7 @@ export default function Create() {
 
     return (
         <Default
-            title={t('New FO Kabel ODC')}
+            title={t('New Kabel')}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

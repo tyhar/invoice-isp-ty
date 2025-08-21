@@ -35,11 +35,11 @@ interface FoKabelTubeOdc {
 }
 
 export default function FoKabelTubeOdcs() {
-    useTitle('FO Kabel Tube ODC');
+    useTitle('Tube Kabel');
 
     const [t] = useTranslation();
     const pages: Page[] = [
-        { name: t('FO Kabel Tube ODC'), href: '/fo-kabel-tube-odcs' },
+        { name: t('Tube Kabel'), href: '/fo-kabel-tube-odcs' },
     ];
 
     const columns: DataTableColumns<FoKabelTubeOdc> = [
@@ -89,9 +89,9 @@ export default function FoKabelTubeOdcs() {
     ];
 
     return (
-        <Default title={t('FO Kabel Tube ODC')} breadcrumbs={pages}>
+        <Default title={t('Tube Kabel')} breadcrumbs={pages}>
             <DataTable2<FoKabelTubeOdc>
-                resource="FO Kabel Tube ODC"
+                resource="Tube Kabel"
                 columns={columns}
                 endpoint="/api/v1/fo-kabel-tube-odcs"
                 linkToCreate="/fo-kabel-tube-odcs/create"

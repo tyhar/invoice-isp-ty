@@ -40,6 +40,10 @@ type PurchaseOrderPermissions =
 type ReportPermissions = 'view_reports';
 type DashboardPermissions = 'view_dashboard';
 type WAGatewayPermissions = 'view_wa_gateway';
+// Consolidated permission to manage all Fiber Optics features at once
+type FiberOpticsPermissions = 'manage_fiberoptics';
+// Consolidated permission to manage Mapping features
+type MappingPermissions = 'manage_mapping';
 
 export type Permissions =
     | AllPermissions
@@ -59,6 +63,8 @@ export type Permissions =
     | PurchaseOrderPermissions
     | ReportPermissions
     | WAGatewayPermissions
+    | FiberOpticsPermissions
+    | MappingPermissions
     | DashboardPermissions;
 
 export function useHasPermission() {

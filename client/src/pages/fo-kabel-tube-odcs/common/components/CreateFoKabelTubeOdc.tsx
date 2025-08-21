@@ -94,8 +94,8 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
     }, [form.kabel_odc_id, odcs]);
 
     return (
-        <Card title={t('New Tube ODC')}>
-            <Element leftSide={t('Kabel ODC')} required>
+        <Card title={t('New Tube Kabel')}>
+            <Element leftSide={t('Kabel')} required>
                 <SelectField
                     required
                     value={form.kabel_odc_id || ''}

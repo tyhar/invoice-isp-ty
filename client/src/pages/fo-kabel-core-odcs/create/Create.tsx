@@ -28,15 +28,15 @@ interface TubeOdcOption {
 }
 
 export default function Create() {
-    useTitle('New FO Kabel Core ODC');
+    useTitle('New Core Kabel');
     const [t] = useTranslation();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     const pages = [
-        { name: t('FO Kabel Core ODC')!, href: '/fo-kabel-core-odcs' },
+        { name: t('Core Kabel')!, href: '/fo-kabel-core-odcs' },
         {
-            name: t('New FO Kabel Core ODC')!,
+            name: t('New Core Kabel')!,
             href: '/fo-kabel-core-odcs/create',
         },
     ];
@@ -90,7 +90,7 @@ export default function Create() {
 
     return (
         <Default
-            title={t('New FO Kabel Core ODC')}
+            title={t('New Core Kabel')}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

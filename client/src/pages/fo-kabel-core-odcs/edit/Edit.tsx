@@ -35,7 +35,7 @@ export default function Edit() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
 
-    useTitle('edit_core_odc');
+    useTitle('Edit Core Kabel');
 
     const [form, setForm] = useState<FoKabelCoreOdcForm>({
         kabel_tube_odc_id: 0,
@@ -95,7 +95,7 @@ export default function Edit() {
 
         request('PUT', endpoint(`/api/v1/fo-kabel-core-odcs/${id}`), form)
             .then(() => {
-                toast.success('update core odc');
+                toast.success('update core kabel');
                 navigate(route('/fo-kabel-core-odcs/:id/edit', { id }), {
                     state: { toast: 'updated core odc' },
                 });
@@ -112,8 +112,8 @@ export default function Edit() {
     };
 
     const pages = [
-        { name: t('FO Kabel Core ODC')!, href: '/fo-kabel-core-odcs' },
-        { name: t('Edit Core ODC')!, href: `/fo-kabel-core-odcs/${id}/edit` },
+        { name: t('Core Kabel')!, href: '/fo-kabel-core-odcs' },
+        { name: t('Edit Core Kabel')!, href: `/fo-kabel-core-odcs/${id}/edit` },
     ];
 
     // show spinner until form is initialized
@@ -123,7 +123,7 @@ export default function Edit() {
 
     return (
         <Default
-            title={t('Edit Core ODC')!}
+            title={t('Edit Core Kabel')!}
             breadcrumbs={pages}
             disableSaveButton={isBusy}
             onSaveClick={handleSave}

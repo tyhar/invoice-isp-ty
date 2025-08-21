@@ -66,7 +66,7 @@ export default function Overview() {
       ['Total Lokasi', summary.lokasi],
       ['Total ODC', summary.odc],
       ['Total ODP', summary.odp],
-      ['Total Kabel ODC', summary.kabel],
+      ['Total Kabel', summary.kabel],
       ['Total Kabel Length (m)', summary.kabelLength],
       ['Total Tubes', summary.tubes],
       ['Total Cores', summary.cores],
@@ -114,7 +114,7 @@ export default function Overview() {
           <Card title="Total Lokasi" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-blue-600">{summary.lokasi}</Card>
           <Card title="Total ODC" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-green-600">{summary.odc}</Card>
           <Card title="Total ODP" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-purple-600">{summary.odp}</Card>
-          <Card title="Total Kabel ODC" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-yellow-600">{summary.kabel}</Card>
+          <Card title="Total Kabel" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-yellow-600">{summary.kabel}</Card>
           <Card title="Total Kabel Length (m)" childrenClassName="flex justify-center items-center text-2xl font-bold min-h-[3rem] text-orange-600">{summary.kabelLength.toLocaleString()}</Card>
           <Card title="Total Tubes" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-red-600">{summary.tubes}</Card>
           <Card title="Total Cores" childrenClassName="flex justify-center items-center text-3xl font-bold min-h-[3rem] text-indigo-600">{summary.cores}</Card>

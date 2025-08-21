@@ -57,7 +57,7 @@ export default function FoOdcs() {
         // { id: 'status', label: 'Status' },
         {
             id: 'kabel_odcs',
-            label: 'Kabel ODC',
+            label: 'Kabel',
             format: (_f, record) => `${record.kabel_odc?.nama_kabel ?? '-'}`,
         },
         // {

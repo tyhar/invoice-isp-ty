@@ -246,7 +246,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                     errorMessage={errors?.errors?.deskripsi}
                 />
             </Element>
-            <Element leftSide="Kabel ODC" required>
+            <Element leftSide="Kabel" required>
                 <SelectField
                     required
                     value={form.kabel_odc_id}
@@ -257,7 +257,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                     }}
                     errorMessage={errors?.errors?.kabel_odc_id}
                 >
-                    <option value="">Pilih Kabel ODC</option>
+                    <option value="">Pilih Kabel</option>
                     {kabelOdcs.map(k => (
                         <option key={k.id} value={k.id}>{k.nama_kabel}</option>
                     ))}

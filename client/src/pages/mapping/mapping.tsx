@@ -458,14 +458,14 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">Kabel Core ODC</label>
+                  <label className="block mb-1">Kabel Core</label>
                   <select
                     className="w-full border p-1"
                     value={form.kabel_core_odc_id}
                     onChange={(e) => setForm({ ...form, kabel_core_odc_id: e.target.value })}
                     required
                   >
-                    <option value="">Pilih Kabel Core ODC</option>
+                    <option value="">Pilih Kabel Core</option>
                     {odcCoreList.map((core) => (
                       <option key={core.id} value={core.id}>
                         {core.warna_core}
@@ -506,14 +506,14 @@ const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, i
                   />
                 </div>
                 <div>
-                  <label className="block mb-1">Kabel ODC</label>
+                  <label className="block mb-1">Kabel</label>
                   <select
                     className="w-full border p-1"
                     value={form.kabel_odc_id}
                     onChange={(e) => setForm({ ...form, kabel_odc_id: e.target.value })}
                     required
                   >
-                    <option value="">Pilih Kabel ODC</option>
+                    <option value="">Pilih Kabel</option>
                     {kabelOdcList.map((kabel) => (
                       <option key={kabel.id} value={kabel.id}>
                         {kabel.nama_kabel}
@@ -652,7 +652,7 @@ const MappingPage: React.FC = () => {
   const [showCenterModal, setShowCenterModal] = useState(false);
 
 
-  const pages: Page[] = [{ name: t('Mapping'), href: '/map' }];
+  const pages: Page[] = [{ name: t('Mapping'), href: '/mapping' }];
 
   // GET DATA CLIENT,ODP,ODC,JOINT_BOXES DARI API
   const fetchData = async () => {
@@ -1203,13 +1203,13 @@ const MappingPage: React.FC = () => {
                 <Marker key={`client-${client.id}`} position={pos} icon={clientIcon}
                 >
                   <Popup>
-                    <div>
+                    <div className="text-base">
                       <strong>CLIENT</strong><br />
-                      Client: {client.nama_client || '-'}<br />
-                      Alamat: {client.alamat || '-'}<br />
-                      ODC: {client.odc?.nama_odc || '-'}<br />
-                      ODP: {client.odp?.nama_odp || '-'}<br />
-                      Total Tagihan:{' '}
+                      <b>Nama Client:</b> {client.nama_client || '-'}<br />
+                      <b>Alamat:</b> {client.alamat || '-'}<br />
+                      <b>ODC:</b> {client.odc?.nama_odc || '-'}<br />
+                      <b>ODP:</b> {client.odp?.nama_odp || '-'}<br />
+                      <b>Total Tagihan:</b>{' '}
                       {client.client?.invoices
                         ? client.client.invoices.reduce((total: number, inv: { amount: string; }) => total + parseFloat(inv.amount), 0).toLocaleString('id-ID', {
                           style: 'currency',
@@ -1217,12 +1217,12 @@ const MappingPage: React.FC = () => {
                         })
                         : 'Rp0'}
                       <br />
-                      Nama Paket:{' '}
+                      <b>Nama Paket:</b>{' '}
                       {client.client?.invoices?.length > 0 && client.client.invoices[0].line_items?.length > 0
                         ? client.client.invoices[0].line_items[0].product_key
                         : '-'}
                       <br />
-                      Status Invoice:{' '}
+                      <b>Status Invoice:</b>{' '}
                       {client.client?.invoices?.length > 0
                         ? client.client.invoices[0].status_id === 4
                           ? 'Lunas'
@@ -1271,13 +1271,13 @@ const MappingPage: React.FC = () => {
                 <Marker key={`odp-${odp.id}`} position={pos} icon={odpIcon}>
                   <Popup>
                     <div className="text-base">
-                      <strong>ODP:</strong> {odp.nama_odp}<br />
+                      <strong>Nama ODP:</strong> {odp.nama_odp}<br />
                       <strong>Deskripsi:</strong> {odp.deskripsi}<br />
                       <strong>Lokasi:</strong> {odp.lokasi.nama_lokasi}<br />
-                      <strong>Kabel ODC:</strong> {odp.kabel_core_odc?.kabel_odc?.nama_kabel || '-'}<br />
-                      <strong>Terhubung ke ODC:</strong> {odp.odc?.nama_odc}<br />
-                      <strong>Kabel Core ODC:</strong> {odp.kabel_core_odc?.warna_core}<br />
-                      <strong>Kabel Tube ODC:</strong> {odp.kabel_core_odc?.kabel_tube_odc?.warna_tube}<br />
+                      <strong>Kabel:</strong> {odp.kabel_core_odc?.kabel_odc?.nama_kabel || '-'}<br />
+                      <strong>Kabel Core:</strong> {odp.kabel_core_odc?.warna_core}<br />
+                      <strong>Kabel Tube:</strong> {odp.kabel_core_odc?.kabel_tube_odc?.warna_tube}<br />
+                      <strong>Connected ODC:</strong> {odp.odc?.nama_odc}<br />
                       <div className="mt-2 flex gap-2">
                         <button
                           className="bg-yellow-400 px-2 py-1 rounded text-xs"
@@ -1319,17 +1319,14 @@ const MappingPage: React.FC = () => {
                 <Marker key={`odc-${odc.id}`} position={pos} icon={odcIcon}>
                   <Popup>
                     <div className="text-base">
-                      <strong>ODC:</strong> {odc.nama_odc}<br />
+                      <strong>Nama ODC:</strong> {odc.nama_odc}<br />
                       <strong>Deskripsi:</strong> {odc.deskripsi}<br />
                       <strong>Lokasi:</strong> {odc.lokasi.nama_lokasi}<br />
-                      <strong>Kabel ODC:</strong> {odc.kabel_odc?.nama_kabel}<br />
-                      <strong>Kabel Tube ODC:</strong> {odc.kabel_core_odc?.kabel_tube_odc?.warna_tube || '-'}<br />
-                      <strong>Kabel Core ODC:</strong> {odc.kabel_core_odc?.warna_core || '-'}<br />
+                      <strong>Kabel:</strong> {odc.kabel_odc?.nama_kabel}<br />
+                      <strong>Kabel Tube:</strong> {odc.kabel_core_odc?.kabel_tube_odc?.warna_tube || '-'}<br />
+                      <strong>Kabel Core:</strong> {odc.kabel_core_odc?.warna_core || '-'}<br />
                       <strong>Connected ODC:</strong> {odc.connected_odc?.nama_odc || '-'}<br />
-                      <strong>Tipe Kabel:</strong> {odc.kabel_odc?.tipe_kabel}<br />
-                      <strong>Panjang Kabel:</strong> {odc.kabel_odc?.panjang_kabel} m<br />
-                      <strong>Jumlah Kabel Tube:</strong> {odc.kabel_odc?.jumlah_tube}<br />
-                      <strong>Jumlah Kabel Core di Tube:</strong> {odc.kabel_odc?.jumlah_core_in_tube}<br />
+                      <strong>Tipe Splitter:</strong> {odc.tipe_splitter || '-'}<br />
 
                       <div className="mt-2 flex gap-2">
                         <button
@@ -1374,7 +1371,7 @@ const MappingPage: React.FC = () => {
                       <strong>Joint Box:</strong> {jointBox.nama_joint_box}<br />
                       <strong>Lokasi:</strong> {jointBox.lokasi?.nama_lokasi}<br />
                       <strong>Deskripsi:</strong> {jointBox.deskripsi || '-'}<br />
-                      <strong>Kabel ODC:</strong> {jointBox.kabel_odc?.nama_kabel || '-'}<br />
+                      <strong>Kabel:</strong> {jointBox.kabel_odc?.nama_kabel || '-'}<br />
                       {jointBox.odc && (
                         <>
                           <strong>Connected FROM ODC:</strong> {jointBox.odc.nama_odc}<br />
@@ -1439,7 +1436,7 @@ const MappingPage: React.FC = () => {
               >
                 <Popup>
                   <div className="text-base">
-                    <strong>ODP ➝ Client</strong><br />
+                    <strong><i>ODP ➝ CLIENT</i></strong><br />
                     <b>ODP:</b> {client.odp?.nama_odp || '-'}<br />
                     <b>Client:</b> {client.nama_client || '-'}<br />
                     {client.odp?.kabel_core_odc?.kabel_tube_odc?.kabel_odc && (
@@ -1606,7 +1603,7 @@ const MappingPage: React.FC = () => {
                 >
                   <Popup>
                     <div className="text-base">
-                      <strong>KABEL (ODC-ODC)</strong><br />
+                      <strong><i>KABEL (ODC ➝ ODC)</i></strong><br />
                       <b>Nama Kabel:</b> {connection.kabel_odc?.nama_kabel || '-'}<br />
                       <b>Dari ODC:</b> {connection.from.nama_odc}<br />
                       <b>Ke ODC:</b> {connection.to.nama_odc}<br />
@@ -1669,6 +1666,15 @@ const MappingPage: React.FC = () => {
 
             if (positions.some(p => isNaN(p[0]) || isNaN(p[1]))) return null;
 
+            // Derive cable details with robust fallbacks:
+            // 1) joint box kabel if present
+            // 2) ODP's kabel via kabel_core_odc → kabel_tube_odc → kabel_odc
+            // 3) ODC's kabel
+            const derivedCable = jointBox?.kabel_odc
+              || odp?.kabel_core_odc?.kabel_tube_odc?.kabel_odc
+              || odp?.odc?.kabel_odc
+              || null;
+
             return (
               <Polyline
                 key={`line-odc-odp-${odp.id}`}
@@ -1688,16 +1694,16 @@ const MappingPage: React.FC = () => {
               >
                 <Popup>
                   <div className="text-base">
-                    <strong>KABEL (ODC-ODP)</strong><br />
-                    <b>Nama Kabel:</b> {jointBox?.kabel_odc?.nama_kabel || odp.kabel_core_odc?.kabel_tube_odc?.kabel_odc?.nama_kabel || '-'}<br />
+                    <strong><i>KABEL (ODC ➝ ODP)</i></strong><br />
+                    <b>Nama Kabel:</b> {derivedCable?.nama_kabel || '-'}<br />
                     <b>ODC:</b> {odp.odc?.nama_odc || '-'}<br />
                     <b>ODP:</b> {odp.nama_odp || '-'}<br />
                     <b>Via Joint Box:</b> {jointBox?.nama_joint_box || '-'}<br />
-                    <b>Panjang Kabel:</b> {jointBox?.kabel_odc?.panjang_kabel || odp.kabel_core_odc?.kabel_tube_odc?.kabel_odc?.panjang_kabel || '-'} m<br />
-                    <b>Jumlah Tube:</b> {jointBox?.kabel_odc?.jumlah_tube || odp.kabel_core_odc?.kabel_tube_odc?.kabel_odc?.jumlah_tube || '-'}<br />
-                    <b>Jumlah Core:</b> {jointBox?.kabel_odc?.jumlah_total_core || odp.kabel_core_odc?.kabel_tube_odc?.kabel_odc?.jumlah_total_core || '-'}<br />
-                    <b>Core/Tube:</b> {jointBox?.kabel_odc?.jumlah_core_in_tube || odp.kabel_core_odc?.kabel_tube_odc?.kabel_odc?.jumlah_core_in_tube || '-'}<br />
-                    <b>Tipe Kabel:</b> {jointBox?.kabel_odc?.tipe_kabel || odp.kabel_core_odc?.kabel_tube_odc?.kabel_odc?.tipe_kabel || '-'}<br />
+                    <b>Panjang Kabel:</b> {derivedCable?.panjang_kabel ?? '-'} {derivedCable?.panjang_kabel ? 'm' : ''}<br />
+                    <b>Jumlah Tube:</b> {derivedCable?.jumlah_tube ?? '-'}<br />
+                    <b>Jumlah Core:</b> {derivedCable?.jumlah_total_core ?? '-'}<br />
+                    <b>Core/Tube:</b> {derivedCable?.jumlah_core_in_tube ?? '-'}<br />
+                    <b>Tipe Kabel:</b> {derivedCable?.tipe_kabel ?? '-'}<br />
                     <b>Jarak:</b> {distance.toFixed(2)} km
                   </div>
                 </Popup>
@@ -1715,9 +1721,9 @@ const MappingPage: React.FC = () => {
                 <Popup>
                   <div className="text-base">
                     <strong>Nama Joint Box:</strong> {jointBox.nama_joint_box}<br />
-                    <b>Lokasi:</b> {jointBox.lokasi?.nama_lokasi || '-'}<br />
                     <b>Deskripsi:</b> {jointBox.deskripsi || '-'}<br />
-                    <b>Kabel ODC:</b> {jointBox.kabel_odc?.nama_kabel || '-'}<br />
+                    <b>Lokasi:</b> {jointBox.lokasi?.nama_lokasi || '-'}<br />
+                    <b>Kabel:</b> {jointBox.kabel_odc?.nama_kabel || '-'}<br />
                     {jointBox.odc && (
                       <>
                         <b>Connected ODC:</b> {jointBox.odc.nama_odc}<br />
@@ -1725,7 +1731,7 @@ const MappingPage: React.FC = () => {
                     )}
                     {jointBox.odc2 && (
                       <>
-                        <b>Connected ODC2:</b> {jointBox.odc2.nama_odc}<br />
+                        <b>Connected ODC_2:</b> {jointBox.odc2.nama_odc}<br />
                       </>
                     )}
                     {jointBox.odp && (
@@ -1759,7 +1765,7 @@ const MappingPage: React.FC = () => {
                       setShowKabelModal(false);
                     }}
                   >
-                    Kabel ODC
+                    Kabel
                   </button>
                   <button
                     className="bg-purple-600 text-white px-4 py-2 rounded"
@@ -1768,7 +1774,7 @@ const MappingPage: React.FC = () => {
                       setShowKabelModal(false);
                     }}
                   >
-                    Kabel Tube ODC
+                    Kabel Tube
                   </button>
                   <button
                     className="bg-green-500 text-white px-4 py-2 rounded"
@@ -1777,7 +1783,7 @@ const MappingPage: React.FC = () => {
                       setShowKabelModal(false);
                     }}
                   >
-                    Kabel Core ODC
+                    Kabel Core
                   </button>
                   <button
                     className="mt-2 text-gray-600 hover:underline"

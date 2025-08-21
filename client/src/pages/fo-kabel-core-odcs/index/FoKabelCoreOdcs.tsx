@@ -53,11 +53,11 @@ interface FoKabelCoreOdc {
 }
 
 export default function FoKabelCoreOdcs() {
-    useTitle('FO Kabel Core ODC');
+    useTitle('Core Kabel');
 
     const [t] = useTranslation();
     const pages: Page[] = [
-        { name: t('FO Kabel Core ODC'), href: '/fo-kabel-core-odcs' },
+        { name: t('Core Kabel'), href: '/fo-kabel-core-odcs' },
     ];
 
     const columns: DataTableColumns<FoKabelCoreOdc> = [
@@ -112,9 +112,9 @@ export default function FoKabelCoreOdcs() {
     ];
 
     return (
-        <Default title={t('FO Kabel Core ODC')} breadcrumbs={pages}>
+        <Default title={t('Core Kabel')} breadcrumbs={pages}>
             <DataTable2<FoKabelCoreOdc>
-                resource="FO Kabel Core ODC"
+                resource="Core Kabel"
                 columns={columns}
                 endpoint="/api/v1/fo-kabel-core-odcs"
                 linkToCreate="/fo-kabel-core-odcs/create"

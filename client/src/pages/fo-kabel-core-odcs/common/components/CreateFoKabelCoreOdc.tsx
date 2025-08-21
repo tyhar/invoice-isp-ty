@@ -99,9 +99,9 @@ export function CreateFoKabelCoreOdc({
     const tubeFull = selectedTube && typeof selectedTube.jumlah_core_in_tube === 'number' && selectedTube.jumlah_core_in_tube > 0 && selectedTube.kabel_core_odc_ids && selectedTube.kabel_core_odc_ids.length >= selectedTube.jumlah_core_in_tube;
 
     return (
-        <Card title={t('New Core ODC')}>
+        <Card title={t('New Core Kabel')}>
             {/* Select parent cable */}
-            <Element leftSide={t('Kabel ODC')} required>
+            <Element leftSide={t('Kabel')} required>
                 <SelectField
                     required
                     value={selectedCable || ''}
