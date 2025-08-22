@@ -54,7 +54,7 @@ export default function FoKabelOdcs() {
         {
             id: 'odcs',
             label: 'ODC',
-            format: (_val, record) => record.odcs?.map(odc => odc.nama_odc).join(', ') ?? '-',
+            format: (_val, record) => `${record.odcs?.map(odc => odc.nama_odc).join(', ') ?? '-'}`,
         },
         { id: 'tipe_kabel', label: 'Tipe Kabel' },
         {
@@ -121,6 +121,8 @@ export default function FoKabelOdcs() {
                 customActions={useFoKabelOdcActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-kabel-odcs"
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

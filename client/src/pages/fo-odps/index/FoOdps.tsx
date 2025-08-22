@@ -113,6 +113,8 @@ export default function FoOdps() {
                 customActions={useFoOdpActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-odps"
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

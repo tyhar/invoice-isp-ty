@@ -68,6 +68,19 @@ export function CreateFoKabelOdc(props: Props) {
 
     return (
         <Card title={t('New Kabel')}>
+
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('KABEL')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this KABEL.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
             <Element leftSide={t('Nama Kabel')} required>
                 <InputField
                     required
@@ -98,42 +111,6 @@ export function CreateFoKabelOdc(props: Props) {
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('Panjang Kabel (m)')} required>
-                <InputField
-                    type="number"
-                    required
-                    value={
-                        form.panjang_kabel != null
-                            ? form.panjang_kabel.toString()
-                            : ''
-                    }
-                    onValueChange={(v) =>
-                        change('panjang_kabel', v ? parseFloat(v) : 0)
-                    }
-                    errorMessage={errors?.errors.panjang_kabel}
-                />
-            </Element>
-
-            <Element leftSide={t('Create Batch Tubes')}>
-                <Checkbox
-                    checked={showBatchTubes}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBatchTubesChange(e.target.checked)}
-                />
-            </Element>
-
-            {showBatchTubes && (
-                <Element leftSide={t('Tube Colors')} required>
-                    <TubeColorPicker
-                        value={form.tube_colors}
-                        onChange={(colors) => change('tube_colors', colors)}
-                    />
-                    {errors?.errors.tube_colors && (
-                        <div className="mt-1 text-xs text-red-600">
-                            {errors.errors.tube_colors}
-                        </div>
-                    )}
-                </Element>
-            )}
 
             <Element leftSide={t('Jumlah Maximum Core per Tube')} required>
                 <SelectField
@@ -162,6 +139,56 @@ export function CreateFoKabelOdc(props: Props) {
                     <option value="144">144</option>
                 </SelectField>
             </Element>
+
+            <Element leftSide={t('Panjang Kabel (m)')} required>
+                <InputField
+                    type="number"
+                    required
+                    value={
+                        form.panjang_kabel != null
+                            ? form.panjang_kabel.toString()
+                            : ''
+                    }
+                    onValueChange={(v) =>
+                        change('panjang_kabel', v ? parseFloat(v) : 0)
+                    }
+                    errorMessage={errors?.errors.panjang_kabel}
+                />
+            </Element>
+
+            {/* Section: Connection (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('Tubes Batches Creation')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Automatically create Tubes at once')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            <Element leftSide={t('Create Batch Tubes')}>
+                <Checkbox
+                    checked={showBatchTubes}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBatchTubesChange(e.target.checked)}
+                />
+            </Element>
+
+            {showBatchTubes && (
+                <Element leftSide={t('Tube Colors')} required>
+                    <TubeColorPicker
+                        value={form.tube_colors}
+                        onChange={(colors) => change('tube_colors', colors)}
+                    />
+                    {errors?.errors.tube_colors && (
+                        <div className="mt-1 text-xs text-red-600">
+                            {errors.errors.tube_colors}
+                        </div>
+                    )}
+                </Element>
+            )}
+
         </Card>
     );
 }

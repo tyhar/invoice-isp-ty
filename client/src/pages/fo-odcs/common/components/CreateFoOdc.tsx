@@ -100,8 +100,22 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                 values.create_new_lokasi ? 'New Lokasi and ODC' : 'New ODC'
             )}
         >
+
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('LOKASI')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Create a new lokasi or select an existing lokasi below.')}
+                </div>
+            </div>
+
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
             {/* Create New Lokasi Toggle */}
-            <Element leftSide={t('Create New Lokasi')}>
+            <Element leftSide={t('Create New Lokasi')} required>
                 <Checkbox
                     checked={values.create_new_lokasi}
                     onChange={(e: { target: { checked: boolean } }) =>
@@ -155,7 +169,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                     </Element>
                 </>
             ) : (
-                <Element leftSide={t('Lokasi')} required>
+                <Element leftSide={t('Select Lokasi')} required>
                     <SelectField
                         required
                         value={values.lokasi_id}
@@ -171,6 +185,19 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                     </SelectField>
                 </Element>
             )}
+
+            {/* Section: ODC details (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('ODC')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this ODC.')}
+                </div>
+            </div>
+
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
 
             {/* ODC Fields */}
             <Element leftSide={t('Nama ODC')} required>
@@ -191,7 +218,24 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                 />
             </Element>
 
-            <Element leftSide={t('Kabel')} required>
+            <Element leftSide={t('Tipe splitter')} required>
+                <SelectField
+                    required
+                    value={values.tipe_splitter}
+                    onValueChange={(v) => onChange('tipe_splitter', v)}
+                    errorMessage={errors?.errors.tipe_splitter}
+                >
+                    {['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128'].map(
+                        (opt) => (
+                            <option key={opt} value={opt}>
+                                {opt}
+                            </option>
+                        )
+                    )}
+                </SelectField>
+            </Element>
+
+            <Element leftSide={t('Kabel')}>
                 <SelectField
                     required
                     value={values.kabel_odc_id}
@@ -212,6 +256,18 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                     ))}
                 </SelectField>
             </Element>
+
+            {/* Section: Connection (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('ODC Connection')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Optionally link this ODC to another ODC and specify Tube/Core.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
 
             {/* Toggle for ODC->ODC optional connection fields */}
             <Element leftSide={t('ODC->ODC connection')}>
@@ -298,24 +354,6 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                 </>
             )}
 
-
-
-            <Element leftSide={t('Tipe splitter')} required>
-                <SelectField
-                    required
-                    value={values.tipe_splitter}
-                    onValueChange={(v) => onChange('tipe_splitter', v)}
-                    errorMessage={errors?.errors.tipe_splitter}
-                >
-                    {['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128'].map(
-                        (opt) => (
-                            <option key={opt} value={opt}>
-                                {opt}
-                            </option>
-                        )
-                    )}
-                </SelectField>
-            </Element>
         </Card>
     );
 }

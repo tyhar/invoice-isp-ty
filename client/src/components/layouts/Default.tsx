@@ -411,7 +411,7 @@ export function Default(props: Props) {
                             rightButton: {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-odcs/create',
-                                label: t('new_product'),
+                                label: t('new_fo_kabel'),
                                 visible: hasPermission('manage_fiberoptics'),
                             },
                         },
@@ -427,7 +427,7 @@ export function Default(props: Props) {
                             rightButton: {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-tube-odcs/create',
-                                label: t('new_product'),
+                                label: t('new_fo_tube_kabel'),
                                 visible: hasPermission('manage_fiberoptics'),
                             },
                         },
@@ -443,7 +443,7 @@ export function Default(props: Props) {
                             rightButton: {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-core-odcs/create',
-                                label: t('new_product'),
+                                label: t('new_fo_core_kabel'),
                                 visible: hasPermission('manage_fiberoptics'),
                             },
                         },
@@ -473,7 +473,7 @@ export function Default(props: Props) {
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-odps/create',
-                        label: t('new_product'),
+                        label: t('new_fo_odp'),
                         visible: hasPermission('manage_fiberoptics'),
                     },
                 },
@@ -487,7 +487,7 @@ export function Default(props: Props) {
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-client-ftths/create',
-                        label: t('new_product'),
+                        label: t('new_fo_client_ftth'),
                         visible: hasPermission('manage_fiberoptics'),
                     },
                 },
@@ -500,7 +500,7 @@ export function Default(props: Props) {
                     rightButton: {
                         icon: PlusCircle,
                         to: '/fo-joint-boxes/create',
-                        label: t('new_joint_box'),
+                        label: t('new_fo_joint_box'),
                         visible: hasPermission('manage_fiberoptics'),
                     },
                 },

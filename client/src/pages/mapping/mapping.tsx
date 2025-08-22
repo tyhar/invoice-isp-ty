@@ -1461,56 +1461,79 @@ const MappingPage: React.FC = () => {
 
           {/* ODC to ODC Connections */}
           {showOdcConnections && (() => {
-            const odcConnections: { from: any; to: any; kabel_odc_id: number; kabel_odc: any; jointBox?: any; isDirect?: boolean }[] = [];
+            type OdcConnection = { from: any; to: any; kabel_odc_id: number; kabel_odc: any; jointBox?: any; isDirect?: boolean; connectionType: string; bidirectional?: boolean };
+            const connectionsMap = new Map<string, OdcConnection>();
 
-            // 1. First, check for explicit ODC→ODC connections via joint boxes
+            const makeKey = (a: number, b: number) => {
+              const min = Math.min(a, b);
+              const max = Math.max(a, b);
+              return `${min}-${max}`;
+            };
+
+            const addOrMerge = (from: any, to: any, data: OdcConnection) => {
+              const key = makeKey(from.id, to.id);
+              const existing = connectionsMap.get(key);
+              if (!existing) {
+                connectionsMap.set(key, { ...data, from, to });
+                return;
+              }
+              // Mark bidirectional if opposite direction observed
+              connectionsMap.set(key, {
+                ...existing,
+                bidirectional: true,
+                // Prefer stronger connection type: Joint Box > Direct > Legacy
+                ...(existing.connectionType === 'Via Joint Box' ? {} :
+                  data.connectionType === 'Via Joint Box' ? { ...data, from, to } :
+                  existing.connectionType === 'Direct Connection' ? {} :
+                  data.connectionType === 'Direct Connection' ? { ...data, from, to } : {})
+              });
+            };
+
+            // 1) Explicit ODC→ODC via joint boxes
             jointBoxes.forEach(jointBox => {
               if (jointBox.odc_id && jointBox.odc_2_id) {
-                // This joint box explicitly connects two ODCs
                 const fromOdc = odcs.find(odc => odc.id === jointBox.odc_id);
                 const toOdc = odcs.find(odc => odc.id === jointBox.odc_2_id);
-
                 if (fromOdc && toOdc) {
-                  odcConnections.push({
+                  addOrMerge(fromOdc, toOdc, {
                     from: fromOdc,
                     to: toOdc,
                     kabel_odc_id: jointBox.kabel_odc_id,
                     kabel_odc: fromOdc.kabel_odc,
                     jointBox: jointBox,
-                    isDirect: false
+                    isDirect: false,
+                    connectionType: 'Via Joint Box'
                   });
                 }
               }
             });
 
-            // 2. Then, check for direct ODC→ODC connections (using odc_id field)
+            // 2) Direct ODC→ODC using odc_id
             odcs.forEach(odc => {
               if (odc.odc_id) {
-                // This ODC connects directly to another ODC
                 const connectedOdc = odcs.find(targetOdc => targetOdc.id === odc.odc_id);
-
                 if (connectedOdc) {
-                  // Check if this connection is already added (to avoid duplicates)
-                  const existingConnection = odcConnections.find(conn =>
-                    (conn.from.id === odc.id && conn.to.id === connectedOdc.id) ||
-                    (conn.from.id === connectedOdc.id && conn.to.id === odc.id)
-                  );
-
-                  if (!existingConnection) {
-                    odcConnections.push({
+                  const key = makeKey(odc.id, connectedOdc.id);
+                  if (connectionsMap.has(key)) {
+                    // Mark bidirectional
+                    const prev = connectionsMap.get(key)!;
+                    connectionsMap.set(key, { ...prev, bidirectional: true });
+                  } else {
+                    addOrMerge(odc, connectedOdc, {
                       from: odc,
                       to: connectedOdc,
                       kabel_odc_id: odc.kabel_odc_id || connectedOdc.kabel_odc_id,
                       kabel_odc: odc.kabel_odc || connectedOdc.kabel_odc,
                       jointBox: undefined,
-                      isDirect: true
+                      isDirect: true,
+                      connectionType: 'Direct Connection'
                     });
                   }
                 }
               }
             });
 
-            // 3. Finally, add legacy connections for ODCs that share the same kabel_odc_id but don't have joint boxes or direct connections
+            // 3) Legacy connections within same kabel_odc (fallback)
             const odcGroups = new Map<number, any[]>();
             odcs.forEach(odc => {
               if (odc.kabel_odc_id) {
@@ -1520,33 +1543,41 @@ const MappingPage: React.FC = () => {
                 odcGroups.get(odc.kabel_odc_id)!.push(odc);
               }
             });
-
-            // Create legacy connections between ODCs in the same group (only if no other connection exists)
+            // Build a set of ODC ids that are already connected (via joint box or direct)
+            const connectedIds = new Set<number>();
+            connectionsMap.forEach((conn) => {
+              connectedIds.add(conn.from.id);
+              connectedIds.add(conn.to.id);
+            });
             odcGroups.forEach((odcList, kabelOdcId) => {
               if (odcList.length > 1) {
                 for (let i = 0; i < odcList.length; i++) {
                   for (let j = i + 1; j < odcList.length; j++) {
-                    // Check if there's already any connection between these ODCs
-                    const existingConnection = odcConnections.find(conn =>
-                      (conn.from.id === odcList[i].id && conn.to.id === odcList[j].id) ||
-                      (conn.from.id === odcList[j].id && conn.to.id === odcList[i].id)
-                    );
-
-                    // Only add legacy connection if no other connection exists
-                    if (!existingConnection) {
-                      odcConnections.push({
+                    const key = makeKey(odcList[i].id, odcList[j].id);
+                    // Only add legacy connection if there is no existing connection
+                    // AND both ODCs currently have no other connections, to avoid unintended triangles
+                    if (!connectionsMap.has(key)
+                      && !connectedIds.has(odcList[i].id)
+                      && !connectedIds.has(odcList[j].id)) {
+                      addOrMerge(odcList[i], odcList[j], {
                         from: odcList[i],
                         to: odcList[j],
                         kabel_odc_id: kabelOdcId,
                         kabel_odc: odcList[i].kabel_odc,
                         jointBox: undefined,
-                        isDirect: false
+                        isDirect: false,
+                        connectionType: 'Legacy Connection'
                       });
+                      // Update connectedIds to prevent creating multiple legacy links forming triangles
+                      connectedIds.add(odcList[i].id);
+                      connectedIds.add(odcList[j].id);
                     }
                   }
                 }
               }
             });
+
+            const odcConnections = Array.from(connectionsMap.values());
 
             return odcConnections.map((connection) => {
               const fromPos = getLatLng(connection.from);
@@ -1604,10 +1635,15 @@ const MappingPage: React.FC = () => {
                   <Popup>
                     <div className="text-base">
                       <strong><i>KABEL (ODC ➝ ODC)</i></strong><br />
+                      <b>Connection Type:</b> {connection.connectionType || 'Direct'}<br />
                       <b>Nama Kabel:</b> {connection.kabel_odc?.nama_kabel || '-'}<br />
-                      <b>Dari ODC:</b> {connection.from.nama_odc}<br />
-                      <b>Ke ODC:</b> {connection.to.nama_odc}<br />
-                      <b>Via Joint Box:</b> {connection.jointBox?.nama_joint_box || '-'}<br />
+                      <b>From ODC:</b> {connection.from.nama_odc}<br />
+                      <b>To ODC:</b> {connection.to.nama_odc}<br />
+                      {connection.jointBox && (
+                        <>
+                          <b>Via Joint Box:</b> {connection.jointBox.nama_joint_box}<br />
+                        </>
+                      )}
                       {connection.kabel_odc && (
                         <>
                           <b>Jumlah Tube:</b> {connection.kabel_odc.jumlah_tube}<br />

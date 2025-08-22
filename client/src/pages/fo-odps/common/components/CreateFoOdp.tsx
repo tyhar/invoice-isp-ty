@@ -94,7 +94,20 @@ export function CreateFoOdp({
                 values.create_new_lokasi ? 'New Lokasi and ODP' : 'New ODP'
             )}
         >
-            <Element leftSide={t('Create New Lokasi')}>
+
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('LOKASI')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Create a new lokasi or select an existing lokasi below.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            <Element leftSide={t('Create New Lokasi')} required>
                 <Checkbox
                     checked={values.create_new_lokasi}
                     onChange={(e: { target: { checked: boolean } }) =>
@@ -147,7 +160,7 @@ export function CreateFoOdp({
                     </Element>
                 </>
             ) : (
-                <Element leftSide={t('Lokasi')} required>
+                <Element leftSide={t('Select Lokasi')} required>
                     <SelectField
                         required
                         value={values.lokasi_id}
@@ -164,7 +177,49 @@ export function CreateFoOdp({
                 </Element>
             )}
 
-            <Element leftSide={t('Kabel')} required>
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('ODP')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this ODP.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            <Element leftSide={t('Nama ODP')} required>
+                <InputField
+                    required
+                    value={values.nama_odp}
+                    onValueChange={(v) => onChange('nama_odp', v)}
+                    errorMessage={errors?.errors.nama_odp}
+                />
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={values.deskripsi || ''}
+                    onValueChange={(v) => onChange('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
+                />
+            </Element>
+
+            {/* Section: Connection (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('ODP Connection')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Optionally link this ODP to ODC and specify Kabel/Tube/Core.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            <Element leftSide={t('Kabel')}>
                 <SelectField
                     required
                     value={values.kabel_odc_id}
@@ -185,7 +240,7 @@ export function CreateFoOdp({
                 </SelectField>
             </Element>
 
-            <Element leftSide={t('Kabel Tube')} required>
+            <Element leftSide={t('Kabel Tube')}>
                 <SelectField
                     required
                     value={values.kabel_tube_odc_id}
@@ -234,24 +289,6 @@ export function CreateFoOdp({
                         </option>
                     ))}
                 </SelectField>
-            </Element>
-
-            <Element leftSide={t('Nama ODP')} required>
-                <InputField
-                    required
-                    value={values.nama_odp}
-                    onValueChange={(v) => onChange('nama_odp', v)}
-                    errorMessage={errors?.errors.nama_odp}
-                />
-            </Element>
-
-            <Element leftSide={t('Deskripsi')}>
-                <InputField
-                    element="textarea"
-                    value={values.deskripsi || ''}
-                    onValueChange={(v) => onChange('deskripsi', v)}
-                    errorMessage={errors?.errors.deskripsi}
-                />
             </Element>
         </Card>
     );

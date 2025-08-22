@@ -95,7 +95,20 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
 
     return (
         <Card title={t('New Tube Kabel')}>
-            <Element leftSide={t('Kabel')} required>
+
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('TUBE')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this TUBE.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            <Element leftSide={t('Select Kabel')} required>
                 <SelectField
                     required
                     value={form.kabel_odc_id || ''}
@@ -109,15 +122,6 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
                         </option>
                     ))}
                 </SelectField>
-            </Element>
-
-            <Element leftSide={t('Deskripsi')}>
-                <InputField
-                    element="textarea"
-                    value={form.deskripsi || ''}
-                    onValueChange={(v) => change('deskripsi', v)}
-                    errorMessage={errors?.errors.deskripsi}
-                />
             </Element>
 
             <Element leftSide={t('Warna Tube')} required>
@@ -135,6 +139,27 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
                     ))}
                 </SelectField>
             </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={form.deskripsi || ''}
+                    onValueChange={(v) => change('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
+                />
+            </Element>
+
+            {/* Section: Connection (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('Cores Batches Creation')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Automatically create Cores at once')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
 
             <Element leftSide={t('Create Batch Cores')}>
                 <Checkbox

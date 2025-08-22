@@ -100,8 +100,21 @@ export function CreateFoKabelCoreOdc({
 
     return (
         <Card title={t('New Core Kabel')}>
+
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('CORE')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this CORE.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
             {/* Select parent cable */}
-            <Element leftSide={t('Kabel')} required>
+            <Element leftSide={t('Select Kabel')} required>
                 <SelectField
                     required
                     value={selectedCable || ''}
@@ -117,7 +130,7 @@ export function CreateFoKabelCoreOdc({
             </Element>
 
             {/* Select tube under chosen cable */}
-            <Element leftSide={t('Warna Tube')} required>
+            <Element leftSide={t('Select Tube')} required>
                 <SelectField
                     required
                     value={form.kabel_tube_odc_id || ''}
@@ -138,15 +151,6 @@ export function CreateFoKabelCoreOdc({
                 )}
             </Element>
 
-            <Element leftSide={t('Deskripsi')}>
-                <InputField
-                    element="textarea"
-                    value={form.deskripsi || ''}
-                    onValueChange={(v) => change('deskripsi', v)}
-                    errorMessage={errors?.errors.deskripsi}
-                />
-            </Element>
-
             {/* Select core color */}
             <Element leftSide={t('Warna Core')} required>
                 <SelectField
@@ -163,6 +167,15 @@ export function CreateFoKabelCoreOdc({
                         </option>
                     ))}
                 </SelectField>
+            </Element>
+
+            <Element leftSide={t('Deskripsi')}>
+                <InputField
+                    element="textarea"
+                    value={form.deskripsi || ''}
+                    onValueChange={(v) => change('deskripsi', v)}
+                    errorMessage={errors?.errors.deskripsi}
+                />
             </Element>
         </Card>
     );

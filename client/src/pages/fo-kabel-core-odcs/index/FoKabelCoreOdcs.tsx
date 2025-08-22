@@ -125,6 +125,8 @@ export default function FoKabelCoreOdcs() {
                 customActions={useFoKabelCoreOdcActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-kabel-core-odcs"
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

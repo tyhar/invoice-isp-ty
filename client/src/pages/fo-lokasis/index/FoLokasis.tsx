@@ -49,7 +49,6 @@ export default function FoLokasis() {
                 </a>
             ),
         },
-        { id: 'deskripsi', label: 'Deskripsi' },
         {
             id: 'used_for',
             label: 'Used For',
@@ -104,6 +103,7 @@ export default function FoLokasis() {
             label: 'Jumlah JointBox',
             format: (_f, resource) => `${resource.jointboxes?.length ?? 0} JointBox`,
         },
+        { id: 'deskripsi', label: 'Deskripsi' },
         { id: 'latitude', label: 'Latitude' },
         { id: 'longitude', label: 'Longitude' },
     ];
@@ -137,6 +137,8 @@ export default function FoLokasis() {
         search.set('per_page', '10');
         search.set('page', '1');
         search.set('status', 'active');
+        // Rely on backend default sort (newest first). Avoid setting sort here
+        // search.set('sort', 'id|desc');
         if (customFilter && customFilter.length > 0) {
             search.set('used_by_status', customFilter.join(','));
         }
@@ -159,6 +161,8 @@ export default function FoLokasis() {
                 customFilters={customFilters}
                 customFilterPlaceholder={t('Used For') || 'Used For'}
                 endpoint={endpoint}
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

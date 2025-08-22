@@ -168,6 +168,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
     }
     return (
         <Card title={form.create_new_lokasi ? 'New Lokasi and Joint Box' : 'New Joint Box'}>
+
             {/* Create New Lokasi Toggle */}
             <Element leftSide="Create New Lokasi">
                 <Checkbox

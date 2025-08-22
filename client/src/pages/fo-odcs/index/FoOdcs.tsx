@@ -17,7 +17,14 @@ interface FoOdc {
     deskripsi: string | null;
     tipe_splitter: string;
     status: 'active' | 'archived';
+    connected_odc?: { id: number; nama_odc: string };
     kabel_odc?: { id: number; nama_kabel: string };
+    kabel_core_odc?: {
+        id: number;
+        warna_core: string;
+        kabel_odc?: { id: number; nama_kabel: string; odcs: { id: number; nama_odc: string }[] };
+        kabel_tube_odc?: { id: number; warna_tube: string };
+    };
     created_at: string;
     updated_at: string;
     deleted_at?: string | null;
@@ -47,19 +54,33 @@ export default function FoOdcs() {
             id: 'deskripsi',
             label: 'Deskripsi',
         },
-        {
-            id: 'lokasi',
-            label: 'Lokasi',
-            format: (_val, record) => record.lokasi?.nama_lokasi ?? '-',
-        },
-
-        { id: 'tipe_splitter', label: 'Tipe Splitter' },
         // { id: 'status', label: 'Status' },
+        {
+            id: 'connected_odc',
+            label: t('connected odc'),
+            format: (_f, record) => `${record.connected_odc?.nama_odc ?? '-'}`,
+        },
         {
             id: 'kabel_odcs',
             label: 'Kabel',
             format: (_f, record) => `${record.kabel_odc?.nama_kabel ?? '-'}`,
         },
+        {
+            id: 'kabel_tube_odc',
+            label: t('warna tube'),
+            format: (_f, record) => `${record.kabel_core_odc?.kabel_tube_odc?.warna_tube ?? '-'}`,
+        },
+        {
+            id: 'kabel_core_odc',
+            label: t('warna core'),
+            format: (_f, record) => `${record.kabel_core_odc?.warna_core ?? '-'}`,
+        },
+        {
+            id: 'lokasi',
+            label: 'Lokasi',
+            format: (_val, record) => record.lokasi?.nama_lokasi ?? '-',
+        },
+        { id: 'tipe_splitter', label: 'Tipe Splitter' },
         // {
         //     id: 'created_at',
         //     label: 'Dibuat Pada',
@@ -91,6 +112,8 @@ export default function FoOdcs() {
                 customActions={useFoOdcActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-odcs"
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

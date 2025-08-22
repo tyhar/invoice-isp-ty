@@ -102,6 +102,8 @@ export default function FoKabelTubeOdcs() {
                 customActions={useFoKabelTubeOdcActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-kabel-tube-odcs"
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

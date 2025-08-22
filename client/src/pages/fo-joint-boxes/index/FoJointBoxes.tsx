@@ -31,6 +31,8 @@ export default function FoJointBoxes() {
                 customBulkActions={useFoJointBoxBulkActions()}
                 customActions={useFoJointBoxActions()}
                 withoutDefaultBulkActions={true}
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

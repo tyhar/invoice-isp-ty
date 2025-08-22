@@ -30,35 +30,13 @@ export const useFoLokasiBulkActions = (): CustomBulkAction<any>[] => {
         }
 
         try {
-            // Fetch the full resource data for selected IDs to check coordinates
-            const response = await request(
-                'GET',
-                endpoint('/api/v1/fo-lokasis'),
-                {
-                    ids: selectedIds.join(','),
-                }
-            );
-
-            const resources = response.data.data;
-            const resourcesToGeocode = resources.filter(
-                (res: any) => res.latitude && res.longitude
-            );
-
-            if (resourcesToGeocode.length === 0) {
-                toast.error(
-                    'No locations selected for geocoding. Make sure locations have coordinates.'
-                );
-                return;
-            }
-
-            const idsToGeocode = resourcesToGeocode.map((res: any) => res.id);
             // Show processing notification while the bulk geocode request runs
             toast.processing();
             const geocodeResponse = await request(
                 'POST',
                 endpoint('/api/v1/fo-lokasis/bulk-geocode'),
                 {
-                    ids: idsToGeocode,
+                    ids: selectedIds,
                 }
             );
 
