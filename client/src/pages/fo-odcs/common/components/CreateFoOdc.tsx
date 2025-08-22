@@ -105,7 +105,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
             <div className="px-5 sm:px-6 py-3">
                 <div className="text-sm md:text-base font-semibold text-gray-700">{t('LOKASI')}</div>
                 <div className="text-xs text-gray-500 mt-1">
-                    {t('Create a new lokasi or select an existing lokasi below.')}
+                    {t('Create a new Lokasi or select an existing lokasi below.')}
                 </div>
             </div>
 

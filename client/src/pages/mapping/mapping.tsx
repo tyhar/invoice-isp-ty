@@ -5,10 +5,9 @@ import {
   MapContainer,
   TileLayer,
   Marker,
-  useMapEvents,
   Popup,
 } from 'react-leaflet';
-import L, { LatLng } from 'leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import axios from 'axios';
 import Select from 'react-select';
@@ -16,6 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { MapCenterUpdater } from './utils/MapZoomer';
 import { Polyline } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
+import ImportedAddMarkerForm from './components/AddMarkerForm';
 
 type FormMode = 'client' | 'odp' | 'odc' | null;
 
@@ -35,566 +35,18 @@ interface MarkerData {
   nama_odp?: string;
   tipe_splitter?: string;
   kabel_core_odc_id?: string;
-  nama_odc?: string;
   kabel_odc_id?: string;
+  kabel_tube_odc_id?: string;
+  nama_odc?: string;
   // joint box specific
   nama_joint_box?: string;
   odc_id?: string;
 }
 
-interface ODC {
-  id: number;
-  nama_odc: string;
-}
-
-interface AddMarkerFormProps {
-
-  mode: 'client' | 'odp' | 'odc';
-  onSave: () => void;
-  onCancel: () => void;
-  initialData?: Partial<MarkerData>;
-  editingId?: number;
-}
-
-const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, initialData, editingId }) => {
-  const parseCoordinate = (value: any): number | null => {
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? null : parsed;
-  };
-
-  const [position, setPosition] = useState<LatLng | null>(() => {
-    const lat = parseCoordinate(initialData?.latitude);
-    const lng = parseCoordinate(initialData?.longitude);
-    if (lat !== null && lng !== null) {
-      return new L.LatLng(lat, lng);
-    }
-    return null;
-  });
-
-  const api = "http://localhost:8000";
-
-  const [form, setForm] = useState({
-    nama_lokasi: initialData?.nama_lokasi || '',
-    deskripsi: initialData?.deskripsi || '',
-    deskripsi_odc: mode === 'odc' ? initialData?.deskripsi || '' : '',
-    deskripsi_odp: mode === 'odp' ? initialData?.deskripsi || '' : '',
-    nama: initialData?.nama_client || initialData?.nama_odp || initialData?.nama_odc || '',
-    alamat: initialData?.alamat || '',
-    odp_id: initialData?.odp_id || '',
-    kabel_core_odc_id: initialData?.kabel_core_odc_id || '',
-    tipe_splitter: initialData?.tipe_splitter || '1:8',
-    latitude: initialData?.latitude || '',
-    longitude: initialData?.longitude || '',
-    client_id: initialData?.client_id || '',
-    kabel_odc_id: initialData?.kabel_odc_id || '',
-    odc_id: initialData?.odc_id || '',
-  });
-
-  const allowMapClick = !position && form.nama_lokasi.trim() === '' && form.nama.trim() === '';
-
-  const [odpList, setOdpList] = useState<any[]>([]);
-  const [odcCoreList, setOdcCoreList] = useState<any[]>([]);
-  const [clientList, setClientList] = useState<any[]>([]);
-  const [kabelOdcList, setKabelOdcList] = useState<any[]>([]);
-  const [odcList, setOdcList] = useState<ODC[]>([]);
-  const [formError, setFormError] = useState<string | null>(null);
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const token = localStorage.getItem('X-API-TOKEN');
-      const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
-      try {
-        if (mode === 'client') {
-          const [odpRes, clientRes] = await Promise.all([
-            axios.get(`${api}/api/v1/fo-odps`, headers),
-            axios.get(`${api}/api/v1/clients`, headers),
-          ]);
-          setOdpList(odpRes.data.data);
-          setClientList(clientRes.data.data);
-        } else if (mode === 'odp') {
-          const [coreRes, odcRes] = await Promise.all([
-            axios.get(`${api}/api/v1/fo-kabel-core-odcs`, headers),
-            axios.get(`${api}/api/v1/fo-odcs`, headers),
-          ]);
-          setOdcCoreList(coreRes.data.data);
-          setOdcList(odcRes.data.data);
-        } else if (mode === 'odc') {
-          const [kabelRes, odcRes] = await Promise.all([
-            axios.get(`${api}/api/v1/fo-kabel-odcs`, headers),
-            axios.get(`${api}/api/v1/fo-odcs`, headers),
-          ]);
-          setKabelOdcList(kabelRes.data.data);
-          setOdcList(odcRes.data.data);
-        }
-      } catch (error) {
-        console.error(error);
-      }
-    };
 
-    fetchData();
-  }, [mode]);
-
-  useMapEvents({
-    click(e) {
-      if (!allowMapClick) return;
-      setPosition(e.latlng);
-      setForm((f) => ({
-        ...f,
-        latitude: e.latlng.lat.toString(),
-        longitude: e.latlng.lng.toString(),
-      }));
-    },
-  });
-
-  const onMarkerDragEnd = (e: L.DragEndEvent) => {
-    const marker = e.target;
-    const latLng = marker.getLatLng();
-    setPosition(latLng);
-    setForm((f) => ({ ...f, latitude: latLng.lat.toString(), longitude: latLng.lng.toString() }));
-  };
-
-  const handleLatLongChange = (field: 'latitude' | 'longitude', value: string) => {
-    setForm((f) => {
-      const newForm = { ...f, [field]: value };
-      const lat = parseFloat(newForm.latitude);
-      const lng = parseFloat(newForm.longitude);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        const newPos = new L.LatLng(lat, lng);
-        setPosition(newPos);
-      }
-      return newForm;
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!position) return alert('Klik lokasi di peta terlebih dahulu.');
-
-    try {
-      const token = localStorage.getItem('X-API-TOKEN');
-      const headers = { headers: { 'X-API-TOKEN': token || '' } };
-
-      if (editingId) {
-        await axios.put(
-          `${api}/api/v1/fo-lokasis/${initialData?.lokasi_id}`,
-          {
-            nama_lokasi: form.nama_lokasi,
-            deskripsi: form.deskripsi,
-            latitude: position.lat,
-            longitude: position.lng,
-          },
-          headers
-        );
-
-        if (mode === 'client') {
-          await axios.put(
-            `${api}/api/v1/fo-client-ftths/${editingId}`,
-            {
-              lokasi_id: initialData?.lokasi_id,
-              odp_id: form.odp_id,
-              nama_client: form.nama,
-              alamat: form.alamat,
-            },
-            headers
-          );
-        } else if (mode === 'odp') {
-          await axios.put(
-            `${api}/api/v1/fo-odps/${editingId}`,
-            {
-              lokasi_id: initialData?.lokasi_id,
-              kabel_core_odc_id: form.kabel_core_odc_id,
-              odc_id: form.odc_id || null,
-              nama_odp: form.nama,
-              deskripsi: form.deskripsi_odp,
-            },
-            headers
-          );
-        } else if (mode === 'odc') {
-          await axios.put(
-            `${api}/api/v1/fo-odcs/${editingId}`,
-            {
-              lokasi_id: initialData?.lokasi_id,
-              odc_id: form.odc_id || null,
-              kabel_odc_id: form.kabel_odc_id,
-              nama_odc: form.nama,
-              tipe_splitter: form.tipe_splitter,
-              deskripsi: form.deskripsi_odc,
-            },
-            headers
-          );
-        }
-
-        window.alert('Data berhasil diperbarui.');
-      } else {
-        const lokasiRes = await axios.post(
-          `${api}/api/v1/fo-lokasis`,
-          {
-            nama_lokasi: form.nama_lokasi,
-            deskripsi: form.deskripsi,
-            latitude: position.lat,
-            longitude: position.lng,
-          },
-          headers
-        );
-
-        const lokasi_id = lokasiRes.data.data.id;
-
-        if (mode === 'client') {
-          await axios.post(
-            `${api}/api/v1/fo-client-ftths`,
-            {
-              lokasi_id,
-              odp_id: form.odp_id || null,
-              nama_client: form.nama,
-              alamat: form.alamat,
-              client_id: form.client_id || null,
-            },
-            headers
-          );
-        } else if (mode === 'odp') {
-          await axios.post(
-            `${api}/api/v1/fo-odps`,
-            {
-              lokasi_id,
-              kabel_core_odc_id: form.kabel_core_odc_id,
-              odc_id: form.odc_id || null,
-              nama_odp: form.nama,
-              deskripsi: form.deskripsi_odp,
-            },
-            headers
-          );
-        } else if (mode === 'odc') {
-          await axios.post(
-            `${api}/api/v1/fo-odcs`,
-            {
-              lokasi_id,
-              odc_id: form.odc_id || null,
-              kabel_odc_id: form.kabel_odc_id,
-              nama_odc: form.nama,
-              tipe_splitter: form.tipe_splitter,
-              deskripsi: form.deskripsi_odc,
-            },
-            headers
-          );
-        }
-
-        setFormError(null);
-        window.alert('Data berhasil disimpan.');
-      }
-
-      onSave();
-    } catch (error: any) {
-      if (error.response && error.response.status === 422) {
-        const errors = error.response.data.errors as Record<string, string[]>;
-        const rawError = (Object.values(errors)[0]?.[0]) || error.response.data.message;
-
-        const errorMap: Record<string, string> = {
-          'The nama odp has already been taken.': 'Nama ODP sudah digunakan.',
-          'The nama odc has already been taken.': 'Nama ODC sudah digunakan.',
-          'The nama client has already been taken.': 'Nama Client sudah digunakan.',
-        };
-
-        const translatedError = errorMap[rawError] || rawError || 'Terjadi kesalahan validasi.';
-        setFormError(translatedError);
-      } else {
-        console.error(error);
-        setFormError('Gagal menyimpan data.');
-      }
-    }
-  };
-
-  const clientIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    shadowSize: [41, 41],
-  });
-
-  const odpIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    shadowSize: [41, 41],
-  });
-
-  const odcIcon = L.icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-    shadowSize: [41, 41],
-  });
-
-  return (
-    <>
-      {position && (
-        <Marker
-          position={position}
-          draggable
-          icon={
-            mode === 'client'
-              ? clientIcon
-              : mode === 'odp'
-                ? odpIcon
-                : odcIcon
-          }
-          eventHandlers={{ dragend: onMarkerDragEnd }}
-        />
-      )}
-
-      <div className="absolute top-10 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
-        <h3 className="font-semibold mb-2">
-          {editingId ? mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : 'Edit ODC' : mode === 'client' ? 'Tambah Client' : mode === 'odp' ? 'Tambah ODP' : 'Tambah ODC'}</h3>
-        <p className="mb-2 text-xs text-gray-600">Klik peta untuk memilih lokasi atau edit latitude dan longitude di bawah</p>
-        <div className="max-h-[55vh] overflow-y-auto px-4">
-          {formError && (
-            <div className="bg-red-100 text-red-800 text-sm px-3 py-2 rounded mb-2">
-              {formError}
-            </div>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-3 text-sm">
-            <div>
-              <label className="block mb-1">Nama Lokasi</label>
-              <input
-                type="text"
-                className="w-full border p-1"
-                placeholder="Nama Lokasi"
-                value={form.nama_lokasi}
-                onChange={(e) => setForm({ ...form, nama_lokasi: e.target.value })}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1">Deskripsi Lokasi</label>
-              <input
-                type="text"
-                className="w-full border p-1"
-                placeholder="Deskripsi Lokasi"
-                value={form.deskripsi}
-                onChange={(e) => setForm({ ...form, deskripsi: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1">
-                {mode === 'client' ? 'Nama Client' : mode === 'odp' ? 'Nama ODP' : 'Nama ODC'}
-              </label>
-              <input
-                type="text"
-                className="w-full border p-1"
-                placeholder="Nama"
-                value={form.nama}
-                onChange={(e) => setForm({ ...form, nama: e.target.value })}
-                required
-              />
-            </div>
-
-            {mode === 'client' && (
-              <>
-                <div>
-                  <label className="block mb-1">Alamat</label>
-                  <input
-                    type="text"
-                    className="w-full border p-1"
-                    placeholder="Alamat"
-                    value={form.alamat}
-                    onChange={(e) => setForm({ ...form, alamat: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="block mb-1">ODP</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.odp_id}
-                    onChange={(e) => setForm({ ...form, odp_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih ODP</option>
-                    {odpList.map((odp) => (
-                      <option key={odp.id} value={odp.id}>
-                        {odp.nama_odp}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-1">Client ID</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.client_id}
-                    onChange={(e) => setForm({ ...form, client_id: e.target.value })}
-                  >
-                    <option value="">Pilih Client ID</option>
-                    {clientList.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name || client.nama_client || `Client #${client.id}`}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </>
-            )}
-
-            {mode === 'odp' && (
-              <>
-                <div>
-                  <label className="block mb-1">Deskripsi ODP</label>
-                  <input
-                    type="text"
-                    className="w-full border p-1"
-                    placeholder="Deskripsi ODP"
-                    value={form.deskripsi_odp}
-                    onChange={(e) => setForm({ ...form, deskripsi_odp: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Kabel Core</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_core_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_core_odc_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih Kabel Core</option>
-                    {odcCoreList.map((core) => (
-                      <option key={core.id} value={core.id}>
-                        {core.warna_core}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-1">ODC ID (Opsional)</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.odc_id}
-                    onChange={(e) => setForm({ ...form, odc_id: e.target.value })}
-                  >
-                    <option value="">Pilih ODC</option>
-                    {odcList.map((odc) => (
-                      <option key={odc.id} value={odc.id}>
-                        {odc.nama_odc}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-              </>
-            )}
-
-            {mode === 'odc' && (
-              <>
-                <div>
-                  <label className="block mb-1">Deskripsi ODC</label>
-                  <input
-                    type="text"
-                    className="w-full border p-1"
-                    placeholder="Deskripsi ODC"
-                    value={form.deskripsi_odc}
-                    onChange={(e) => setForm({ ...form, deskripsi_odc: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1">Kabel</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_odc_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih Kabel</option>
-                    {kabelOdcList.map((kabel) => (
-                      <option key={kabel.id} value={kabel.id}>
-                        {kabel.nama_kabel}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-1">ODC ID (Opsional)</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.odc_id}
-                    onChange={(e) => setForm({ ...form, odc_id: e.target.value })}
-                  >
-                    <option value="">Pilih ODC</option>
-                    {odcList.map((odc) => (
-                      <option key={odc.id} value={odc.id}>
-                        {odc.nama_odc}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-1">Tipe Splitter</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.tipe_splitter}
-                    onChange={(e) => setForm({ ...form, tipe_splitter: e.target.value })}
-                  >
-                    <option value="1:2">1:2</option>
-                    <option value="1:4">1:4</option>
-                    <option value="1:8">1:8</option>
-                    <option value="1:16">1:16</option>
-                    <option value="1:32">1:32</option>
-                    <option value="1:64">1:64</option>
-                    <option value="1:128">1:128</option>
-                  </select>
-                </div>
-              </>
-            )}
-
-            <div>
-              <label className="block mb-1">Koordinat</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  step="any"
-                  className="w-1/2 border p-1"
-                  placeholder="Latitude"
-                  value={form.latitude}
-                  onChange={(e) => handleLatLongChange('latitude', e.target.value)}
-                  required
-                />
-                <input
-                  type="number"
-                  step="any"
-                  className="w-1/2 border p-1"
-                  placeholder="Longitude"
-                  value={form.longitude}
-                  onChange={(e) => handleLatLongChange('longitude', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-2 justify-end pt-2">
-              <button type="button" className="bg-gray-300 px-2 py-1 rounded" onClick={onCancel}>
-                Batal
-              </button>
-              <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded">
-                Simpan
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </>
-  );
-};
 
 const MappingPage: React.FC = () => {
   const [formMode, setFormMode] = useState<FormMode>(null);
@@ -616,8 +68,9 @@ const MappingPage: React.FC = () => {
   const [validClients, setValidClients] = useState<any[]>([]);
   const [validOdps, setValidOdps] = useState<any[]>([]);
   const [showOdcConnections, setShowOdcConnections] = useState(true); // <-- add this
-  const [legendPosition, setLegendPosition] = useState({ x: 12, y: 80 }); // <-- add this
+  const [legendPosition, setLegendPosition] = useState({ x: 12, y: 120 }); // <-- add this
   const [isDraggingLegend, setIsDraggingLegend] = useState(false); // <-- add this
+  const [showLegend, setShowLegend] = useState(true); // <-- add this for legend visibility
   const api = "http://localhost:8000";
 
   // Add global mouse event listeners for dragging
@@ -752,27 +205,27 @@ const MappingPage: React.FC = () => {
   const locationsSource = filterLokasi.length
     ? filterLokasi
     : (() => {
-        const seen = new Map<string, any>();
-        const allLocs: any[] = [
-          ...clients.map((c: any) => c.lokasi).filter(Boolean),
-          ...odps.map((o: any) => o.lokasi).filter(Boolean),
-          ...odcs.map((o: any) => o.lokasi).filter(Boolean),
-        ];
-        allLocs.forEach((l: any) => {
-          const prov = l.provinsi || l.province || '';
-          const kota = l.kota || l.city || '';
-          const key = `${prov}::${kota}`;
-          if (!seen.has(key)) {
-            seen.set(key, {
-              provinsi: prov,
-              kota: kota,
-              latitude: l.latitude,
-              longitude: l.longitude,
-            });
-          }
+    const seen = new Map<string, any>();
+    const allLocs: any[] = [
+      ...clients.map((c: any) => c.lokasi).filter(Boolean),
+      ...odps.map((o: any) => o.lokasi).filter(Boolean),
+      ...odcs.map((o: any) => o.lokasi).filter(Boolean),
+    ];
+    allLocs.forEach((l: any) => {
+      const prov = l.provinsi || l.province || '';
+      const kota = l.kota || l.city || '';
+      const key = `${prov}::${kota}`;
+      if (!seen.has(key)) {
+        seen.set(key, {
+          provinsi: prov,
+          kota: kota,
+          latitude: l.latitude,
+          longitude: l.longitude,
         });
-        return Array.from(seen.values());
-      })();
+      }
+    });
+    return Array.from(seen.values());
+  })();
 
   const provinsiOptionsFormatted = Array.from(
     new Set(locationsSource.map((l: any) => l.provinsi).filter(Boolean))
@@ -1025,10 +478,10 @@ const MappingPage: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-x-2">
           <button
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={() => setFormMode('client')}
+            className="bg-purple-600 text-white px-4 py-2 rounded"
+            onClick={() => setFormMode('odc' as FormMode)}
           >
-            Add Client
+            Add ODC
           </button>
           <button
             className="bg-green-500 text-white px-4 py-2 rounded"
@@ -1037,10 +490,10 @@ const MappingPage: React.FC = () => {
             Add ODP
           </button>
           <button
-            className="bg-purple-600 text-white px-4 py-2 rounded"
-            onClick={() => setFormMode('odc' as FormMode)}
+            className="bg-blue-500 text-white px-4 py-2 rounded"
+            onClick={() => setFormMode('client')}
           >
-            Add ODC
+            Add Client
           </button>
           <button
             className="bg-pink-600 text-white px-4 py-2 rounded"
@@ -1088,12 +541,25 @@ const MappingPage: React.FC = () => {
           </div>
         )}
 
+        {/* Legend Toggle Button */}
+        <button
+          onClick={() => setShowLegend(!showLegend)}
+          className="absolute z-[1000] bg-white rounded shadow-md p-2 text-xs font-medium hover:bg-gray-50 transition-colors"
+          style={{
+            left: `${legendPosition.x}px`,
+            top: `${legendPosition.y - 40}px`
+          }}
+        >
+          {showLegend ? 'Hide Legend' : 'Show Legend'}
+        </button>
+
         {/* Draggable Connection Legend */}
         <div
           className="absolute z-[999] bg-white rounded shadow-md p-4 w-56 cursor-move select-none"
           style={{
             left: `${legendPosition.x}px`,
-            top: `${legendPosition.y}px`
+            top: `${legendPosition.y}px`,
+            display: showLegend ? 'block' : 'none'
           }}
           onMouseDown={(e) => {
             // Don't start dragging if clicking on interactive elements
@@ -1107,7 +573,15 @@ const MappingPage: React.FC = () => {
             e.preventDefault();
           }}
         >
-          <h3 className="text-sm font-semibold mb-2">Markers & Koneksi</h3>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-semibold">Markers & Koneksi</h3>
+            <button
+              onClick={() => setShowLegend(false)}
+              className="text-gray-500 hover:text-gray-700 text-xs"
+            >
+              ✕
+            </button>
+          </div>
           <div className="space-y-2 text-xs">
             {/* Marker Legend */}
             <div className="mb-2">
@@ -1143,7 +617,7 @@ const MappingPage: React.FC = () => {
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
-                <span>ODC ➝ ODC (Direct)</span>
+                <span>ODC ➝ ODC</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
@@ -1247,7 +721,7 @@ const MappingPage: React.FC = () => {
                               longitude: client.lokasi.longitude,
                               nama_client: client.nama_client,
                               alamat: client.alamat,
-                              odp_id: client.odp_id,
+                              odp_id: client.odp_id?.toString(),
                               client_id: client.client_id
                             }
                           })}
@@ -1296,6 +770,9 @@ const MappingPage: React.FC = () => {
                               nama_odp: odp.nama_odp,
                               tipe_splitter: odp.tipe_splitter,
                               kabel_core_odc_id: odp.kabel_core_odc_id,
+                              kabel_odc_id: odp.kabel_core_odc?.kabel_odc?.id?.toString(),
+                              kabel_tube_odc_id: odp.kabel_core_odc?.kabel_tube_odc?.id?.toString(),
+                              odc_id: odp.odc_id?.toString(),
                               client_id: 0
                             }
                           })}
@@ -1345,6 +822,11 @@ const MappingPage: React.FC = () => {
                               latitude: odc.lokasi.latitude,
                               longitude: odc.lokasi.longitude,
                               nama_odc: odc.nama_odc,
+                              kabel_odc_id: odc.kabel_odc_id?.toString(),
+                              kabel_tube_odc_id: odc.kabel_core_odc?.kabel_tube_odc?.id?.toString(),
+                              kabel_core_odc_id: odc.kabel_core_odc_id?.toString(),
+                              tipe_splitter: odc.tipe_splitter,
+                              odc_id: odc.odc_id?.toString(),
                               client_id: 0
                             }
                           })}
@@ -1890,7 +1372,7 @@ const MappingPage: React.FC = () => {
 
           {/* Form Add */}
           {formMode && !editData && (
-            <AddMarkerForm
+            <ImportedAddMarkerForm
               mode={formMode}
               onCancel={() => setFormMode(null)}
               onSave={() => {
@@ -1902,7 +1384,7 @@ const MappingPage: React.FC = () => {
 
           {/* Form Edit */}
           {editData && (
-            <AddMarkerForm
+            <ImportedAddMarkerForm
               mode={editData.mode}
               initialData={editData.data}
               editingId={editData.data.id}

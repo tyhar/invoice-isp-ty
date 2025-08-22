@@ -110,6 +110,7 @@ class FoOdcController extends Controller
                 'lokasi_id' => $o->lokasi_id,
                 'kabel_odc_id' => $o->kabel_odc_id, // <-- add this
                 'odc_id' => $o->odc_id, // direct connection to another ODC
+                'kabel_core_odc_id' => $o->kabel_core_odc_id,
                 'kabel_core_odc' => $o->kabelCoreOdc ? [
                     'id' => $o->kabelCoreOdc->id,
                     'warna_core' => $o->kabelCoreOdc->warna_core,

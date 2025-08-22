@@ -126,6 +126,7 @@ class FoOdpController extends Controller
                 'nama_odp' => $o->nama_odp,
                 'deskripsi' => $o->deskripsi,
                 'odc_id' => $o->odc_id,
+                'kabel_core_odc_id' => $o->kabel_core_odc_id,
                 'lokasi' => $o->lokasi ? [
                     'id' => $o->lokasi->id,
                     'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -300,6 +301,7 @@ class FoOdpController extends Controller
             'nama_odp' => $o->nama_odp,
             'deskripsi' => $o->deskripsi,
             'odc_id' => $o->odc_id, // <-- add this
+            'kabel_core_odc_id' => $o->kabel_core_odc_id,
             'lokasi' => $o->lokasi ? [
                 'id' => $o->lokasi->id,
                 'nama_lokasi' => $o->lokasi->nama_lokasi,
@@ -531,6 +533,7 @@ class FoOdpController extends Controller
                 'nama_odp' => $odp->nama_odp,
                 'deskripsi' => $odp->deskripsi,
                 'odc_id' => $odp->odc_id, // <-- add this
+                'kabel_core_odc_id' => $odp->kabel_core_odc_id,
                 'lokasi' => $odp->lokasi ? [
                     'id' => $odp->lokasi->id,
                     'nama_lokasi' => $odp->lokasi->nama_lokasi,

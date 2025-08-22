@@ -39,6 +39,19 @@ export function CreateFoLokasi(props: Props) {
 
     return (
         <Card title={t('New Lokasi')}>
+
+            {/* Section: Lokasi (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('LOKASI')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this Lokasi.')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
             <Element leftSide={t('Nama lokasi')} required>
                 <InputField
                     required
