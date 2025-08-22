@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card } from '$app/components/cards';
 import { Element } from '$app/components/cards';
 import { InputField } from '$app/components/forms/InputField';
@@ -58,6 +59,7 @@ interface Props {
 }
 
 export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, kabelOdcs, odcs, odpss }: Props) {
+    const [t] = useTranslation();
     // Determine connection type and checkbox states
     const [selectedConnectionType, setSelectedConnectionType] = useState<'odc-odc' | 'odc-odp' | ''>('');
     const [showOdcToOdcFields, setShowOdcToOdcFields] = useState(false);
@@ -169,8 +171,16 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
     return (
         <Card title={form.create_new_lokasi ? 'New Lokasi and Joint Box' : 'New Joint Box'}>
 
+            {/* Section: Lokasi */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('LOKASI')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Create a new lokasi or select an existing lokasi below.')}
+                </div>
+            </div>
+
             {/* Create New Lokasi Toggle */}
-            <Element leftSide="Create New Lokasi">
+            <Element leftSide={t('Create New Lokasi')} required>
                 <Checkbox
                     checked={form.create_new_lokasi}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange('create_new_lokasi', e.target.checked)}
@@ -179,7 +189,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
             {/* Lokasi Fields */}
             {form.create_new_lokasi ? (
                 <>
-                    <Element leftSide="Nama Lokasi" required>
+                    <Element leftSide={t('Nama Lokasi')} required>
                         <InputField
                             required
                             value={form.lokasi_name}
@@ -187,7 +197,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             errorMessage={errors?.errors?.nama_lokasi}
                         />
                     </Element>
-                    <Element leftSide="Deskripsi">
+                    <Element leftSide={t('Deskripsi')}>
                         <InputField
                             element="textarea"
                             value={form.lokasi_deskripsi}
@@ -195,7 +205,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             errorMessage={errors?.errors?.deskripsi}
                         />
                     </Element>
-                    <Element leftSide="Latitude" required>
+                    <Element leftSide={t('Latitude')} required>
                         <InputField
                             required
                             type="number"
@@ -204,7 +214,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             errorMessage={errors?.errors?.latitude}
                         />
                     </Element>
-                    <Element leftSide="Longitude" required>
+                    <Element leftSide={t('Longitude')} required>
                         <InputField
                             required
                             type="number"
@@ -215,22 +225,36 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                     </Element>
                 </>
             ) : (
-                <Element leftSide="Lokasi" required>
+                <Element leftSide={t('Lokasi')} required>
                     <SelectField
                         required
                         value={form.lokasi_id}
                         onValueChange={v => handleChange('lokasi_id', v)}
                         errorMessage={errors?.errors?.lokasi_id}
                     >
-                        <option value="">Pilih Lokasi</option>
+                        <option value="">{t('Pilih Lokasi')}</option>
                         {lokasis.map(l => (
                             <option key={l.id} value={l.id}>{l.nama_lokasi}</option>
                         ))}
                     </SelectField>
                 </Element>
             )}
+
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            {/* Section: Joint Box */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('JOINT BOX')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Fill in the basic information for this JOINT BOX.')}
+                </div>
+            </div>
+
             {/* Joint Box Fields */}
-            <Element leftSide="Nama Joint Box" required>
+            <Element leftSide={t('Nama Joint Box')} required>
                 <InputField
                     required
                     value={form.nama_joint_box}
@@ -239,7 +263,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                 />
             </Element>
 
-            <Element leftSide="Deskripsi">
+            <Element leftSide={t('Deskripsi')}>
                 <InputField
                     element="textarea"
                     value={form.deskripsi || ''}
@@ -247,7 +271,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                     errorMessage={errors?.errors?.deskripsi}
                 />
             </Element>
-            <Element leftSide="Kabel" required>
+            <Element leftSide={t('Kabel')} required>
                 <SelectField
                     required
                     value={form.kabel_odc_id}
@@ -258,15 +282,28 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                     }}
                     errorMessage={errors?.errors?.kabel_odc_id}
                 >
-                    <option value="">Pilih Kabel</option>
+                    <option value="">{t('Pilih Kabel')}</option>
                     {kabelOdcs.map(k => (
                         <option key={k.id} value={k.id}>{k.nama_kabel}</option>
                     ))}
                 </SelectField>
             </Element>
 
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            {/* Section: Connection Type */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('CONNECTION TYPE & DETAILS')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Choose the type of connection this joint box will facilitate. Then configure the specific connection details based on your selection.')}
+                </div>
+            </div>
+
             {/* Connection Type Selection */}
-            <Element leftSide="Connection Type">
+            <Element leftSide={t('Connection Type')}>
                 <div className="space-y-2">
                     <div className="flex items-center gap-2">
                         <input
@@ -277,7 +314,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             checked={selectedConnectionType === 'odc-odc'}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
                         />
-                        <label htmlFor="odc-odc">ODC → ODC Connection</label>
+                        <label htmlFor="odc-odc">{t('ODC → ODC Connection')}</label>
                     </div>
                     <div className="flex items-center gap-2">
                         <input
@@ -288,14 +325,14 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             checked={selectedConnectionType === 'odc-odp'}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
                         />
-                        <label htmlFor="odc-odp">ODC → ODP Connection</label>
+                        <label htmlFor="odc-odp">{t('ODC → ODP Connection')}</label>
                     </div>
                 </div>
             </Element>
 
             {/* Checkboxes that appear based on radio selection */}
             {selectedConnectionType === 'odc-odc' && (
-                <Element leftSide="Create ODC → ODC Connection">
+                <Element leftSide={t('Create ODC → ODC Connection')}>
                     <Checkbox
                         checked={showOdcToOdcFields}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOdcToOdcCheckbox(e.target.checked)}
@@ -304,7 +341,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
             )}
 
             {selectedConnectionType === 'odc-odp' && (
-                <Element leftSide="Create ODC → ODP Connection">
+                <Element leftSide={t('Create ODC → ODP Connection')}>
                     <Checkbox
                         checked={showOdcToOdpFields}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOdcToOdpCheckbox(e.target.checked)}
@@ -315,7 +352,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
             {/* ODC→ODC Fields */}
             {showOdcToOdcFields && (
                 <>
-                    <Element leftSide="Source ODC" required>
+                    <Element leftSide={t('Source ODC')} required>
                         <SelectField
                             required
                             value={form.odc_id || ''}
@@ -326,7 +363,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             }}
                             errorMessage={errors?.errors?.odc_id}
                         >
-                            <option value="">Pilih ODC Sumber</option>
+                            <option value="">{t('Pilih ODC Sumber')}</option>
                             {filteredOdcs.map(o => (
                                 <option key={o.id} value={o.id}>
                                     {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
@@ -334,14 +371,14 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             ))}
                         </SelectField>
                     </Element>
-                    <Element leftSide="Target ODC" required>
+                    <Element leftSide={t('Target ODC')} required>
                         <SelectField
                             required
                             value={form.odc_2_id}
                             onValueChange={v => handleChange('odc_2_id', v)}
                             errorMessage={errors?.errors?.odc_2_id}
                         >
-                            <option value="">Pilih ODC Target</option>
+                            <option value="">{t('Pilih ODC Target')}</option>
                             {filteredOdcs.filter(odc => odc.id !== form.odc_id).map(o => (
                                 <option key={o.id} value={o.id}>
                                     {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
@@ -355,7 +392,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
             {/* ODC→ODP Fields */}
             {showOdcToOdpFields && (
                 <>
-                    <Element leftSide="Source ODC" required>
+                    <Element leftSide={t('Source ODC')} required>
                         <SelectField
                             required
                             value={form.odc_id || ''}
@@ -366,7 +403,7 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             }}
                             errorMessage={errors?.errors?.odc_id}
                         >
-                            <option value="">Pilih ODC Sumber</option>
+                            <option value="">{t('Pilih ODC Sumber')}</option>
                             {filteredOdcs.map(o => (
                                 <option key={o.id} value={o.id}>
                                     {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
@@ -374,14 +411,14 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                             ))}
                         </SelectField>
                     </Element>
-                    <Element leftSide="Target ODP" required>
+                    <Element leftSide={t('Target ODP')} required>
                         <SelectField
                             required
                             value={form.odp_id}
                             onValueChange={v => handleChange('odp_id', v)}
                             errorMessage={errors?.errors?.odp_id}
                         >
-                            <option value="">Pilih ODP Target</option>
+                            <option value="">{t('Pilih ODP Target')}</option>
                             {filteredOdps.map(o => (
                                 <option key={o.id} value={o.id}>
                                     {o.nama_odp}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
@@ -394,11 +431,13 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
 
             {/* Visual feedback for connection types */}
             {(showOdcToOdcFields || showOdcToOdpFields) && (
-                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
-                    <div className="text-sm text-blue-800">
-                        <strong>Active Connections:</strong>
-                        {showOdcToOdcFields && <div>• ODC → ODC</div>}
-                        {showOdcToOdpFields && <div>• ODC → ODP</div>}
+                <div className="px-5 sm:px-6 py-3">
+                    <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
+                        <div className="text-sm text-blue-800">
+                            <strong>{t('Active Connections')}:</strong>
+                            {showOdcToOdcFields && <div>• {t('ODC → ODC')}</div>}
+                            {showOdcToOdpFields && <div>• {t('ODC → ODP')}</div>}
+                        </div>
                     </div>
                 </div>
             )}

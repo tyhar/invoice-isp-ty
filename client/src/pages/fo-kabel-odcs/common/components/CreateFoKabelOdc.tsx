@@ -158,9 +158,9 @@ export function CreateFoKabelOdc(props: Props) {
 
             {/* Section: Connection (full-width) */}
             <div className="px-5 sm:px-6 py-3">
-                <div className="text-sm md:text-base font-semibold text-gray-700">{t('Tubes Batches Creation')}</div>
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('Tube Batch Creation')}</div>
                 <div className="text-xs text-gray-500 mt-1">
-                    {t('Automatically create Tubes at once')}
+                    {t('Automatically create multiple tubes for this cable at once')}
                 </div>
             </div>
             {/* Separator */}

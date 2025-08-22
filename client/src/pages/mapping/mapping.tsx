@@ -1141,11 +1141,15 @@ const MappingPage: React.FC = () => {
                 <div className="w-6 h-2.5 bg-red-500"></div>
                 <span>ODP ➝ Client</span>
               </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
-                  <span>ODC ➝ ODC</span>
-                </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
+                <span>ODC ➝ ODC (Direct)</span>
               </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
+                <span>ODC ↔ ODC (Bidirectional)</span>
+              </div>
+            </div>
             <div className="flex items-center gap-2 mt-2">
               <input
                 type="checkbox"
@@ -1635,10 +1639,10 @@ const MappingPage: React.FC = () => {
                   <Popup>
                     <div className="text-base">
                       <strong><i>KABEL (ODC ➝ ODC)</i></strong><br />
-                      <b>Connection Type:</b> {connection.connectionType || 'Direct'}<br />
+                      <b>Connection Type:</b> {connection.bidirectional ? 'Bidirectional' : connection.connectionType || 'Direct'}<br />
                       <b>Nama Kabel:</b> {connection.kabel_odc?.nama_kabel || '-'}<br />
-                      <b>From ODC:</b> {connection.from.nama_odc}<br />
-                      <b>To ODC:</b> {connection.to.nama_odc}<br />
+                      <b>From:</b> {connection.bidirectional ? `${connection.from.nama_odc} ↔ ${connection.to.nama_odc}` : connection.from.nama_odc}<br />
+                      {!connection.bidirectional && <><b>To:</b> {connection.to.nama_odc}<br /></>}
                       {connection.jointBox && (
                         <>
                           <b>Via Joint Box:</b> {connection.jointBox.nama_joint_box}<br />
