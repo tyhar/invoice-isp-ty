@@ -176,6 +176,8 @@ class FoKabelOdcController extends Controller
             'jumlah_core_in_tube'  => 'nullable|integer',
             'tube_colors'          => 'required|array',
             'tube_colors.*'        => 'string|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
+            'core_colors'          => 'sometimes|array',
+            'core_colors.*'        => 'string|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
             'status'               => 'sometimes|in:active,archived',
         ]);
         $tubeColors = $data['tube_colors'];
@@ -289,6 +291,8 @@ class FoKabelOdcController extends Controller
             'jumlah_core_in_tube'  => 'nullable|integer',
             'tube_colors'          => 'sometimes|array',
             'tube_colors.*'        => 'string|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
+            'core_colors'          => 'sometimes|array',
+            'core_colors.*'        => 'string|in:biru,jingga,hijau,coklat,abu_abu,putih,merah,hitam,kuning,ungu,merah_muda,aqua',
             'status'               => 'sometimes|in:active,archived',
         ]);
         $tubeColors = $data['tube_colors'] ?? null;

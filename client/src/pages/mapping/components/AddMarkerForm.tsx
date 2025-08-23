@@ -549,6 +549,17 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
             {mode === 'odp' && (
               <>
                 <div>
+                  <label className="block mb-1">Deskripsi ODP</label>
+                  <input
+                    type="text"
+                    className="w-full border p-1"
+                    placeholder="Deskripsi ODP"
+                    value={form.deskripsi_odp}
+                    onChange={(e) => setForm({ ...form, deskripsi_odp: e.target.value })}
+                  />
+                </div>
+
+                <div>
                   <label className="block mb-1">Kabel</label>
                   <select
                     className="w-full border p-1"
@@ -581,16 +592,6 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
                   </select>
                 </div>
 
-                <div>
-                  <label className="block mb-1">Deskripsi ODP</label>
-                  <input
-                    type="text"
-                    className="w-full border p-1"
-                    placeholder="Deskripsi ODP"
-                    value={form.deskripsi_odp}
-                    onChange={(e) => setForm({ ...form, deskripsi_odp: e.target.value })}
-                  />
-                </div>
                 <div>
                   <label className="block mb-1">Kabel Core</label>
                   <select

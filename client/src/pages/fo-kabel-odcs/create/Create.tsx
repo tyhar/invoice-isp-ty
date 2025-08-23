@@ -20,6 +20,7 @@ interface FoKabelOdcCreate {
     panjang_kabel: number;
     tube_colors: string[];
     jumlah_core_in_tube: number;
+    core_colors: string[]; // new field for core colors
 }
 
 interface OdcOption {
@@ -45,6 +46,7 @@ export default function Create() {
         panjang_kabel: 0,
         tube_colors: [],
         jumlah_core_in_tube: 1,
+        core_colors: [], // initialize empty array
     });
     const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
@@ -94,11 +96,41 @@ export default function Create() {
                     });
 
                     await Promise.all(tubeUpdatePromises);
+
+                    // Create cores for each tube if core batch creation is enabled
+                    if (form.core_colors.length > 0) {
+                        const coreCreatePromises: Promise<any>[] = [];
+
+                        createdTubes.forEach((tube: any) => {
+                            const tubeColorCounts: { [key: string]: number } = {};
+
+                            form.core_colors.forEach((coreColor) => {
+                                // Count occurrences of this core color
+                                tubeColorCounts[coreColor] = (tubeColorCounts[coreColor] || 0) + 1;
+                                const coreIndex = tubeColorCounts[coreColor];
+
+                                const coreData = {
+                                    kabel_tube_odc_id: tube.id,
+                                    warna_core: coreColor,
+                                    deskripsi: `Core ${coreColor}(${coreIndex}) for tube ${tube.warna_tube}(${colorCounts[tube.warna_tube]})`,
+                                };
+
+                                coreCreatePromises.push(
+                                    request('POST', endpoint('/api/v1/fo-kabel-core-odcs'), coreData)
+                                );
+                            });
+                        });
+
+                        if (coreCreatePromises.length > 0) {
+                            await Promise.all(coreCreatePromises);
+                        }
+                    }
                 }
 
-                toast.success('created kabel with tubes');
+                toast.success('created kabel with tubes and cores');
                 await queryClient.invalidateQueries('fo-kabel-odcs');
                 await queryClient.invalidateQueries('fo-kabel-tube-odcs');
+                await queryClient.invalidateQueries('fo-kabel-core-odcs');
                 navigate('/fo-kabel-odcs');
             })
             .catch((err) => {

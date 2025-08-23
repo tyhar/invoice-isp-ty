@@ -20,6 +20,7 @@ interface FoKabelOdcEdit {
     panjang_kabel: number;
     tube_colors: string[];
     jumlah_core_in_tube: number;
+    core_colors: string[]; // new field for core colors
 }
 
 interface OdcOption {
@@ -42,6 +43,7 @@ export default function Edit() {
         panjang_kabel: 0,
         tube_colors: [],
         jumlah_core_in_tube: 1,
+        core_colors: [], // initialize empty array
     });
     const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
@@ -60,9 +62,15 @@ export default function Edit() {
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-kabel-odcs/${id}`)),
             request('GET', endpoint('/api/v1/fo-odcs')),
+            request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?filter=&status=active`)),
         ])
-            .then(([resKabel, resOdc]: any) => {
+            .then(([resKabel, resOdc, resCores]: any) => {
                 const kabel = resKabel.data.data;
+                const existingCores = resCores.data.data.filter((core: any) => {
+                    // Check if this core belongs to any tube of this kabel
+                    return kabel.tube_colors.some((tube: any) => tube.id === core.kabel_tube_odc_id);
+                });
+
                 setForm({
                     nama_kabel: kabel.nama_kabel,
                     deskripsi: kabel.deskripsi ?? '',
@@ -72,6 +80,7 @@ export default function Edit() {
                         (t: any) => t.warna_tube
                     ),
                     jumlah_core_in_tube: kabel.jumlah_core_in_tube,
+                    core_colors: existingCores.map((core: any) => core.warna_core), // populate with existing cores
                 });
                 setOdcs(
                     resOdc.data.data.map((o: any) => ({
@@ -138,11 +147,63 @@ export default function Edit() {
                     });
 
                     await Promise.all(tubeUpdatePromises);
+
+                    // Handle core batch creation/updates if enabled
+                    if (form.core_colors.length > 0) {
+                        // Get existing cores for all tubes of this kabel
+                        const existingCoresResponse = await request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?filter=&status=active`));
+                        const allCores = existingCoresResponse.data.data;
+                        const existingCores = allCores.filter((core: any) => {
+                            return updatedTubes.some((tube: any) => tube.id === core.kabel_tube_odc_id);
+                        });
+
+                        // Calculate which cores to delete and which to create
+                        const coresToDelete = existingCores.filter((core: any) =>
+                            !form.core_colors.includes(core.warna_core)
+                        );
+                        const coresToCreate: any[] = [];
+
+                        updatedTubes.forEach((tube: any) => {
+                            const existingCoresForTube = existingCores.filter((core: any) =>
+                                core.kabel_tube_odc_id === tube.id
+                            );
+                            const existingCoreColorsForTube = existingCoresForTube.map((core: any) => core.warna_core);
+
+                            form.core_colors.forEach((coreColor) => {
+                                if (!existingCoreColorsForTube.includes(coreColor)) {
+                                    // Count how many cores of this color already exist for this tube
+                                    const existingCount = existingCoresForTube.filter((core: any) =>
+                                        core.warna_core === coreColor
+                                    ).length;
+                                    const newCount = existingCount + 1;
+
+                                    coresToCreate.push({
+                                        kabel_tube_odc_id: tube.id,
+                                        warna_core: coreColor,
+                                        deskripsi: `Core ${coreColor}(${newCount}) for tube ${tube.warna_tube}(${colorCounts[tube.warna_tube]})`,
+                                    });
+                                }
+                            });
+                        });
+
+                        // Delete cores that are no longer needed
+                        const deletePromises = coresToDelete.map((core: any) =>
+                            request('DELETE', endpoint(`/api/v1/fo-kabel-core-odcs/${core.id}`))
+                        );
+
+                        // Create new cores
+                        const createPromises = coresToCreate.map((coreData) =>
+                            request('POST', endpoint('/api/v1/fo-kabel-core-odcs'), coreData)
+                        );
+
+                        await Promise.all([...deletePromises, ...createPromises]);
+                    }
                 }
 
-                toast.success('updated kabel with tubes');
+                toast.success('updated kabel with tubes and cores');
                 queryClient.invalidateQueries('fo-kabel-odcs');
                 queryClient.invalidateQueries('fo-kabel-tube-odcs');
+                queryClient.invalidateQueries('fo-kabel-core-odcs');
                 navigate('/fo-kabel-odcs');
             })
             .catch((error) => {

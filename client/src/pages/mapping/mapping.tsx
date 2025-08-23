@@ -71,6 +71,13 @@ const MappingPage: React.FC = () => {
   const [legendPosition, setLegendPosition] = useState({ x: 12, y: 120 }); // <-- add this
   const [isDraggingLegend, setIsDraggingLegend] = useState(false); // <-- add this
   const [showLegend, setShowLegend] = useState(true); // <-- add this for legend visibility
+  const [isLoading, setIsLoading] = useState(true); // <-- add loading state
+  const [loadingProgress, setLoadingProgress] = useState({
+    mainData: false,
+    filterData: false,
+    statistikData: false,
+    mapCenter: false
+  });
   const api = "http://localhost:8000";
 
   // Add global mouse event listeners for dragging
@@ -109,25 +116,33 @@ const MappingPage: React.FC = () => {
 
   // GET DATA CLIENT,ODP,ODC,JOINT_BOXES DARI API
   const fetchData = async () => {
-    const token = localStorage.getItem('X-API-TOKEN');
-    const headers = { headers: { 'X-API-TOKEN': token || '' } };
+    setLoadingProgress(prev => ({ ...prev, mainData: true }));
+    try {
+      const token = localStorage.getItem('X-API-TOKEN');
+      const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
-    const [clientRes, odpRes, odcRes, jointBoxRes] = await Promise.all([
-      axios.get(`${api}/api/v1/fo-client-ftths`, headers),
-      axios.get(`${api}/api/v1/fo-odps`, headers),
-      axios.get(`${api}/api/v1/fo-odcs`, headers),
-      axios.get(`${api}/api/v1/fo-joint-boxes`, headers),
-    ]);
+      const [clientRes, odpRes, odcRes, jointBoxRes] = await Promise.all([
+        axios.get(`${api}/api/v1/fo-client-ftths`, headers),
+        axios.get(`${api}/api/v1/fo-odps`, headers),
+        axios.get(`${api}/api/v1/fo-odcs`, headers),
+        axios.get(`${api}/api/v1/fo-joint-boxes`, headers),
+      ]);
 
-    setClients(clientRes.data.data);
-    setOdps(odpRes.data.data);
-    setOdcs(odcRes.data.data);
-    setJointBoxes(jointBoxRes.data.data);
+      setClients(clientRes.data.data);
+      setOdps(odpRes.data.data);
+      setOdcs(odcRes.data.data);
+      setJointBoxes(jointBoxRes.data.data);
+    } catch (error) {
+      console.error('Error fetching main data:', error);
+    } finally {
+      setLoadingProgress(prev => ({ ...prev, mainData: false }));
+    }
   };
 
 
   // GET DATA FILTER DARI API
   const fetchFilterLokasi = async () => {
+    setLoadingProgress(prev => ({ ...prev, filterData: true }));
     try {
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
@@ -136,10 +151,13 @@ const MappingPage: React.FC = () => {
       setFilterLokasi(res.data.data);
     } catch (err) {
       console.error('Gagal fetch filter lokasi:', err);
+    } finally {
+      setLoadingProgress(prev => ({ ...prev, filterData: false }));
     }
   };
 
   const fetchStatistikData = async () => {
+    setLoadingProgress(prev => ({ ...prev, statistikData: true }));
     try {
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
@@ -148,10 +166,13 @@ const MappingPage: React.FC = () => {
       setStatistikData(res.data.data);
     } catch (err) {
       console.error('Gagal fetch statistik lokasi:', err);
+    } finally {
+      setLoadingProgress(prev => ({ ...prev, statistikData: false }));
     }
   };
 
   const fetchMapCenter = async () => {
+    setLoadingProgress(prev => ({ ...prev, mapCenter: true }));
     try {
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
@@ -160,14 +181,29 @@ const MappingPage: React.FC = () => {
       setSelectedCenter([parseFloat(latitude), parseFloat(longitude)]);
     } catch (err) {
       console.error('Gagal fetch Map Center:', err);
+    } finally {
+      setLoadingProgress(prev => ({ ...prev, mapCenter: false }));
     }
   };
 
   useEffect(() => {
-    fetchMapCenter();
-    fetchData();
-    fetchFilterLokasi();
-    fetchStatistikData();
+    const loadAllData = async () => {
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          fetchMapCenter(),
+          fetchData(),
+          fetchFilterLokasi(),
+          fetchStatistikData()
+        ]);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAllData();
   }, []);
 
   useEffect(() => {
@@ -475,8 +511,45 @@ const MappingPage: React.FC = () => {
 
   return (
     <Default title={t('Mapping')} breadcrumbs={pages}>
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-white bg-opacity-90 z-[9999] flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <div className="text-lg font-semibold text-gray-700 mb-2">Loading Mapping Data...</div>
+            <div className="text-sm text-gray-500 mb-4">Please wait while we fetch all the data</div>
+
+            {/* Loading Progress Indicators */}
+            <div className="space-y-2 text-sm">
+              <div className={`flex items-center justify-between ${loadingProgress.mainData ? 'text-blue-600' : 'text-gray-400'}`}>
+                <span>Main Data (Clients, ODPs, ODCs, Joint Boxes)</span>
+                {loadingProgress.mainData && <span className="ml-2">⏳</span>}
+              </div>
+              <div className={`flex items-center justify-between ${loadingProgress.filterData ? 'text-blue-600' : 'text-gray-400'}`}>
+                <span>Location Filters</span>
+                {loadingProgress.filterData && <span className="ml-2">⏳</span>}
+              </div>
+              <div className={`flex items-center justify-between ${loadingProgress.statistikData ? 'text-blue-600' : 'text-gray-400'}`}>
+                <span>Statistics Data</span>
+                {loadingProgress.statistikData && <span className="ml-2">⏳</span>}
+              </div>
+              <div className={`flex items-center justify-between ${loadingProgress.mapCenter ? 'text-blue-600' : 'text-gray-400'}`}>
+                <span>Map Center</span>
+                {loadingProgress.mapCenter && <span className="ml-2">⏳</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-x-2">
+          <button
+            className="bg-pink-600 text-white px-4 py-2 rounded mr-2"
+            onClick={() => setShowKabelModal(true)}
+          >
+            Add Kabel
+          </button>
           <button
             className="bg-purple-600 text-white px-4 py-2 rounded"
             onClick={() => setFormMode('odc' as FormMode)}
@@ -494,12 +567,6 @@ const MappingPage: React.FC = () => {
             onClick={() => setFormMode('client')}
           >
             Add Client
-          </button>
-          <button
-            className="bg-pink-600 text-white px-4 py-2 rounded"
-            onClick={() => setShowKabelModal(true)}
-          >
-            Add Kabel
           </button>
           <button
             className="bg-gray-600 text-white px-4 py-2 rounded"
@@ -618,10 +685,6 @@ const MappingPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
                 <span>ODC ➝ ODC</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-6 h-2.5" style={{ backgroundImage: 'repeating-linear-gradient(to right, #a855f7 0px, #a855f7 2px, transparent 2px, transparent 4px)' }}></div>
-                <span>ODC ↔ ODC (Bidirectional)</span>
               </div>
             </div>
             <div className="flex items-center gap-2 mt-2">
@@ -1136,6 +1199,7 @@ const MappingPage: React.FC = () => {
                           <b>Jumlah Core:</b> {connection.kabel_odc.jumlah_total_core}<br />
                           <b>Core/Tube:</b> {connection.kabel_odc.jumlah_core_in_tube}<br />
                           <b>Tipe Kabel:</b> {connection.kabel_odc.tipe_kabel}<br />
+                          <b>Panjang Kabel:</b> {connection.kabel_odc.panjang_kabel} m<br />
                         </>
                       )}
                       <b>Jarak:</b> {distance.toFixed(2)} km
@@ -1221,11 +1285,11 @@ const MappingPage: React.FC = () => {
                     <b>ODC:</b> {odp.odc?.nama_odc || '-'}<br />
                     <b>ODP:</b> {odp.nama_odp || '-'}<br />
                     <b>Via Joint Box:</b> {jointBox?.nama_joint_box || '-'}<br />
-                    <b>Panjang Kabel:</b> {derivedCable?.panjang_kabel ?? '-'} {derivedCable?.panjang_kabel ? 'm' : ''}<br />
                     <b>Jumlah Tube:</b> {derivedCable?.jumlah_tube ?? '-'}<br />
                     <b>Jumlah Core:</b> {derivedCable?.jumlah_total_core ?? '-'}<br />
                     <b>Core/Tube:</b> {derivedCable?.jumlah_core_in_tube ?? '-'}<br />
                     <b>Tipe Kabel:</b> {derivedCable?.tipe_kabel ?? '-'}<br />
+                    <b>Panjang Kabel:</b> {derivedCable?.panjang_kabel ?? '-'} {derivedCable?.panjang_kabel ? 'm' : ''}<br />
                     <b>Jarak:</b> {distance.toFixed(2)} km
                   </div>
                 </Popup>

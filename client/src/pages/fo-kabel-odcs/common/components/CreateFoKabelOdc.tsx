@@ -1,10 +1,15 @@
 // client/src/pages/fo-kabel-odcs/common/components/CreateFoKabelOdc.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { InputField, SelectField, Checkbox } from '$app/components/forms';
+import {
+    InputField,
+    SelectField,
+    Checkbox,
+} from '$app/components/forms';
 import { TubeColorPicker } from './TubeColorPicker';
+import { CoreColorPicker } from '../../../fo-kabel-tube-odcs/common/components/CoreColorPicker';
 
 interface FoKabelOdcCreate {
     nama_kabel: string;
@@ -13,6 +18,7 @@ interface FoKabelOdcCreate {
     panjang_kabel: number;
     tube_colors: string[]; // now a simple array of color strings
     jumlah_core_in_tube: number;
+    core_colors: string[]; // new field for core colors
 }
 
 interface OdcOption {
@@ -32,14 +38,17 @@ export function CreateFoKabelOdc(props: Props) {
     const [t] = useTranslation();
     const { form, setForm, errors, mode = 'create' } = props;
     const [showBatchTubes, setShowBatchTubes] = useState(true); // Default to true for create mode
+    const [showBatchCores, setShowBatchCores] = useState(true); // Default to true for create mode
 
     // Initialize checkbox state based on mode and existing data
     useEffect(() => {
         if (mode === 'edit') {
             // In edit mode, show the checkbox if there are existing tube colors
             setShowBatchTubes(form.tube_colors.length > 0);
+            // In edit mode, show the checkbox if there are existing core colors
+            setShowBatchCores(form.core_colors.length > 0);
         }
-    }, [mode, form.tube_colors.length]);
+    }, [mode, form.tube_colors.length, form.core_colors.length]);
 
     const change = <K extends keyof FoKabelOdcCreate>(
         field: K,
@@ -63,6 +72,24 @@ export function CreateFoKabelOdc(props: Props) {
         if (!checked) {
             // Clear tube colors when unchecking
             change('tube_colors', []);
+        }
+    };
+
+    const handleBatchCoresChange = (checked: boolean) => {
+        if (!checked && mode === 'edit' && form.core_colors.length > 0) {
+            // Show confirmation dialog in edit mode when there are existing cores
+            const confirmed = window.confirm(
+                'Warning: Unchecking "Create Batch Cores" will remove all existing core colors. This action cannot be undone. Are you sure you want to continue?'
+            );
+            if (!confirmed) {
+                return; // Don't proceed if user cancels
+            }
+        }
+
+        setShowBatchCores(checked);
+        if (!checked) {
+            // Clear core colors when unchecking
+            change('core_colors', []);
         }
     };
 
@@ -184,6 +211,45 @@ export function CreateFoKabelOdc(props: Props) {
                     {errors?.errors.tube_colors && (
                         <div className="mt-1 text-xs text-red-600">
                             {errors.errors.tube_colors}
+                        </div>
+                    )}
+                </Element>
+            )}
+
+            {/* Section: Core Batch Creation (full-width) */}
+            <div className="px-5 sm:px-6 py-3">
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('Core Batch Creation')}</div>
+                <div className="text-xs text-gray-500 mt-1">
+                    {t('Automatically create multiple cores for each tube at once')}
+                </div>
+            </div>
+            {/* Separator */}
+            <div className="px-5 sm:px-6">
+                <div className="h-px bg-gray-200" />
+            </div>
+
+            <Element leftSide={t('Create Batch Cores')}>
+                <Checkbox
+                    checked={showBatchCores}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleBatchCoresChange(e.target.checked)}
+                />
+            </Element>
+
+            {showBatchCores && (
+                <Element leftSide={t('Core Colors')}>
+                    <CoreColorPicker
+                        value={form.core_colors}
+                        onChange={(colors: string[]) => change('core_colors', colors)}
+                        maxCores={form.jumlah_core_in_tube}
+                    />
+                    {errors?.errors.core_colors && (
+                        <div className="mt-1 text-xs text-red-600">
+                            {errors.errors.core_colors}
+                        </div>
+                    )}
+                    {form.jumlah_core_in_tube && (
+                        <div className="mt-1 text-xs text-gray-600">
+                            Maximum cores per tube: {form.jumlah_core_in_tube}
                         </div>
                     )}
                 </Element>
