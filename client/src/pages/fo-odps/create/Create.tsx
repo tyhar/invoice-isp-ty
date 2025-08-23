@@ -100,7 +100,7 @@ export default function Create() {
       .catch(() => toast.error('error refresh page'));
 
     // Fetch Core options
-    request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250'))
+    request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250&status=active'))
       .then((res: any) => {
         setCores(
           res.data.data.map((c: any) => ({

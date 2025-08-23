@@ -42,11 +42,11 @@ export default function Create() {
     useEffect(() => {
         setOptionsLoading(true);
         Promise.all([
-            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250')),
-            request('GET', endpoint('/api/v1/fo-odps?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250&status=active')),
+            request('GET', endpoint('/api/v1/fo-odps?per_page=250&status=active')),
             request(
                 'GET',
-                endpoint('/api/v1/clients?per_page=500&status=active')
+                endpoint('/api/v1/clients?per_page=250&status=active')
             ),
         ])
             .then(([lokasiRes, odpRes, clientRes]) => {

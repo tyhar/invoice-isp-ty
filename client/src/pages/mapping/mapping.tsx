@@ -122,10 +122,10 @@ const MappingPage: React.FC = () => {
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
       const [clientRes, odpRes, odcRes, jointBoxRes] = await Promise.all([
-        axios.get(`${api}/api/v1/fo-client-ftths`, headers),
-        axios.get(`${api}/api/v1/fo-odps`, headers),
-        axios.get(`${api}/api/v1/fo-odcs`, headers),
-        axios.get(`${api}/api/v1/fo-joint-boxes`, headers),
+        axios.get(`${api}/api/v1/fo-client-ftths?status=active&per_page=250`, headers),
+        axios.get(`${api}/api/v1/fo-odps?status=active&per_page=250`, headers),
+        axios.get(`${api}/api/v1/fo-odcs?status=active&per_page=250`, headers),
+        axios.get(`${api}/api/v1/fo-joint-boxes?status=active&per_page=250`, headers),
       ]);
 
       setClients(clientRes.data.data);

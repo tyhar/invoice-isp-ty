@@ -58,10 +58,10 @@ export default function Edit() {
     useEffect(() => {
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-odps/${id}`)),
-            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250')),
-            request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250')),
-            request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250')),
-            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250&status=active')),
+            request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250&status=active')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250&status=active')),
+            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=250&status=active')),
         ])
             .then(([odpRes, lokRes, coreRes, kabelOdcRes, kabelTubeRes]: any) => {
                 const odp = odpRes.data.data;
