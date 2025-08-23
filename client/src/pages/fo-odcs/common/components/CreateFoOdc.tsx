@@ -190,7 +190,7 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
             <div className="px-5 sm:px-6 py-3">
                 <div className="text-sm md:text-base font-semibold text-gray-700">{t('ODC')}</div>
                 <div className="text-xs text-gray-500 mt-1">
-                    {t('Fill in the basic information for this ODC.')}
+                    {t('Fill in the basic information for this ODC and optionally specify Tube/Core.')}
                 </div>
             </div>
 
@@ -257,11 +257,46 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                 </SelectField>
             </Element>
 
+            <Element leftSide={t('Kabel Tube')}>
+                <SelectField
+                    value={values.kabel_tube_odc_id}
+                    onValueChange={(v) => {
+                        onChange('kabel_tube_odc_id', v);
+                        // Reset core when tube changes
+                        onChange('kabel_core_odc_id', '');
+                    }}
+                    errorMessage={errors?.errors.kabel_tube_odc_id}
+                >
+                    <option value="">{t('Pilih Tube (Opsional)')}</option>
+                    {filteredTubes.map((t) => (
+                        <option key={t.id} value={t.id.toString()}>
+                            {t.warna_tube} {t.deskripsi ? `- ${t.deskripsi}` : ''}
+                        </option>
+                    ))}
+                </SelectField>
+            </Element>
+
+            {/* Optional: Core that feeds this child ODC */}
+            <Element leftSide={t('Kabel Core')}>
+                <SelectField
+                    value={values.kabel_core_odc_id}
+                    onValueChange={(v) => onChange('kabel_core_odc_id', v)}
+                    errorMessage={errors?.errors.kabel_core_odc_id}
+                >
+                    <option value="">{t('Pilih Core (Opsional)')}</option>
+                    {filteredCores.map((c) => (
+                        <option key={c.id} value={c.id.toString()}>
+                            {c.warna_core} {c.warna_tube ? `- Tube ${c.warna_tube}` : ''}
+                        </option>
+                    ))}
+                </SelectField>
+            </Element>
+
             {/* Section: Connection (full-width) */}
             <div className="px-5 sm:px-6 py-3">
                 <div className="text-sm md:text-base font-semibold text-gray-700">{t('ODC Connection')}</div>
                 <div className="text-xs text-gray-500 mt-1">
-                    {t('Optionally link this ODC to another ODC and specify Tube/Core.')}
+                    {t('Optionally link this ODC to another ODC.')}
                 </div>
             </div>
             {/* Separator */}
@@ -298,41 +333,6 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
 
             {values.odc_connection_enabled && (
                 <>
-                    <Element leftSide={t('Kabel Tube')}>
-                        <SelectField
-                            value={values.kabel_tube_odc_id}
-                            onValueChange={(v) => {
-                                onChange('kabel_tube_odc_id', v);
-                                // Reset core when tube changes
-                                onChange('kabel_core_odc_id', '');
-                            }}
-                            errorMessage={errors?.errors.kabel_tube_odc_id}
-                        >
-                            <option value="">{t('Pilih Tube (Opsional)')}</option>
-                            {filteredTubes.map((t) => (
-                                <option key={t.id} value={t.id.toString()}>
-                                    {t.warna_tube} {t.deskripsi ? `- ${t.deskripsi}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
-                    </Element>
-
-                    {/* Optional: Core that feeds this child ODC */}
-                    <Element leftSide={t('Kabel Core')}>
-                        <SelectField
-                            value={values.kabel_core_odc_id}
-                            onValueChange={(v) => onChange('kabel_core_odc_id', v)}
-                            errorMessage={errors?.errors.kabel_core_odc_id}
-                        >
-                            <option value="">{t('Pilih Core (Opsional)')}</option>
-                            {filteredCores.map((c) => (
-                                <option key={c.id} value={c.id.toString()}>
-                                    {c.warna_core} {c.warna_tube ? `- Tube ${c.warna_tube}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
-                    </Element>
-
                     <Element leftSide={t('Connected ODC')}>
                         <SelectField
                             value={values.odc_id}
