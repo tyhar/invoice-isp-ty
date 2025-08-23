@@ -88,11 +88,11 @@ export default function Create() {
     // Fetch Lokasi list
     useEffect(() => {
         Promise.all([
-            request('GET', endpoint('/api/v1/fo-lokasis')),
-            request('GET', endpoint('/api/v1/fo-kabel-odcs')),
-            request('GET', endpoint('/api/v1/fo-odcs')),
-            request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=1000')),
-            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000')),
+            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-odcs?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=250')),
         ])
             .then(([lokRes, kabelRes, odcRes, coreRes, tubeRes]: any) => {
                 setLokasis(

@@ -71,10 +71,10 @@ export default function Create() {
     useEffect(() => {
         // Fetch all required options
         Promise.all([
-            request('GET', endpoint('/api/v1/fo-lokasis')),
-            request('GET', endpoint('/api/v1/fo-kabel-odcs')),
-            request('GET', endpoint('/api/v1/fo-odcs')),
-            request('GET', endpoint('/api/v1/fo-odps'))
+            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-odcs?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-odps?per_page=250'))
         ])
         .then(([lokasiRes, kabelRes, odcRes, odpRes]: any[]) => {
             setLokasis(lokasiRes.data.data.map((l: any) => ({

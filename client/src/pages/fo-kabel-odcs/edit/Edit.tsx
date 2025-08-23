@@ -61,8 +61,8 @@ export default function Edit() {
         setLoadError(null);
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-kabel-odcs/${id}`)),
-            request('GET', endpoint('/api/v1/fo-odcs')),
-            request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?filter=&status=active`)),
+            request('GET', endpoint('/api/v1/fo-odcs?per_page=250')),
+            request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?filter=&status=active?per_page=250`)),
         ])
             .then(([resKabel, resOdc, resCores]: any) => {
                 const kabel = resKabel.data.data;

@@ -43,8 +43,8 @@ export default function Edit() {
         setLoading(true);
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-client-ftths/${id}`)),
-            request('GET', endpoint('/api/v1/fo-lokasis')),
-            request('GET', endpoint('/api/v1/fo-odps')),
+            request('GET', endpoint('/api/v1/fo-lokasis?per_page=250')),
+            request('GET', endpoint('/api/v1/fo-odps?per_page=250')),
             request('GET', endpoint('/api/v1/clients?per_page=500&status=active')),
         ]).then(([ftthRes, lokasiRes, odpRes, clientRes]) => {
             const ftth = ftthRes.data.data;

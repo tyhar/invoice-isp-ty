@@ -53,8 +53,8 @@ export default function Edit() {
 
         Promise.all([
             request('GET', endpoint(`/api/v1/fo-kabel-tube-odcs/${id}`)),
-            request('GET', endpoint('/api/v1/fo-kabel-odcs')),
-            request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?filter=&status=active`)),
+            request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250')),
+            request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?filter=&status=active?per_page=250`)),
         ])
             .then(([resTube, resOdc, resCores]: any) => {
                 const tubeData = resTube.data.data;

@@ -357,7 +357,10 @@ export function Default(props: Props) {
                 icon: PlusCircle,
                 to: '/mapping',
                 label: t('mapping'),
-                visible: hasPermission('manage_mapping'),
+                visible: hasPermission('manage_mapping')||
+                hasPermission('view_client') ||
+                hasPermission('create_client') ||
+                hasPermission('edit_client'),
             },
         },
         {
@@ -373,7 +376,10 @@ export function Default(props: Props) {
                 location.pathname.startsWith('/fo-odps') ||
                 location.pathname.startsWith('/fo-client-ftths') ||
                 location.pathname.startsWith('/fo-reports'),
-            visible: hasPermission('manage_fiberoptics'),
+            visible: hasPermission('manage_fiberoptics') ||
+                        hasPermission('view_client') ||
+                        hasPermission('create_client') ||
+                        hasPermission('edit_client'),
             children: [
                 {
                     name: t('Lokasi'),
@@ -386,7 +392,10 @@ export function Default(props: Props) {
                         icon: PlusCircle,
                         to: '/fo-lokasis/create',
                         label: t('new_fo_lokasi'),
-                        visible: hasPermission('manage_fiberoptics'),
+                        visible: hasPermission('manage_fiberoptics') ||
+                                    hasPermission('view_client') ||
+                                    hasPermission('create_client') ||
+                                    hasPermission('edit_client'),
                     },
                 },
                 {
@@ -398,7 +407,10 @@ export function Default(props: Props) {
                         location.pathname.startsWith('/fo-kabel-tube-odcs') ||
                         location.pathname.startsWith('/fo-kabel-core-odcs'),
                     visible:
-                        hasPermission('manage_fiberoptics'),
+                        hasPermission('manage_fiberoptics')||
+                        hasPermission('view_client') ||
+                        hasPermission('create_client') ||
+                        hasPermission('edit_client'),
                     children: [
                         {
                             name: t('Kabel'),
@@ -412,8 +424,11 @@ export function Default(props: Props) {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-odcs/create',
                                 label: t('new_fo_kabel'),
-                                visible: hasPermission('manage_fiberoptics'),
-                            },
+                                visible: hasPermission('manage_fiberoptics')||
+                                            hasPermission('view_client') ||
+                                            hasPermission('create_client') ||
+                                            hasPermission('edit_client'),
+                                        },
                         },
                         {
                             name: t('Tube Kabel'),
@@ -428,7 +443,10 @@ export function Default(props: Props) {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-tube-odcs/create',
                                 label: t('new_fo_tube_kabel'),
-                                visible: hasPermission('manage_fiberoptics'),
+                                visible: hasPermission('manage_fiberoptics')||
+                                            hasPermission('view_client') ||
+                                            hasPermission('create_client') ||
+                                            hasPermission('edit_client'),
                             },
                         },
                         {
@@ -444,7 +462,10 @@ export function Default(props: Props) {
                                 icon: PlusCircle,
                                 to: '/fo-kabel-core-odcs/create',
                                 label: t('new_fo_core_kabel'),
-                                visible: hasPermission('manage_fiberoptics'),
+                                visible: hasPermission('manage_fiberoptics')||
+                                            hasPermission('view_client') ||
+                                            hasPermission('create_client') ||
+                                            hasPermission('edit_client'),
                             },
                         },
                     ],
@@ -460,7 +481,10 @@ export function Default(props: Props) {
                         icon: PlusCircle,
                         to: '/fo-odcs/create',
                         label: t('new_fo_odc'),
-                        visible: hasPermission('manage_fiberoptics'),
+                        visible: hasPermission('manage_fiberoptics')||
+                                    hasPermission('view_client') ||
+                                    hasPermission('create_client') ||
+                                    hasPermission('edit_client'),
                     },
                 },
                 {
@@ -474,7 +498,10 @@ export function Default(props: Props) {
                         icon: PlusCircle,
                         to: '/fo-odps/create',
                         label: t('new_fo_odp'),
-                        visible: hasPermission('manage_fiberoptics'),
+                        visible: hasPermission('manage_fiberoptics')||
+                                    hasPermission('view_client') ||
+                                    hasPermission('create_client') ||
+                                    hasPermission('edit_client'),
                     },
                 },
                 {
@@ -488,7 +515,10 @@ export function Default(props: Props) {
                         icon: PlusCircle,
                         to: '/fo-client-ftths/create',
                         label: t('new_fo_client_ftth'),
-                        visible: hasPermission('manage_fiberoptics'),
+                        visible: hasPermission('manage_fiberoptics')||
+                                    hasPermission('view_client') ||
+                                    hasPermission('create_client') ||
+                                    hasPermission('edit_client'),
                     },
                 },
                 {
@@ -501,7 +531,10 @@ export function Default(props: Props) {
                         icon: PlusCircle,
                         to: '/fo-joint-boxes/create',
                         label: t('new_fo_joint_box'),
-                        visible: hasPermission('manage_fiberoptics'),
+                        visible: hasPermission('manage_fiberoptics')||
+                                    hasPermission('view_client') ||
+                                    hasPermission('create_client') ||
+                                    hasPermission('edit_client'),
                     },
                 },
                 {
@@ -509,7 +542,10 @@ export function Default(props: Props) {
                     href: '/fo-reports',
                     icon: PieChart,
                     current: location.pathname.startsWith('/fo-reports'),
-                    visible: hasPermission('view_reports'),
+                    visible: hasPermission('view_reports')||
+                                hasPermission('view_client') ||
+                                hasPermission('create_client') ||
+                                hasPermission('edit_client'),
                 },
             ],
         },

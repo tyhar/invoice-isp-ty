@@ -261,8 +261,6 @@ Route::group(['middleware' => ['throttle:api', 'api_db', 'token_auth', 'locale']
     Route::get('/map-center', [MapSettingController::class, 'getMapCenter']);
     Route::post('/map-center', [MapSettingController::class, 'updateMapCenter']);
 
-
-
     Route::get('/test-ftth', function () {
         return \App\Models\FoClientFtth::all();
     });

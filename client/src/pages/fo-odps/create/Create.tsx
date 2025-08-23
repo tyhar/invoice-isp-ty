@@ -63,7 +63,7 @@ export default function Create() {
 
   useEffect(() => {
     // Fetch Lokasi options
-    request('GET', endpoint('/api/v1/fo-lokasis'))
+    request('GET', endpoint('/api/v1/fo-lokasis?per_page=250'))
       .then((res: any) => {
         setLokasis(
           res.data.data.map((l: any) => ({ id: l.id, nama_lokasi: l.nama_lokasi }))
@@ -72,7 +72,7 @@ export default function Create() {
       .catch(() => toast.error('error refresh page'));
 
     // Fetch Kabel ODCs
-    request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=1000'))
+    request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250'))
       .then((res: any) => {
         setKabelOdcs(
           res.data.data.map((k: any) => ({
@@ -86,7 +86,7 @@ export default function Create() {
       .catch(() => toast.error('error refresh page'));
 
     // Fetch Kabel Tubes
-    request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=1000'))
+    request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=250'))
       .then((res: any) => {
         setKabelTubes(
           res.data.data.map((t: any) => ({
@@ -100,7 +100,7 @@ export default function Create() {
       .catch(() => toast.error('error refresh page'));
 
     // Fetch Core options
-    request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=1000'))
+    request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250'))
       .then((res: any) => {
         setCores(
           res.data.data.map((c: any) => ({

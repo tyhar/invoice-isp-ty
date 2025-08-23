@@ -51,7 +51,7 @@ export default function Create() {
     const [isBusy, setIsBusy] = useState(false);
 
     useEffect(() => {
-        request('GET', endpoint('/api/v1/fo-kabel-odcs')).then((res) => {
+        request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250')).then((res) => {
             setOdcs(
                 res.data.data.map((o: any) => ({
                     id: o.id,
