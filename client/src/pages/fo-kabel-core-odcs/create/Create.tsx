@@ -61,6 +61,8 @@ export default function Create() {
                         kabel_odc_id: o.kabel_odc.id,
                         nama_kabel: o.kabel_odc.nama_kabel,
                         deskripsi: o.deskripsi,
+                        jumlah_core_in_tube: o.jumlah_core_in_tube,
+                        kabel_core_odc_ids: o.kabel_core_odc_ids,
                     }))
                 );
                 setTubesLoading(false);

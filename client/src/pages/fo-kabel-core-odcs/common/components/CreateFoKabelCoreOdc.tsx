@@ -164,6 +164,11 @@ export function CreateFoKabelCoreOdc({
                 {errors?.errors.warna_core && (
                     <p className="text-red-500 text-xs mt-1">{errors.errors.warna_core}</p>
                 )}
+                {typeof selectedTube?.jumlah_core_in_tube === 'number' && selectedTube.jumlah_core_in_tube > 0 && (
+                    <div className="mt-1 text-xs text-gray-600">
+                        Maximum cores per tube: {selectedTube.jumlah_core_in_tube}
+                    </div>
+                )}
             </Element>
 
             <Element leftSide={t('Deskripsi')}>

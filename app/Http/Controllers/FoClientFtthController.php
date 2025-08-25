@@ -183,7 +183,6 @@ class FoClientFtthController extends Controller
                     'name' => $c->client->name,
                     'phone' => $c->client->phone,
                     'email' => $c->client->email,
-
                     'address1' => $c->client->address1,
                     'address2' => $c->client->address2,
                     'city' => $c->client->city,

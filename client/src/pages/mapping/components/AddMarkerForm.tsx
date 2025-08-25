@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import L, { LatLng } from 'leaflet';
-import { Marker, useMapEvents } from 'react-leaflet';
+import { Marker, useMap, useMapEvents } from 'react-leaflet';
 import axios from 'axios';
 import Select from 'react-select';
 
@@ -42,16 +42,46 @@ interface AddMarkerFormProps {
 }
 
 export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, initialData, editingId }) => {
+  const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const map = useMap();
   const [isOptionsLoading, setIsOptionsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const selectCommonProps: any = useMemo(() => ({
     menuPortalTarget: document.body,
     menuPosition: 'fixed',
-    styles: {
-      menuPortal: (base: any) => ({ ...base, zIndex: 10000 }),
-      menu: (base: any) => ({ ...base, zIndex: 10000 }),
+    closeMenuOnScroll: false,
+    menuShouldScrollIntoView: false,
+    captureMenuScroll: true,
+    onMenuOpen: () => {
+      try {
+        map.dragging.disable();
+        map.scrollWheelZoom.disable();
+        // Prevent map shortcuts interfering with input
+        (map as any).keyboard?.disable?.();
+        // Prevent double click zoom while menu is open
+        map.doubleClickZoom?.disable?.();
+      } catch {
+        /* ignore errors disabling map handlers */
+      }
     },
-  }), []);
+    onMenuClose: () => {
+      try {
+        map.dragging.enable();
+        map.scrollWheelZoom.enable();
+        (map as any).keyboard?.enable?.();
+        map.doubleClickZoom?.enable?.();
+      } catch {
+        /* ignore errors enabling map handlers */
+      }
+    },
+    styles: {
+      menuPortal: (base: any) => ({ ...base, zIndex: 999999, pointerEvents: 'auto' }),
+      menu: (base: any) => ({ ...base, zIndex: 999999, pointerEvents: 'auto' }),
+      control: (base: any) => ({ ...base, cursor: 'text' }),
+      valueContainer: (base: any) => ({ ...base, cursor: 'text' }),
+    },
+  }), [map]);
   const parseCoordinate = (value: any): number | null => {
     const parsed = parseFloat(value);
     return isNaN(parsed) ? null : parsed;
@@ -71,10 +101,11 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
   const [form, setForm] = useState({
     nama_lokasi: initialData?.nama_lokasi || '',
     deskripsi: initialData?.deskripsi || '',
-    deskripsi_odc: mode === 'odc' ? initialData?.deskripsi || '' : '',
+    deskripsi_odc: mode === 'odc' ? ((initialData as any)?.deskripsi_odc || initialData?.deskripsi || '') : '',
     deskripsi_odp: mode === 'odp' ? initialData?.deskripsi || '' : '',
     nama: initialData?.nama_client || initialData?.nama_odp || initialData?.nama_odc || initialData?.nama_joint_box || '',
     alamat: initialData?.alamat || '',
+    deskripsi_client: (initialData as any)?.deskripsi_client || '',
     odp_id: initialData?.odp_id || '',
     kabel_core_odc_id: initialData?.kabel_core_odc_id || '',
     tipe_splitter: initialData?.tipe_splitter || '1:8',
@@ -85,6 +116,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
     kabel_tube_odc_id: initialData?.kabel_tube_odc_id || '',
     odc_id: initialData?.odc_id || '',
     odc_2_id: (initialData as any)?.odc_2_id || '',
+    deskripsi_joint_box: (initialData as any)?.deskripsi_joint_box || '',
   });
 
   const allowMapClick = !position && form.nama_lokasi.trim() === '' && form.nama.trim() === '';
@@ -155,12 +187,13 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
       setForm({
         nama_lokasi: initialData.nama_lokasi || '',
         deskripsi: initialData.deskripsi || '',
-        deskripsi_odc: mode === 'odc' ? initialData.deskripsi || '' : '',
-        deskripsi_odp: mode === 'odp' ? initialData.deskripsi || '' : '',
+        deskripsi_odc: mode === 'odc' ? ((initialData as any).deskripsi_odc || initialData.deskripsi || '') : '',
+        deskripsi_odp: mode === 'odp' ? (initialData as any).deskripsi_odp || initialData.deskripsi || '' : '',
         nama: initialData.nama_client || initialData.nama_odp || initialData.nama_odc || (initialData as any).nama_joint_box || '',
         alamat: initialData.alamat || '',
+        deskripsi_client: (initialData as any).deskripsi_client || '',
         odp_id: initialData.odp_id || '',
-        kabel_core_odc_id: initialData.kabel_core_odc_id || '',
+        kabel_core_odc_id: (initialData as any).kabel_core_odc_id?.toString?.() || initialData.kabel_core_odc_id || '',
         tipe_splitter: initialData.tipe_splitter || '1:8',
         latitude: initialData.latitude || '',
         longitude: initialData.longitude || '',
@@ -169,6 +202,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
         kabel_tube_odc_id: initialData.kabel_tube_odc_id || '',
         odc_id: initialData.odc_id || '',
         odc_2_id: (initialData as any).odc_2_id || '',
+        deskripsi_joint_box: (initialData as any).deskripsi_joint_box || '',
       });
       if (mode === 'joint_box') {
         const hasOdcOdc = Boolean(initialData.odc_id) && Boolean((initialData as any).odc_2_id);
@@ -177,6 +211,30 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
       }
     }
   }, [initialData, mode]);
+
+  useEffect(() => {
+    // Keep scroll events local to the form area, but do not block click events needed by React
+    if (scrollAreaRef.current) {
+      try {
+        L.DomEvent.disableScrollPropagation(scrollAreaRef.current);
+        // Stop key events from bubbling to the map while typing/searching
+        scrollAreaRef.current.addEventListener('keydown', (e) => {
+          e.stopPropagation();
+        });
+      } catch {
+        /* ignore DOM event setup failures */
+      }
+    }
+
+    if (containerRef.current) {
+      try {
+        L.DomEvent.disableScrollPropagation(containerRef.current);
+        // Do NOT stop click propagation at the native layer; this breaks React onClick
+      } catch {
+        /* ignore DOM event setup failures */
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -331,6 +389,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
               odp_id: parsedIds.odp_id,
               nama_client: form.nama,
               alamat: form.alamat,
+              deskripsi: (form as any).deskripsi_client || undefined,
             },
             headers
           );
@@ -370,7 +429,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
               odc_2_id: parsedIds.odc_2_id,
               odp_id: parsedIds.odp_id,
               nama_joint_box: form.nama,
-              deskripsi: form.deskripsi,
+              deskripsi: (form as any).deskripsi_joint_box || undefined,
               status: 'active',
             },
             headers
@@ -401,6 +460,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
               nama_client: form.nama,
               alamat: form.alamat,
               client_id: parsedIds.client_id,
+              deskripsi: (form as any).deskripsi_client || undefined,
             },
             headers
           );
@@ -440,7 +500,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
               odc_2_id: parsedIds.odc_2_id,
               odp_id: parsedIds.odp_id,
               nama_joint_box: form.nama,
-              deskripsi: form.deskripsi,
+              deskripsi: (form as any).deskripsi_joint_box || undefined,
               status: 'active',
             },
             headers
@@ -529,7 +589,11 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
         />
       )}
 
-      <div className="absolute top-10 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
+      <div
+        ref={containerRef}
+        className="absolute top-10 right-4 bg-white p-4 shadow-md rounded z-[99999] w-[320px] max-h-[80vh] overflow-auto pointer-events-auto"
+        // Let React handle clicks; we only want to block map interactions while menus are open
+      >
         <h3 className="font-semibold mb-2">
           {editingId
             ? (mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : mode === 'odc' ? 'Edit ODC' : 'Edit Joint Box')
@@ -546,7 +610,10 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
           </div>
         )}
         <p className="mb-2 text-xs text-gray-600">Klik peta untuk memilih lokasi atau edit latitude dan longitude di bawah</p>
-        <div className="max-h-[55vh] overflow-y-auto px-4">
+        <div
+          ref={scrollAreaRef}
+          className="max-h-[55vh] overflow-y-auto px-4"
+        >
           {formError && (
             <div className="bg-red-100 text-red-800 text-sm px-3 py-2 rounded mb-2">
               {formError}
@@ -578,7 +645,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
 
             <div>
               <label className="block mb-1">
-                {mode === 'client' ? 'Nama Client' : mode === 'odp' ? 'Nama ODP' : mode === 'odc' ? 'Nama ODC' : 'Nama Joint Box'}
+                {mode === 'client' ? 'Nama Client FTTH' : mode === 'odp' ? 'Nama ODP' : mode === 'odc' ? 'Nama ODC' : 'Nama Joint Box'}
               </label>
               <input
                 type="text"
@@ -696,18 +763,17 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
 
                 <div>
                   <label className="block mb-1">ODC ID (Opsional)</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.odc_id}
-                    onChange={(e) => setForm({ ...form, odc_id: e.target.value })}
-                  >
-                    <option value="">Pilih ODC</option>
-                    {filteredOdcForOdp.map((odc) => (
-                      <option key={odc.id} value={odc.id}>
-                        {odc.nama_odc}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={filteredOdcForOdp.map((o:any)=>({ value: o.id.toString(), label: o.nama_odc }))}
+                    value={filteredOdcForOdp.find((o:any)=> o.id.toString()===form.odc_id) ? { value: form.odc_id, label: filteredOdcForOdp.find((o:any)=> o.id.toString()===form.odc_id)?.nama_odc } : null}
+                    onChange={(opt:any)=> setForm({ ...form, odc_id: opt?.value || '' })}
+                    placeholder="Pilih ODC"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                   {selectedCore && (
                     <p className="text-xs text-gray-500 mt-1">
                       Menampilkan ODC yang terhubung dengan kabel {selectedCore.kabel_tube_odc?.kabel_odc?.nama_kabel} - tube {selectedCore.kabel_tube_odc?.warna_tube} - core {selectedCore.warna_core}
@@ -819,6 +885,17 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
             {mode === 'joint_box' && (
               <>
                 <div>
+                  <label className="block mb-1">Deskripsi Joint Box</label>
+                  <input
+                    type="text"
+                    className="w-full border p-1"
+                    placeholder="Deskripsi Joint Box"
+                    value={(form as any).deskripsi_joint_box || ''}
+                    onChange={(e) => setForm({ ...form, deskripsi_joint_box: e.target.value } as any)}
+                  />
+                </div>
+
+                <div>
                   <label className="block mb-1">Kabel</label>
                   <Select
                     className="w-full"
@@ -921,6 +998,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
                     </div>
                   </>
                 )}
+
               </>
             )}
 

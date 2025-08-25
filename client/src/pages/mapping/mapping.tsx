@@ -31,15 +31,19 @@ interface MarkerData {
   alamat?: string;
   odp_id?: string;
   client_id: number;
+  deskripsi_client?: string;
   // odp specific
   nama_odp?: string;
   tipe_splitter?: string;
   kabel_core_odc_id?: string;
   kabel_odc_id?: string;
   kabel_tube_odc_id?: string;
+  deskripsi_odp?: string;
+  deskripsi_odc?: string;
   nama_odc?: string;
   // joint box specific
   nama_joint_box?: string;
+  deskripsi_joint_box?: string;
   odc_id?: string;
   odc_2_id?: string;
 }
@@ -738,7 +742,7 @@ const MappingPage: React.FC = () => {
           </div>
         </div>
 
-        <MapContainer center={selectedCenter || mapDefaultCenter} zoom={13} className="h-full w-full">
+        <MapContainer center={selectedCenter || mapDefaultCenter} zoom={13} className="h-full w-full" keyboard={false} doubleClickZoom={false}>
           <MapCenterUpdater center={selectedCenter || mapDefaultCenter} />
           <TileLayer
             attribution="&copy; OpenStreetMap contributors"
@@ -755,6 +759,8 @@ const MappingPage: React.FC = () => {
                   <Popup>
                     <div className="text-base">
                       <strong>CLIENT</strong><br />
+                      <b>Lokasi:</b> {client.lokasi.nama_lokasi || '-'}<br />
+                      <b>Deskripsi Lokasi:</b> {client.lokasi.deskripsi || '-'}<br />
                       <b>Nama Client FTTH:</b> {client.nama_client || '-'}<br />
                       <b>Nama Client:</b> {client.client?.name || '-'}<br />
                       <b>Alamat:</b> {client.alamat || '-'}<br />
@@ -793,9 +799,10 @@ const MappingPage: React.FC = () => {
                               latitude: client.lokasi.latitude,
                               longitude: client.lokasi.longitude,
                               nama_client: client.nama_client,
+                              deskripsi_client: (client as any).deskripsi || '',
                               alamat: client.alamat,
-                              odp_id: client.odp_id?.toString(),
-                              client_id: client.client_id
+                              odp_id: client.odp?.id?.toString(),
+                              client_id: client.client?.id?.toString() || 0
                             }
                           })}
                         >
@@ -822,12 +829,13 @@ const MappingPage: React.FC = () => {
                 <Marker key={`odp-${odp.id}`} position={pos} icon={odpIcon}>
                   <Popup>
                     <div className="text-base">
-                      <strong>Nama ODP:</strong> {odp.nama_odp}<br />
-                      <strong>Deskripsi:</strong> {odp.deskripsi}<br />
                       <strong>Lokasi:</strong> {odp.lokasi.nama_lokasi}<br />
+                      <strong>Deskripsi Lokasi:</strong> {odp.lokasi.deskripsi}<br />
+                      <strong>Nama ODP:</strong> {odp.nama_odp}<br />
+                      <strong>Deskripsi ODP:</strong> {odp.deskripsi}<br />
                       <strong>Kabel:</strong> {odp.kabel_core_odc?.kabel_odc?.nama_kabel || '-'}<br />
-                      <strong>Kabel Core:</strong> {odp.kabel_core_odc?.warna_core}<br />
                       <strong>Kabel Tube:</strong> {odp.kabel_core_odc?.kabel_tube_odc?.warna_tube}<br />
+                      <strong>Kabel Core:</strong> {odp.kabel_core_odc?.warna_core}<br />
                       <strong>Connected ODC:</strong> {odp.odc?.nama_odc}<br />
                       <div className="mt-2 flex gap-2">
                         <button
@@ -842,7 +850,8 @@ const MappingPage: React.FC = () => {
                               longitude: odp.lokasi.longitude,
                               nama_odp: odp.nama_odp,
                               tipe_splitter: odp.tipe_splitter,
-                              kabel_core_odc_id: odp.kabel_core_odc_id,
+                              deskripsi_odp: odp.deskripsi || '',
+                              kabel_core_odc_id: odp.kabel_core_odc_id?.toString(),
                               kabel_odc_id: odp.kabel_core_odc?.kabel_odc?.id?.toString(),
                               kabel_tube_odc_id: odp.kabel_core_odc?.kabel_tube_odc?.id?.toString(),
                               odc_id: odp.odc_id?.toString(),
@@ -873,9 +882,10 @@ const MappingPage: React.FC = () => {
                 <Marker key={`odc-${odc.id}`} position={pos} icon={odcIcon}>
                   <Popup>
                     <div className="text-base">
-                      <strong>Nama ODC:</strong> {odc.nama_odc}<br />
-                      <strong>Deskripsi:</strong> {odc.deskripsi}<br />
                       <strong>Lokasi:</strong> {odc.lokasi.nama_lokasi}<br />
+                      <strong>Deskripsi Lokasi:</strong> {odc.lokasi.deskripsi}<br />
+                      <strong>Nama ODC:</strong> {odc.nama_odc}<br />
+                      <strong>Deskripsi ODC:</strong> {odc.deskripsi}<br />
                       <strong>Kabel:</strong> {odc.kabel_odc?.nama_kabel}<br />
                       <strong>Kabel Tube:</strong> {odc.kabel_core_odc?.kabel_tube_odc?.warna_tube || '-'}<br />
                       <strong>Kabel Core:</strong> {odc.kabel_core_odc?.warna_core || '-'}<br />
@@ -895,6 +905,7 @@ const MappingPage: React.FC = () => {
                               latitude: odc.lokasi.latitude,
                               longitude: odc.lokasi.longitude,
                               nama_odc: odc.nama_odc,
+                              deskripsi_odc: odc.deskripsi || '',
                               kabel_odc_id: odc.kabel_odc_id?.toString(),
                               kabel_tube_odc_id: odc.kabel_core_odc?.kabel_tube_odc?.id?.toString(),
                               kabel_core_odc_id: odc.kabel_core_odc_id?.toString(),
@@ -956,6 +967,7 @@ const MappingPage: React.FC = () => {
                               latitude: String(jointBox.lokasi.latitude),
                               longitude: String(jointBox.lokasi.longitude),
                               nama_joint_box: jointBox.nama_joint_box,
+                              deskripsi_joint_box: jointBox.deskripsi || '',
                               kabel_odc_id: jointBox.kabel_odc?.id?.toString(),
                               odc_id: jointBox.odc_id?.toString(),
                               odc_2_id: jointBox.odc_2_id?.toString(),
@@ -1332,9 +1344,10 @@ const MappingPage: React.FC = () => {
               <Marker key={`jointbox-${jointBox.id}`} position={pos} icon={jointBoxIcon}>
                 <Popup>
                   <div className="text-base">
-                    <strong>Nama Joint Box:</strong> {jointBox.nama_joint_box}<br />
-                    <b>Deskripsi:</b> {jointBox.deskripsi || '-'}<br />
                     <b>Lokasi:</b> {jointBox.lokasi?.nama_lokasi || '-'}<br />
+                    <b>Deskripsi Lokasi:</b> {jointBox.lokasi?.deskripsi || '-'}<br />
+                    <strong>Nama Joint Box:</strong> {jointBox.nama_joint_box}<br />
+                    <b>Deskripsi Joint Box:</b> {jointBox.deskripsi || '-'}<br />
                     <b>Kabel:</b> {jointBox.kabel_odc?.nama_kabel || '-'}<br />
                     {jointBox.odc && (
                       <>
@@ -1364,6 +1377,7 @@ const MappingPage: React.FC = () => {
                             latitude: String(jointBox.lokasi.latitude),
                             longitude: String(jointBox.lokasi.longitude),
                             nama_joint_box: jointBox.nama_joint_box,
+                            deskripsi_joint_box: jointBox.deskripsi || '',
                             kabel_odc_id: jointBox.kabel_odc?.id?.toString(),
                             odc_id: jointBox.odc_id?.toString(),
                             odc_2_id: jointBox.odc_2_id?.toString(),
