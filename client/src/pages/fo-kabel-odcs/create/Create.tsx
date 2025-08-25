@@ -154,6 +154,9 @@ export default function Create() {
                         errors={errors}
                         odcs={odcs}
                         mode="create"
+                        existingTubes={[]}
+                        onCoreDelete={() => {}}
+                        onCoreAdd={() => {}}
                     />
                 </form>
                 {isBusy && <Spinner />}

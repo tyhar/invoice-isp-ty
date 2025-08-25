@@ -68,6 +68,7 @@ export default function Edit() {
 
                 // Invalidate related queries
                 queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
+                navigate('/fo-lokasis');
             })
             .catch((error) => {
                 if (error.response?.status === 422) {

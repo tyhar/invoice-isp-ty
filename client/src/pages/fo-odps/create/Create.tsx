@@ -60,6 +60,12 @@ export default function Create() {
   const [cores, setCores] = useState<CoreOption[]>([]);
   const [errors, setErrors] = useState<ValidationBag>();
   const [isBusy, setIsBusy] = useState(false);
+  // per-field loading flags
+  const [lokasisLoading, setLokasisLoading] = useState(true);
+  const [kabelOdcsLoading, setKabelOdcsLoading] = useState(true);
+  const [kabelTubesLoading, setKabelTubesLoading] = useState(true);
+  const [coresLoading, setCoresLoading] = useState(true);
+  const [odcsLoading, setOdcsLoading] = useState(true);
 
   useEffect(() => {
     // Fetch Lokasi options
@@ -68,8 +74,9 @@ export default function Create() {
         setLokasis(
           res.data.data.map((l: any) => ({ id: l.id, nama_lokasi: l.nama_lokasi }))
         );
+        setLokasisLoading(false);
       })
-      .catch(() => toast.error('error refresh page'));
+      .catch(() => { toast.error('error refresh page'); setLokasisLoading(false); });
 
     // Fetch Kabel ODCs
     request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250'))
@@ -82,8 +89,10 @@ export default function Create() {
             odcs: k.odcs || [], // <-- add this
           }))
         );
+        setKabelOdcsLoading(false);
+        setOdcsLoading(false);
       })
-      .catch(() => toast.error('error refresh page'));
+      .catch(() => { toast.error('error refresh page'); setKabelOdcsLoading(false); setOdcsLoading(false); });
 
     // Fetch Kabel Tubes
     request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=250'))
@@ -96,8 +105,9 @@ export default function Create() {
             deskripsi: t.deskripsi,
           }))
         );
+        setKabelTubesLoading(false);
       })
-      .catch(() => toast.error('error refresh page'));
+      .catch(() => { toast.error('error refresh page'); setKabelTubesLoading(false); });
 
     // Fetch Core options
     request('GET', endpoint('/api/v1/fo-kabel-core-odcs?per_page=250&status=active'))
@@ -113,8 +123,9 @@ export default function Create() {
             deskripsi: c.deskripsi,
           }))
         );
+        setCoresLoading(false);
       })
-      .catch(() => toast.error('error refresh page'));
+      .catch(() => { toast.error('error refresh page'); setCoresLoading(false); });
   }, []);
 
   const handleSave = (e: FormEvent) => {
@@ -207,6 +218,11 @@ export default function Create() {
             kabelTubes={kabelTubes}
             cores={cores}
             errors={errors}
+            lokasisLoading={lokasisLoading}
+            kabelOdcsLoading={kabelOdcsLoading}
+            kabelTubesLoading={kabelTubesLoading}
+            coresLoading={coresLoading}
+            odcsLoading={odcsLoading}
           />
         </form>
         {isBusy && <Spinner />}

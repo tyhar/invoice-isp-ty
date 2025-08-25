@@ -67,6 +67,11 @@ export default function Create() {
     const [kabelOdcs, setKabelOdcs] = useState<KabelOdcOption[]>([]);
     const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [odpss, setOdpss] = useState<OdpOption[]>([]);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [kabelOdcsLoading, setKabelOdcsLoading] = useState(true);
+    const [odcsLoading, setOdcsLoading] = useState(true);
+    const [odpsLoading, setOdpsLoading] = useState(true);
 
     useEffect(() => {
         // Fetch all required options
@@ -81,24 +86,34 @@ export default function Create() {
                 id: String(l.id),
                 nama_lokasi: l.nama_lokasi
             })));
+            setLokasisLoading(false);
             setKabelOdcs(kabelRes.data.data.map((k: any) => ({
                 id: String(k.id),
                 nama_kabel: k.nama_kabel
             })));
+            setKabelOdcsLoading(false);
             setOdcs(odcRes.data.data.map((o: any) => ({
                 id: String(o.id),
                 nama_odc: o.nama_odc,
                 lokasi_name: o.lokasi?.nama_lokasi,
                 kabel_odc_id: o.kabel_odc_id ? String(o.kabel_odc_id) : undefined,
             })));
+            setOdcsLoading(false);
             setOdpss(odpRes.data.data.map((p: any) => ({
                 id: String(p.id),
                 nama_odp: p.nama_odp,
                 lokasi_name: p.lokasi?.nama_lokasi,
                 odc_id: p.odc_id ? String(p.odc_id) : undefined,
             })));
+            setOdpsLoading(false);
         })
-        .catch(() => toast.error('error refresh page'));
+        .catch(() => {
+            toast.error('error refresh page');
+            setLokasisLoading(false);
+            setKabelOdcsLoading(false);
+            setOdcsLoading(false);
+            setOdpsLoading(false);
+        });
     }, []);
 
     const postJointBox = (lokasi_id: string) => {
@@ -176,6 +191,10 @@ export default function Create() {
                         kabelOdcs={kabelOdcs}
                         odcs={odcs}
                         odpss={odpss}
+                        lokasisLoading={lokasisLoading}
+                        kabelOdcsLoading={kabelOdcsLoading}
+                        odcsLoading={odcsLoading}
+                        odpsLoading={odpsLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

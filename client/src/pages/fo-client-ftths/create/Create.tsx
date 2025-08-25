@@ -38,6 +38,10 @@ export default function Create() {
     const [lokasis, setLokasis] = useState<any[]>([]);
     const [odps, setOdps] = useState<any[]>([]);
     const [clients, setClients] = useState<any[]>([]);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [odpsLoading, setOdpsLoading] = useState(true);
+    const [clientsLoading, setClientsLoading] = useState(true);
 
     useEffect(() => {
         setOptionsLoading(true);
@@ -56,18 +60,21 @@ export default function Create() {
                         nama_lokasi: l.nama_lokasi,
                     }))
                 );
+                setLokasisLoading(false);
                 setOdps(
                     odpRes.data.data.map((o: any) => ({
                         id: o.id,
                         nama_odp: o.nama_odp,
                     }))
                 );
+                setOdpsLoading(false);
                 setClients(
                     clientRes.data.data.map((c: any) => ({
                         id: c.id,
                         name: c.name,
                     }))
                 );
+                setClientsLoading(false);
             })
             .finally(() => setOptionsLoading(false));
     }, []);
@@ -159,6 +166,9 @@ export default function Create() {
                         odps={odps}
                         clients={clients}
                         isEdit={false}
+                        lokasisLoading={lokasisLoading}
+                        odpsLoading={odpsLoading}
+                        clientsLoading={clientsLoading}
                     />
                 </form>
                 {(loading || optionsLoading) && <Spinner />}

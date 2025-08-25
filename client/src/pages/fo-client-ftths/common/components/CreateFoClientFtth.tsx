@@ -2,7 +2,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { InputField, SelectField, Checkbox } from '$app/components/forms';
+import { InputField, Checkbox } from '$app/components/forms';
+import Select from 'react-select';
 
 export interface FoClientFtthFormValues {
     create_new_lokasi: boolean;
@@ -39,6 +40,10 @@ interface Props {
     odps: OdpOption[];
     clients: Option[];
     isEdit?: boolean;
+    // Loading flags per field
+    lokasisLoading?: boolean;
+    odpsLoading?: boolean;
+    clientsLoading?: boolean;
 }
 
 export function CreateFoClientFtth({
@@ -49,6 +54,9 @@ export function CreateFoClientFtth({
     odps,
     clients,
     isEdit,
+    lokasisLoading = false,
+    odpsLoading = false,
+    clientsLoading = false,
 }: Props) {
     const [t] = useTranslation();
     const onChange = <K extends keyof FoClientFtthFormValues>(
@@ -125,19 +133,26 @@ export function CreateFoClientFtth({
                 </>
             ) : (
                 <Element leftSide={t('Select Lokasi')} required>
-                    <SelectField
-                        required
-                        value={values.lokasi_id}
-                        onValueChange={(v) => onChange('lokasi_id', v)}
-                        errorMessage={errors?.errors.lokasi_id}
-                    >
-                        <option value="">{t('select lokasi')}</option>
-                        {lokasis.map((l) => (
-                            <option key={l.id} value={l.id.toString()}>
-                                {l.nama_lokasi}
-                            </option>
-                        ))}
-                    </SelectField>
+                    <Select
+                        name="lokasi_id"
+                        options={lokasis.map((l) => ({
+                            value: l.id.toString(),
+                            label: l.nama_lokasi
+                        }))}
+                        value={lokasis.map((l) => ({
+                            value: l.id.toString(),
+                            label: l.nama_lokasi
+                        })).find(option => option.value === values.lokasi_id)}
+                        onChange={(option) => onChange('lokasi_id', option ? option.value : '')}
+                        placeholder={lokasisLoading ? t('Loading locations...') : t('Search and select location...')}
+                        isClearable
+                        className="basic-single"
+                        classNamePrefix="select"
+                        isLoading={lokasisLoading}
+                    />
+                    {errors?.errors.lokasi_id && (
+                        <p className="text-red-500 text-xs mt-1">{errors.errors.lokasi_id}</p>
+                    )}
                 </Element>
             )}
 
@@ -154,36 +169,49 @@ export function CreateFoClientFtth({
             </div>
 
             <Element leftSide={t('Select ODP')} required>
-                <SelectField
-                    required
-                    value={values.odp_id}
-                    onValueChange={(v) => onChange('odp_id', v)}
-                    errorMessage={errors?.errors.odp_id}
-                >
-                    <option value="">{t('select odp')}</option>
-                    {odps.map((o) => (
-                        <option key={o.id} value={o.id.toString()}>
-                            {o.nama_odp}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="odp_id"
+                    options={odps.map((o) => ({
+                        value: o.id.toString(),
+                        label: o.nama_odp
+                    }))}
+                    value={odps.map((o) => ({
+                        value: o.id.toString(),
+                        label: o.nama_odp
+                    })).find(option => option.value === values.odp_id)}
+                    onChange={(option) => onChange('odp_id', option ? option.value : '')}
+                    placeholder={odpsLoading ? t('Loading ODPs...') : t('Search and select ODP...')}
+                    isClearable
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isLoading={odpsLoading}
+                />
+                {errors?.errors.odp_id && (
+                    <p className="text-red-500 text-xs mt-1">{errors.errors.odp_id}</p>
+                )}
             </Element>
 
             <Element leftSide={t('Client')}>
-                <SelectField
-                    value={values.client_id}
-                    onValueChange={(v) => onChange('client_id', v)}
-                    errorMessage={errors?.errors.client_id}
-                >
-                    <option value="">
-                        {t('select client') || 'Select a client (optional)'}
-                    </option>
-                    {clients.map((c) => (
-                        <option key={c.id} value={c.id.toString()}>
-                            {c.name}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="client_id"
+                    options={clients.map((c) => ({
+                        value: c.id.toString(),
+                        label: c.name
+                    }))}
+                    value={clients.map((c) => ({
+                        value: c.id.toString(),
+                        label: c.name
+                    })).find(option => option.value === values.client_id)}
+                    onChange={(option) => onChange('client_id', option ? option.value : '')}
+                    placeholder={clientsLoading ? t('Loading clients...') : t('Search and select client (optional)...')}
+                    isClearable
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isLoading={clientsLoading}
+                />
+                {errors?.errors.client_id && (
+                    <p className="text-red-500 text-xs mt-1">{errors.errors.client_id}</p>
+                )}
             </Element>
 
             <Element leftSide={t('Nama Client')}>

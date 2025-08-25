@@ -30,6 +30,8 @@ export default function FoClientFtths() {
                 customActions={useFoClientFtthActions()}
                 withoutDefaultBulkActions={true}
                 queryIdentificator="fo-client-ftths"
+                // Disable sorting in frontend (using sort from backend default which is newest first)
+                withoutSortQueryParameter={true}
             />
         </Default>
     );

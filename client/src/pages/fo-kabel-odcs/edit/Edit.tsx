@@ -45,6 +45,17 @@ export default function Edit() {
         jumlah_core_in_tube: 1,
         core_colors: [], // initialize empty array
     });
+    const [existingTubes, setExistingTubes] = useState<Array<{
+        id: number;
+        warna_tube: string;
+        deskripsi?: string;
+        cores: Array<{
+            id: number;
+            warna_core: string;
+            deskripsi?: string;
+            kabel_tube_odc_id: number;
+        }>;
+    }>>([]);
     const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
@@ -63,14 +74,27 @@ export default function Edit() {
             request('GET', endpoint(`/api/v1/fo-kabel-odcs/${id}`)),
             request('GET', endpoint('/api/v1/fo-odcs?per_page=250&status=active')),
             request('GET', endpoint(`/api/v1/fo-kabel-core-odcs?per_page=250&status=active`)),
+            request('GET', endpoint(`/api/v1/fo-kabel-tube-odcs?per_page=250&status=active`)),
         ])
-            .then(([resKabel, resOdc, resCores]: any) => {
+            .then(([resKabel, resOdc, resCores, resTubes]: any) => {
                 const kabel = resKabel.data.data;
                 const existingCores = resCores.data.data.filter((core: any) => {
                     // Check if this core belongs to any tube of this kabel
                     return kabel.tube_colors.some((tube: any) => tube.id === core.kabel_tube_odc_id);
                 });
+                const existingTubesData = resTubes.data.data.filter((tube: any) =>
+                    tube.kabel_odc_id === kabel.id
+                );
 
+                // Organize cores by tube
+                const tubesWithCores = existingTubesData.map((tube: any) => ({
+                    id: tube.id,
+                    warna_tube: tube.warna_tube,
+                    deskripsi: tube.deskripsi,
+                    cores: existingCores.filter((core: any) => core.kabel_tube_odc_id === tube.id)
+                }));
+
+                setExistingTubes(tubesWithCores);
                 setForm({
                     nama_kabel: kabel.nama_kabel,
                     deskripsi: kabel.deskripsi ?? '',
@@ -80,7 +104,7 @@ export default function Edit() {
                         (t: any) => t.warna_tube
                     ),
                     jumlah_core_in_tube: kabel.jumlah_core_in_tube,
-                    core_colors: existingCores.map((core: any) => core.warna_core), // populate with existing cores
+                    core_colors: [...new Set(existingCores.map((core: any) => core.warna_core))] as string[], // FIX: Use unique core colors only
                 });
                 setOdcs(
                     resOdc.data.data.map((o: any) => ({
@@ -111,6 +135,33 @@ export default function Edit() {
             </div>
         );
     }
+
+    const handleCoreDelete = async (coreId: number) => {
+        try {
+            await request('DELETE', endpoint(`/api/v1/fo-kabel-core-odcs/${coreId}`));
+            // Refresh the data after deletion
+            window.location.reload();
+        } catch (error) {
+            toast.error('Failed to delete core');
+        }
+    };
+
+    const handleCoreAdd = async (tubeId: number, warnaCore: string) => {
+        try {
+            const coreData = {
+                kabel_tube_odc_id: tubeId,
+                warna_core: warnaCore,
+                deskripsi: `Core ${warnaCore} for tube ${tubeId}`,
+                status: 'active'
+            };
+
+            await request('POST', endpoint('/api/v1/fo-kabel-core-odcs'), coreData);
+            // Refresh the data after addition
+            window.location.reload();
+        } catch (error) {
+            toast.error('Failed to add core');
+        }
+    };
 
     const handleSave = (e: FormEvent) => {
         e.preventDefault();
@@ -237,6 +288,9 @@ export default function Edit() {
                         errors={errors}
                         odcs={odcs}
                         mode="edit"
+                        existingTubes={existingTubes}
+                        onCoreDelete={handleCoreDelete}
+                        onCoreAdd={handleCoreAdd}
                     />
                 </form>
                 {isBusy && <Spinner />}

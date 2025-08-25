@@ -55,6 +55,11 @@ export default function Edit() {
     const [odcs, setOdcs] = useState<OdcOption[]>([]);
     const [odpss, setOdpss] = useState<OdpOption[]>([]);
     const [loading, setLoading] = useState(true);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [kabelOdcsLoading, setKabelOdcsLoading] = useState(true);
+    const [odcsLoading, setOdcsLoading] = useState(true);
+    const [odpsLoading, setOdpsLoading] = useState(true);
 
     // Fetch existing record and options
     useEffect(() => {
@@ -95,12 +100,14 @@ export default function Edit() {
                     lokasisArr = [{ id: lokasi_id, nama_lokasi: data.lokasi.nama_lokasi }, ...lokasisArr];
                 }
                 setLokasis(lokasisArr);
+                setLokasisLoading(false);
 
                 let kabelArr = (kabelRes.data.data as any[]).map((k: any) => ({ id: String(k.id), nama_kabel: k.nama_kabel }));
                 if (kabel_odc_id && !kabelArr.some((k: any) => k.id === kabel_odc_id) && data.kabel_odc) {
                     kabelArr = [{ id: kabel_odc_id, nama_kabel: data.kabel_odc.nama_kabel }, ...kabelArr];
                 }
                 setKabelOdcs(kabelArr);
+                setKabelOdcsLoading(false);
 
                 let odcsArr = (odcRes.data.data as any[]).map((o: any) => ({
                     id: String(o.id),
@@ -112,6 +119,7 @@ export default function Edit() {
                     odcsArr = [{ id: odc_id, nama_odc: data.odc.nama_odc, lokasi_name: data.odc.lokasi?.nama_lokasi, kabel_odc_id: data.kabel_odc?.id ? String(data.kabel_odc.id) : undefined }, ...odcsArr];
                 }
                 setOdcs(odcsArr);
+                setOdcsLoading(false);
 
                 let odpsArr = (odpRes.data.data as any[]).map((p: any) => ({
                     id: String(p.id),
@@ -123,6 +131,7 @@ export default function Edit() {
                     odpsArr = [{ id: odp_id, nama_odp: data.odp.nama_odp, lokasi_name: data.odp.lokasi?.nama_lokasi, odc_id: data.odc_id ? String(data.odc_id) : undefined }, ...odpsArr];
                 }
                 setOdpss(odpsArr);
+                setOdpsLoading(false);
             })
             .catch(() => {
                 toast.error('error refresh page');
@@ -235,6 +244,10 @@ export default function Edit() {
                         kabelOdcs={kabelOdcs}
                         odcs={odcs}
                         odpss={odpss}
+                        lokasisLoading={lokasisLoading}
+                        kabelOdcsLoading={kabelOdcsLoading}
+                        odcsLoading={odcsLoading}
+                        odpsLoading={odpsLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

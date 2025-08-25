@@ -17,7 +17,7 @@ import { Polyline } from 'react-leaflet';
 import { useNavigate } from 'react-router-dom';
 import ImportedAddMarkerForm from './components/AddMarkerForm';
 
-type FormMode = 'client' | 'odp' | 'odc' | null;
+type FormMode = 'client' | 'odp' | 'odc' | 'joint_box' | null;
 
 interface MarkerData {
   id: number;
@@ -41,6 +41,7 @@ interface MarkerData {
   // joint box specific
   nama_joint_box?: string;
   odc_id?: string;
+  odc_2_id?: string;
 }
 
 
@@ -54,7 +55,7 @@ const MappingPage: React.FC = () => {
   const [odps, setOdps] = useState<any[]>([]);
   const [odcs, setOdcs] = useState<any[]>([]);
   const [jointBoxes, setJointBoxes] = useState<any[]>([]);
-  const [editData, setEditData] = useState<{ mode: 'client' | 'odp' | 'odc'; data: MarkerData; } | null>(null);
+  const [editData, setEditData] = useState<{ mode: 'client' | 'odp' | 'odc' | 'joint_box'; data: MarkerData; } | null>(null);
   const [t] = useTranslation();
   const [selectedProvinsi, setSelectedProvinsi] = useState('');
   const [selectedKota, setSelectedKota] = useState('');
@@ -331,7 +332,7 @@ const MappingPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (mode: 'client' | 'odp' | 'odc', id: number, lokasi_id: number) => {
+  const handleDelete = async (mode: 'client' | 'odp' | 'odc' | 'joint_box', id: number, lokasi_id: number) => {
     if (!window.confirm('Yakin ingin menghapus data ini?')) return;
 
     try {
@@ -345,6 +346,8 @@ const MappingPage: React.FC = () => {
         await axios.delete(`${api}/api/v1/fo-odps/${id}`, headers);
       } else if (mode === 'odc') {
         await axios.delete(`${api}/api/v1/fo-odcs/${id}`, headers);
+      } else if (mode === 'joint_box') {
+        await axios.delete(`${api}/api/v1/fo-joint-boxes/${id}`, headers);
       }
 
       // Hapus lokasi terkait
@@ -569,6 +572,12 @@ const MappingPage: React.FC = () => {
             Add Client
           </button>
           <button
+            className="bg-amber-600 text-white px-4 py-2 rounded"
+            onClick={() => setFormMode('joint_box' as FormMode)}
+          >
+            Add Joint Box
+          </button>
+          <button
             className="bg-gray-600 text-white px-4 py-2 rounded"
             onClick={() => setShowCenterModal(true)}
           >
@@ -746,7 +755,8 @@ const MappingPage: React.FC = () => {
                   <Popup>
                     <div className="text-base">
                       <strong>CLIENT</strong><br />
-                      <b>Nama Client:</b> {client.nama_client || '-'}<br />
+                      <b>Nama Client FTTH:</b> {client.nama_client || '-'}<br />
+                      <b>Nama Client:</b> {client.client?.name || '-'}<br />
                       <b>Alamat:</b> {client.alamat || '-'}<br />
                       <b>ODC:</b> {client.odc?.nama_odc || '-'}<br />
                       <b>ODP:</b> {client.odp?.nama_odp || '-'}<br />
@@ -936,13 +946,29 @@ const MappingPage: React.FC = () => {
                       <div className="mt-2 flex gap-2">
                         <button
                           className="bg-yellow-400 px-2 py-1 rounded text-xs"
-                          onClick={() => navigate(`/fo-joint-boxes/${jointBox.id}/edit`)}
+                          onClick={() => setEditData({
+                            mode: 'joint_box',
+                            data: {
+                              id: jointBox.id,
+                              lokasi_id: jointBox.lokasi.id,
+                              nama_lokasi: jointBox.lokasi.nama_lokasi,
+                              deskripsi: jointBox.lokasi.deskripsi,
+                              latitude: String(jointBox.lokasi.latitude),
+                              longitude: String(jointBox.lokasi.longitude),
+                              nama_joint_box: jointBox.nama_joint_box,
+                              kabel_odc_id: jointBox.kabel_odc?.id?.toString(),
+                              odc_id: jointBox.odc_id?.toString(),
+                              odc_2_id: jointBox.odc_2_id?.toString(),
+                              odp_id: jointBox.odp_id?.toString(),
+                              client_id: 0,
+                            }
+                          })}
                         >
                           Edit
                         </button>
                         <button
                           className="bg-red-500 text-white px-2 py-1 rounded text-xs"
-                          onClick={() => handleDelete('jointbox' as any, jointBox.id, jointBox.lokasi.id)}
+                          onClick={() => handleDelete('joint_box', jointBox.id, jointBox.lokasi.id)}
                         >
                           Delete
                         </button>
@@ -1325,6 +1351,36 @@ const MappingPage: React.FC = () => {
                         <b>Connected ODP:</b> {jointBox.odp.nama_odp}<br />
                       </>
                     )}
+                    <div className="mt-2 flex gap-2">
+                      <button
+                        className="bg-yellow-400 px-2 py-1 rounded text-xs"
+                        onClick={() => setEditData({
+                          mode: 'joint_box',
+                          data: {
+                            id: jointBox.id,
+                            lokasi_id: jointBox.lokasi.id,
+                            nama_lokasi: jointBox.lokasi.nama_lokasi,
+                            deskripsi: jointBox.lokasi.deskripsi,
+                            latitude: String(jointBox.lokasi.latitude),
+                            longitude: String(jointBox.lokasi.longitude),
+                            nama_joint_box: jointBox.nama_joint_box,
+                            kabel_odc_id: jointBox.kabel_odc?.id?.toString(),
+                            odc_id: jointBox.odc_id?.toString(),
+                            odc_2_id: jointBox.odc_2_id?.toString(),
+                            odp_id: jointBox.odp_id?.toString(),
+                            client_id: 0,
+                          }
+                        })}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="bg-red-500 text-white px-2 py-1 rounded text-xs"
+                        onClick={() => handleDelete('joint_box', jointBox.id, jointBox.lokasi.id)}
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </Popup>
               </Marker>
@@ -1342,7 +1398,7 @@ const MappingPage: React.FC = () => {
           {showKabelModal && (
             <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-50">
               <div className="bg-white rounded-lg p-6 w-80 shadow-lg z-[1001]">
-                <h2 className="text-lg font-semibold mb-4 text-center">Pilih Jenis Kabel</h2>
+                <h2 className="text-lg font-semibold mb-4 text-center">Pilih Opsi Manajemen</h2>
                 <div className="flex flex-col gap-2">
                   <button
                     className="bg-blue-500 text-white px-4 py-2 rounded"
@@ -1351,7 +1407,7 @@ const MappingPage: React.FC = () => {
                       setShowKabelModal(false);
                     }}
                   >
-                    Kabel
+                    Manajemen Kabel
                   </button>
                   <button
                     className="bg-purple-600 text-white px-4 py-2 rounded"
@@ -1360,7 +1416,7 @@ const MappingPage: React.FC = () => {
                       setShowKabelModal(false);
                     }}
                   >
-                    Kabel Tube
+                    Manajemen Tube Kabel
                   </button>
                   <button
                     className="bg-green-500 text-white px-4 py-2 rounded"
@@ -1369,7 +1425,7 @@ const MappingPage: React.FC = () => {
                       setShowKabelModal(false);
                     }}
                   >
-                    Kabel Core
+                    Manajemen Core Kabel
                   </button>
                   <button
                     className="mt-2 text-gray-600 hover:underline"

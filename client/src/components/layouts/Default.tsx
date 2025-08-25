@@ -352,16 +352,19 @@ export function Default(props: Props) {
             current: location.pathname.startsWith('/mapping'),
             visible:
                 enabled(ModuleBitmask.Vendors) &&
-                hasPermission('manage_mapping'),
-            rightButton: {
-                icon: PlusCircle,
-                to: '/mapping',
-                label: t('mapping'),
-                visible: hasPermission('manage_mapping')||
-                hasPermission('view_client') ||
-                hasPermission('create_client') ||
-                hasPermission('edit_client'),
-            },
+                (hasPermission('manage_mapping') ||
+                 hasPermission('view_client') ||
+                 hasPermission('create_client') ||
+                 hasPermission('edit_client')),
+            // rightButton: {
+            //     icon: PlusCircle,
+            //     to: '/mapping',
+            //     label: t('mapping'),
+            //     visible: hasPermission('manage_mapping')||
+            //     hasPermission('view_client') ||
+            //     hasPermission('create_client') ||
+            //     hasPermission('edit_client'),
+            // },
         },
         {
             name: t('Fiber Optics'),

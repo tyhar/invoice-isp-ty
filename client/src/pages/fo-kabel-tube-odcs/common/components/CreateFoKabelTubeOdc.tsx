@@ -5,10 +5,11 @@ import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import {
     InputField,
-    SelectField,
     Checkbox,
 } from '$app/components/forms';
+import Select from 'react-select';
 import { CoreColorPicker } from './CoreColorPicker';
+import { SingleTubeColorPicker } from './SingleTubeColorPicker';
 
 interface FoKabelTubeOdcCreate {
     kabel_odc_id: number;
@@ -29,24 +30,12 @@ interface Props {
     errors?: ValidationBag;
     odcs: KabelOdcOption[];
     mode?: 'create' | 'edit';
+    odcsLoading?: boolean;
 }
 
-const TUBE_COLORS = [
-    'biru',
-    'jingga',
-    'hijau',
-    'coklat',
-    'abu_abu',
-    'putih',
-    'merah',
-    'hitam',
-    'kuning',
-    'ungu',
-    'merah_muda',
-    'aqua',
-];
+//
 
-export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'create' }: Props) {
+export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'create', odcsLoading = false }: Props) {
     const [t] = useTranslation();
     const [selectedKabelOdc, setSelectedKabelOdc] = useState<KabelOdcOption | null>(null);
     const [showBatchCores, setShowBatchCores] = useState(true); // Default to true for create mode
@@ -109,35 +98,36 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
             </div>
 
             <Element leftSide={t('Select Kabel')} required>
-                <SelectField
-                    required
-                    value={form.kabel_odc_id || ''}
-                    onValueChange={(v) => change('kabel_odc_id', parseInt(v))}
-                    errorMessage={errors?.errors.kabel_odc_id}
-                >
-                    <option value="">{t('select kabel odc')}</option>
-                    {odcs.map((o) => (
-                        <option key={o.id} value={o.id}>
-                            {o.nama_kabel}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="kabel_odc_id"
+                    options={odcs.map((o) => ({
+                        value: o.id.toString(),
+                        label: o.nama_kabel,
+                    }))}
+                    value={odcs.map((o) => ({
+                        value: o.id.toString(),
+                        label: o.nama_kabel,
+                    })).find((option) => option.value === form.kabel_odc_id?.toString())}
+                    onChange={(option) => change('kabel_odc_id', option ? parseInt(option.value) : 0)}
+                    placeholder={odcsLoading ? t('Loading cables...') : t('Search and select cable ODC...')}
+                    isClearable
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isLoading={odcsLoading}
+                />
+                {errors?.errors.kabel_odc_id && (
+                    <p className="text-red-500 text-xs mt-1">{errors.errors.kabel_odc_id}</p>
+                )}
             </Element>
 
-            <Element leftSide={t('Warna Tube')} required>
-                <SelectField
-                    required
+            <Element leftSide={t('Select Warna Tube')} required>
+                <SingleTubeColorPicker
                     value={form.warna_tube}
-                    onValueChange={(v) => change('warna_tube', v)}
-                    errorMessage={errors?.errors.warna_tube}
-                >
-                    <option value="">{t('select warna tube')}</option>
-                    {TUBE_COLORS.map((color) => (
-                        <option key={color} value={color}>
-                            {t(color)}
-                        </option>
-                    ))}
-                </SelectField>
+                    onChange={(color) => change('warna_tube', color)}
+                />
+                {errors?.errors.warna_tube && (
+                    <p className="text-red-500 text-xs mt-1">{errors.errors.warna_tube}</p>
+                )}
             </Element>
 
             <Element leftSide={t('Deskripsi')}>
@@ -169,7 +159,7 @@ export function CreateFoKabelTubeOdc({ form, setForm, errors, odcs, mode = 'crea
             </Element>
 
             {showBatchCores && (
-                <Element leftSide={t('Core Colors')}>
+                <Element leftSide={t('Select Core Colors')}>
                     <CoreColorPicker
                         value={form.core_colors}
                         onChange={(colors) => change('core_colors', colors)}

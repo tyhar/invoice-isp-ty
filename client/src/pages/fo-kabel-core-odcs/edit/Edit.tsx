@@ -10,7 +10,6 @@ import { Spinner } from '$app/components/Spinner';
 import { toast } from '$app/common/helpers/toast/toast';
 import { request } from '$app/common/helpers/request';
 import { endpoint } from '$app/common/helpers';
-import { route } from '$app/common/helpers/route';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { GenericSingleResourceResponse } from '$app/common/interfaces/generic-api-response';
@@ -46,6 +45,7 @@ export default function Edit() {
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
     const [selectedCable, setSelectedCable] = useState<number>(0);
+    const [tubesLoading, setTubesLoading] = useState(true);
 
     useEffect(() => {
         Promise.all([
@@ -74,6 +74,7 @@ export default function Edit() {
                     deskripsi: o.deskripsi,
                 }));
                 setTubes(list);
+                setTubesLoading(false);
 
                 const selected = list.find(
                     (l) => l.id === data.kabel_tube_odc_id
@@ -96,9 +97,7 @@ export default function Edit() {
         request('PUT', endpoint(`/api/v1/fo-kabel-core-odcs/${id}`), form)
             .then(() => {
                 toast.success('update core kabel');
-                navigate(route('/fo-kabel-core-odcs/:id/edit', { id }), {
-                    state: { toast: 'updated core odc' },
-                });
+                navigate('/fo-kabel-core-odcs');
             })
             .catch((error) => {
                 if (error.response?.status === 422) {
@@ -137,6 +136,7 @@ export default function Edit() {
                         tubes={tubes}
                         selectedCable={selectedCable}
                         setSelectedCable={setSelectedCable}
+                        tubesLoading={tubesLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

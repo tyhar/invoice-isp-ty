@@ -49,6 +49,7 @@ export default function Create() {
     const [odcs, setOdcs] = useState<KabelOdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
+    const [odcsLoading, setOdcsLoading] = useState(true);
 
     useEffect(() => {
         request('GET', endpoint('/api/v1/fo-kabel-odcs?per_page=250&status=active')).then((res) => {
@@ -59,7 +60,8 @@ export default function Create() {
                     jumlah_core_in_tube: o.jumlah_core_in_tube,
                 }))
             );
-        });
+            setOdcsLoading(false);
+        }).catch(() => { setOdcsLoading(false); });
     }, []);
 
     const handleSave = (e: FormEvent) => {
@@ -136,6 +138,7 @@ export default function Create() {
                         setForm={setForm}
                         errors={errors}
                         odcs={odcs}
+                        odcsLoading={odcsLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

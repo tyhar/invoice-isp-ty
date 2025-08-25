@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
 import { Element } from '$app/components/cards';
-import { InputField, SelectField, Checkbox } from '$app/components/forms';
+import { InputField, Checkbox } from '$app/components/forms';
+import Select from 'react-select';
 
 export interface FoOdcFormValues {
     create_new_lokasi: boolean;
@@ -66,9 +67,15 @@ interface Props {
     cores: CoreOption[]; // <-- available cores to select (optional)
     kabelTubes: TubeOption[]; // <-- available tubes for filtering cores
     errors?: ValidationBag;
+    // Loading flags for per-field spinners
+    lokasisLoading?: boolean;
+    kabelOdcsLoading?: boolean;
+    odcsLoading?: boolean;
+    coresLoading?: boolean;
+    kabelTubesLoading?: boolean;
 }
 
-export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores, kabelTubes, errors }: Props) {
+export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores, kabelTubes, errors, lokasisLoading = false, kabelOdcsLoading = false, odcsLoading = false, coresLoading = false, kabelTubesLoading = false }: Props) {
     const [t] = useTranslation();
     const onChange = <K extends keyof FoOdcFormValues>(field: K, value: FoOdcFormValues[K]) =>
         setValues((v) => ({ ...v, [field]: value }));
@@ -170,19 +177,33 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                 </>
             ) : (
                 <Element leftSide={t('Select Lokasi')} required>
-                    <SelectField
-                        required
-                        value={values.lokasi_id}
-                        onValueChange={(v) => onChange('lokasi_id', v)}
-                        errorMessage={errors?.errors.lokasi_id}
-                    >
-                        <option value="">{t('select lokasi')}</option>
-                        {lokasis.map((l) => (
-                            <option key={l.id} value={l.id.toString()}>
-                                {l.nama_lokasi}
-                            </option>
-                        ))}
-                    </SelectField>
+                    <Select
+                        name="lokasi_id"
+                        options={lokasis.map((l) => ({
+                            value: l.id.toString(),
+                            label: l.nama_lokasi,
+                        }))}
+                        onChange={(selected) => {
+                            const selectedOption = selected as { value: string; label: string } | null;
+                            onChange('lokasi_id', selectedOption ? selectedOption.value : '');
+                        }}
+                        value={lokasis
+                            .filter((l) => l.id.toString() === values.lokasi_id)
+                            .map((l) => ({
+                                value: l.id.toString(),
+                                label: l.nama_lokasi,
+                            }))[0] || null}
+                        className="w-full"
+                        placeholder={lokasisLoading ? t('Loading locations...') : t('Search and select location...')}
+                        isClearable
+                        isSearchable
+                        isLoading={lokasisLoading}
+                    />
+                    {errors?.errors.lokasi_id && (
+                        <div className="mt-1 text-xs text-red-600">
+                            {errors.errors.lokasi_id}
+                        </div>
+                    )}
                 </Element>
             )}
 
@@ -219,28 +240,43 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
             </Element>
 
             <Element leftSide={t('Tipe splitter')} required>
-                <SelectField
-                    required
-                    value={values.tipe_splitter}
-                    onValueChange={(v) => onChange('tipe_splitter', v)}
-                    errorMessage={errors?.errors.tipe_splitter}
-                >
-                    {['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128'].map(
-                        (opt) => (
-                            <option key={opt} value={opt}>
-                                {opt}
-                            </option>
-                        )
-                    )}
-                </SelectField>
+                <Select
+                    name="tipe_splitter"
+                    options={['1:2', '1:4', '1:8', '1:16', '1:32', '1:64', '1:128'].map((opt) => ({
+                        value: opt,
+                        label: opt,
+                    }))}
+                    onChange={(selected) => {
+                        const selectedOption = selected as { value: string; label: string } | null;
+                        onChange('tipe_splitter', selectedOption ? selectedOption.value : '');
+                    }}
+                    value={values.tipe_splitter ? {
+                        value: values.tipe_splitter,
+                        label: values.tipe_splitter,
+                    } : null}
+                    className="w-full"
+                    placeholder={t('Select splitter type...')}
+                    isClearable
+                    isSearchable
+                />
+                {errors?.errors.tipe_splitter && (
+                    <div className="mt-1 text-xs text-red-600">
+                        {errors.errors.tipe_splitter}
+                    </div>
+                )}
             </Element>
 
             <Element leftSide={t('Kabel')}>
-                <SelectField
-                    required
-                    value={values.kabel_odc_id}
-                    onValueChange={(v) => {
-                        onChange('kabel_odc_id', v);
+                <Select
+                    name="kabel_odc_id"
+                    options={kabelOdcs.map((k) => ({
+                        value: k.id.toString(),
+                        label: k.nama_kabel,
+                    }))}
+                    onChange={(selected) => {
+                        const selectedOption = selected as { value: string; label: string } | null;
+                        const newValue = selectedOption ? selectedOption.value : '';
+                        onChange('kabel_odc_id', newValue);
                         // Clear selected ODC when Kabel ODC changes
                         onChange('odc_id', '');
                         // Clear selected Core when Kabel ODC changes
@@ -248,48 +284,87 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
                         // Clear selected Tube when Kabel ODC changes
                         onChange('kabel_tube_odc_id', '');
                     }}
-                    errorMessage={errors?.errors.kabel_odc_id}
-                >
-                    <option value="">{t('Pilih Kabel')}</option>
-                    {kabelOdcs.map((k) => (
-                        <option key={k.id} value={k.id}>{k.nama_kabel}</option>
-                    ))}
-                </SelectField>
+                    value={kabelOdcs
+                        .filter((k) => k.id.toString() === values.kabel_odc_id)
+                        .map((k) => ({
+                            value: k.id.toString(),
+                            label: k.nama_kabel,
+                        }))[0] || null}
+                    className="w-full"
+                    placeholder={kabelOdcsLoading ? t('Loading cables...') : t('Select cable...')}
+                    isClearable
+                    isSearchable
+                    isLoading={kabelOdcsLoading}
+                />
+                {errors?.errors.kabel_odc_id && (
+                    <div className="mt-1 text-xs text-red-600">
+                        {errors.errors.kabel_odc_id}
+                    </div>
+                )}
             </Element>
 
             <Element leftSide={t('Kabel Tube')}>
-                <SelectField
-                    value={values.kabel_tube_odc_id}
-                    onValueChange={(v) => {
-                        onChange('kabel_tube_odc_id', v);
+                <Select
+                    name="kabel_tube_odc_id"
+                    options={filteredTubes.map((t) => ({
+                        value: t.id.toString(),
+                        label: `${t.warna_tube}${t.deskripsi ? ` - ${t.deskripsi}` : ''}`,
+                    }))}
+                    onChange={(selected) => {
+                        const selectedOption = selected as { value: string; label: string } | null;
+                        const newValue = selectedOption ? selectedOption.value : '';
+                        onChange('kabel_tube_odc_id', newValue);
                         // Reset core when tube changes
                         onChange('kabel_core_odc_id', '');
                     }}
-                    errorMessage={errors?.errors.kabel_tube_odc_id}
-                >
-                    <option value="">{t('Pilih Tube (Opsional)')}</option>
-                    {filteredTubes.map((t) => (
-                        <option key={t.id} value={t.id.toString()}>
-                            {t.warna_tube} {t.deskripsi ? `- ${t.deskripsi}` : ''}
-                        </option>
-                    ))}
-                </SelectField>
+                    value={filteredTubes
+                        .filter((t) => t.id.toString() === values.kabel_tube_odc_id)
+                        .map((t) => ({
+                            value: t.id.toString(),
+                            label: `${t.warna_tube}${t.deskripsi ? ` - ${t.deskripsi}` : ''}`,
+                        }))[0] || null}
+                    className="w-full"
+                    placeholder={kabelTubesLoading ? t('Loading tubes...') : t('Select tube (optional)...')}
+                    isClearable
+                    isSearchable
+                    isLoading={kabelTubesLoading}
+                />
+                {errors?.errors.kabel_tube_odc_id && (
+                    <div className="mt-1 text-xs text-red-600">
+                        {errors.errors.kabel_tube_odc_id}
+                    </div>
+                )}
             </Element>
 
             {/* Optional: Core that feeds this child ODC */}
             <Element leftSide={t('Kabel Core')}>
-                <SelectField
-                    value={values.kabel_core_odc_id}
-                    onValueChange={(v) => onChange('kabel_core_odc_id', v)}
-                    errorMessage={errors?.errors.kabel_core_odc_id}
-                >
-                    <option value="">{t('Pilih Core (Opsional)')}</option>
-                    {filteredCores.map((c) => (
-                        <option key={c.id} value={c.id.toString()}>
-                            {c.warna_core} {c.warna_tube ? `- Tube ${c.warna_tube}` : ''}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="kabel_core_odc_id"
+                    options={filteredCores.map((c) => ({
+                        value: c.id.toString(),
+                        label: `${c.warna_core}${c.warna_tube ? ` - Tube ${c.warna_tube}` : ''}`,
+                    }))}
+                    onChange={(selected) => {
+                        const selectedOption = selected as { value: string; label: string } | null;
+                        onChange('kabel_core_odc_id', selectedOption ? selectedOption.value : '');
+                    }}
+                    value={filteredCores
+                        .filter((c) => c.id.toString() === values.kabel_core_odc_id)
+                        .map((c) => ({
+                            value: c.id.toString(),
+                            label: `${c.warna_core}${c.warna_tube ? ` - Tube ${c.warna_tube}` : ''}`,
+                        }))[0] || null}
+                    className="w-full"
+                    placeholder={coresLoading ? t('Loading cores...') : t('Select core (optional)...')}
+                    isClearable
+                    isSearchable
+                    isLoading={coresLoading}
+                />
+                {errors?.errors.kabel_core_odc_id && (
+                    <div className="mt-1 text-xs text-red-600">
+                        {errors.errors.kabel_core_odc_id}
+                    </div>
+                )}
             </Element>
 
             {/* Section: Connection (full-width) */}
@@ -334,22 +409,38 @@ export function CreateFoOdc({ values, setValues, lokasis, kabelOdcs, odcs, cores
             {values.odc_connection_enabled && (
                 <>
                     <Element leftSide={t('Connected ODC')}>
-                        <SelectField
-                            value={values.odc_id}
-                            onValueChange={(v) => onChange('odc_id', v)}
-                            errorMessage={errors?.errors.odc_id}
-                        >
-                            <option value="">
-                                {values.kabel_odc_id && filteredOdcs.length === 0
+                        <Select
+                            name="odc_id"
+                            options={filteredOdcs.map((o) => ({
+                                value: o.id.toString(),
+                                label: `${o.nama_odc}${o.lokasi_name ? ` - ${o.lokasi_name}` : ''}`,
+                            }))}
+                            onChange={(selected) => {
+                                const selectedOption = selected as { value: string; label: string } | null;
+                                onChange('odc_id', selectedOption ? selectedOption.value : '');
+                            }}
+                            value={filteredOdcs
+                                .filter((o) => o.id.toString() === values.odc_id)
+                                .map((o) => ({
+                                    value: o.id.toString(),
+                                    label: `${o.nama_odc}${o.lokasi_name ? ` - ${o.lokasi_name}` : ''}`,
+                                }))[0] || null}
+                            className="w-full"
+                            placeholder={
+                                values.kabel_odc_id && filteredOdcs.length === 0
                                     ? t('No ODCs available for selected Kabel')
-                                    : t('Pilih ODC (Optional)')}
-                            </option>
-                            {filteredOdcs.map((o) => (
-                                <option key={o.id} value={o.id}>
-                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
+                                    : odcsLoading ? t('Loading ODCs...') : t('Select ODC (optional)...')
+                            }
+                            isClearable
+                            isSearchable
+                            isDisabled={Boolean(values.kabel_odc_id) && filteredOdcs.length === 0}
+                            isLoading={odcsLoading}
+                        />
+                        {errors?.errors.odc_id && (
+                            <div className="mt-1 text-xs text-red-600">
+                                {errors.errors.odc_id}
+                            </div>
+                        )}
                     </Element>
                 </>
             )}

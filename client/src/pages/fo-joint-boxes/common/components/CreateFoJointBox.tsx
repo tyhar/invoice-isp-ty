@@ -3,9 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Card } from '$app/components/cards';
 import { Element } from '$app/components/cards';
 import { InputField } from '$app/components/forms/InputField';
-import { SelectField } from '$app/components/forms/SelectField';
 import { Checkbox } from '$app/components/forms/Checkbox';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
+import Select from 'react-select';
 
 export interface FoJointBoxForm {
     create_new_lokasi: boolean;
@@ -56,28 +56,31 @@ interface Props {
     kabelOdcs: KabelOdcOption[];
     odcs: OdcOption[];
     odpss: OdpOption[];
+    // Loading flags per field
+    lokasisLoading?: boolean;
+    kabelOdcsLoading?: boolean;
+    odcsLoading?: boolean;
+    odpsLoading?: boolean;
 }
 
-export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, kabelOdcs, odcs, odpss }: Props) {
+export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, kabelOdcs, odcs, odpss, lokasisLoading = false, kabelOdcsLoading = false, odcsLoading = false, odpsLoading = false }: Props) {
     const [t] = useTranslation();
-    // Determine connection type and checkbox states
+    // Determine connection type and enable/disable state
     const [selectedConnectionType, setSelectedConnectionType] = useState<'odc-odc' | 'odc-odp' | ''>('');
-    const [showOdcToOdcFields, setShowOdcToOdcFields] = useState(false);
-    const [showOdcToOdpFields, setShowOdcToOdpFields] = useState(false);
+    const [connectionEnabled, setConnectionEnabled] = useState(false);
 
     // Initialize state based on existing form data (for editing)
     useEffect(() => {
         // Determine connection type from existing data
         if (form.odc_2_id) {
             setSelectedConnectionType('odc-odc');
-            setShowOdcToOdcFields(true);
+            setConnectionEnabled(true);
         } else if (form.odp_id) {
             setSelectedConnectionType('odc-odp');
-            setShowOdcToOdpFields(true);
+            setConnectionEnabled(true);
         } else {
             setSelectedConnectionType('');
-            setShowOdcToOdcFields(false);
-            setShowOdcToOdpFields(false);
+            setConnectionEnabled(false);
         }
     }, [form.odc_2_id, form.odp_id]);
 
@@ -95,48 +98,24 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
 
     const handleConnectionTypeChange = (type: 'odc-odc' | 'odc-odp' | '') => {
         setSelectedConnectionType(type);
-        // Clear all connection fields and checkbox states when changing type
+        // Clear all connection fields when changing type
         setForm(f => ({
             ...f,
             odc_id: '',
             odc_2_id: '',
             odp_id: ''
         }));
-        setShowOdcToOdcFields(false);
-        setShowOdcToOdpFields(false);
     };
 
-    const handleOdcToOdcCheckbox = (checked: boolean) => {
-        setShowOdcToOdcFields(checked);
-        if (checked) {
-            // Enable ODC→ODC fields
-            setForm(f => ({
-                ...f,
-                odc_2_id: '' // Clear so user can select
-            }));
-        } else {
-            // Disable ODC→ODC fields
+    const handleConnectionEnabledChange = (enabled: boolean) => {
+        setConnectionEnabled(enabled);
+        if (!enabled) {
+            // Clear all connection selections when disabling
+            setSelectedConnectionType('');
             setForm(f => ({
                 ...f,
                 odc_id: '',
-                odc_2_id: ''
-            }));
-        }
-    };
-
-    const handleOdcToOdpCheckbox = (checked: boolean) => {
-        setShowOdcToOdpFields(checked);
-        if (checked) {
-            // Enable ODC→ODP fields
-            setForm(f => ({
-                ...f,
-                odp_id: '' // Clear so user can select
-            }));
-        } else {
-            // Disable ODC→ODP fields
-            setForm(f => ({
-                ...f,
-                odc_id: '',
+                odc_2_id: '',
                 odp_id: ''
             }));
         }
@@ -230,17 +209,29 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                 </>
             ) : (
                 <Element leftSide={t('Select Lokasi')} required>
-                    <SelectField
-                        required
-                        value={form.lokasi_id}
-                        onValueChange={v => handleChange('lokasi_id', v)}
-                        errorMessage={errors?.errors?.lokasi_id}
-                    >
-                        <option value="">{t('Pilih Lokasi')}</option>
-                        {lokasis.map(l => (
-                            <option key={l.id} value={l.id}>{l.nama_lokasi}</option>
-                        ))}
-                    </SelectField>
+                    <Select
+                        name="lokasi_id"
+                        options={lokasis.map((l) => ({
+                            value: l.id,
+                            label: l.nama_lokasi
+                        }))}
+                        value={lokasis.find((l) => l.id === form.lokasi_id) ? {
+                            value: form.lokasi_id,
+                            label: lokasis.find((l) => l.id === form.lokasi_id)?.nama_lokasi || ''
+                        } : null}
+                        onChange={(option: any) => handleChange('lokasi_id', option?.value || '')}
+                        placeholder={lokasisLoading ? t('Loading locations...') : t('Search and select location...')}
+                        isClearable
+                        isSearchable
+                        className="w-full"
+                        classNamePrefix="select"
+                        noOptionsMessage={() => t('No locations found')}
+                        loadingMessage={() => t('Loading locations...')}
+                        isLoading={lokasisLoading}
+                    />
+                    {errors?.errors?.lokasi_id && (
+                        <div className="text-red-500 text-sm mt-1">{errors.errors.lokasi_id}</div>
+                    )}
                 </Element>
             )}
 
@@ -275,28 +266,40 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                 />
             </Element>
             <Element leftSide={t('Kabel')} required>
-                <SelectField
-                    required
-                    value={form.kabel_odc_id}
-                    onValueChange={v => {
-                        handleChange('kabel_odc_id', v);
+                <Select
+                    name="kabel_odc_id"
+                    options={kabelOdcs.map((k) => ({
+                        value: k.id,
+                        label: k.nama_kabel
+                    }))}
+                    value={kabelOdcs.find((k) => k.id === form.kabel_odc_id) ? {
+                        value: form.kabel_odc_id,
+                        label: kabelOdcs.find((k) => k.id === form.kabel_odc_id)?.nama_kabel || ''
+                    } : null}
+                    onChange={(option: any) => {
+                        handleChange('kabel_odc_id', option?.value || '');
                         // Reset dependent selections when Kabel ODC changes
                         setForm(f => ({ ...f, odc_id: '', odp_id: '' }));
                     }}
-                    errorMessage={errors?.errors?.kabel_odc_id}
-                >
-                    <option value="">{t('Pilih Kabel')}</option>
-                    {kabelOdcs.map(k => (
-                        <option key={k.id} value={k.id}>{k.nama_kabel}</option>
-                    ))}
-                </SelectField>
+                    placeholder={kabelOdcsLoading ? t('Loading cables...') : t('Search and select cable...')}
+                    isClearable
+                    isSearchable
+                    className="w-full"
+                    classNamePrefix="select"
+                    noOptionsMessage={() => t('No cables found')}
+                    loadingMessage={() => t('Loading cables...')}
+                    isLoading={kabelOdcsLoading}
+                />
+                {errors?.errors?.kabel_odc_id && (
+                    <div className="text-red-500 text-sm mt-1">{errors.errors.kabel_odc_id}</div>
+                )}
             </Element>
 
             {/* Section: Connection Type */}
             <div className="px-5 sm:px-6 py-3">
-                <div className="text-sm md:text-base font-semibold text-gray-700">{t('CONNECTION TYPE & DETAILS')}</div>
+                <div className="text-sm md:text-base font-semibold text-gray-700">{t('Connection Type & Details (Optional)')}</div>
                 <div className="text-xs text-gray-500 mt-1">
-                    {t('Choose the type of connection this joint box will facilitate. Then configure the specific connection details based on your selection.')}
+                    {t('Optionally choose the type of connection this joint box will facilitate. Then configure the specific connection details based on your selection.')}
                 </div>
             </div>
             {/* Separator */}
@@ -304,141 +307,188 @@ export function CreateFoJointBox({ form, setForm, errors, setErrors, lokasis, ka
                 <div className="h-px bg-gray-200" />
             </div>
 
-            {/* Connection Type Selection */}
+            {/* Connection Type Toggle */}
             <Element leftSide={t('Connection Type')}>
-                <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            id="odc-odc"
-                            name="connection_type"
-                            value="odc-odc"
-                            checked={selectedConnectionType === 'odc-odc'}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
-                        />
-                        <label htmlFor="odc-odc">{t('ODC → ODC Connection')}</label>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="radio"
-                            id="odc-odp"
-                            name="connection_type"
-                            value="odc-odp"
-                            checked={selectedConnectionType === 'odc-odp'}
-                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
-                        />
-                        <label htmlFor="odc-odp">{t('ODC → ODP Connection')}</label>
-                    </div>
-                </div>
+                <Checkbox
+                    checked={connectionEnabled}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionEnabledChange(e.target.checked)}
+                />
             </Element>
 
-            {/* Checkboxes that appear based on radio selection */}
-            {selectedConnectionType === 'odc-odc' && (
-                <Element leftSide={t('Create ODC → ODC Connection')}>
-                    <Checkbox
-                        checked={showOdcToOdcFields}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOdcToOdcCheckbox(e.target.checked)}
-                    />
-                </Element>
-            )}
-
-            {selectedConnectionType === 'odc-odp' && (
-                <Element leftSide={t('Create ODC → ODP Connection')}>
-                    <Checkbox
-                        checked={showOdcToOdpFields}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleOdcToOdpCheckbox(e.target.checked)}
-                    />
+            {/* Radio options shown when enabled */}
+            {connectionEnabled && (
+                <Element leftSide={t('Select Connection')}>
+                    <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                id="odc-odc"
+                                name="connection_type"
+                                value="odc-odc"
+                                checked={selectedConnectionType === 'odc-odc'}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
+                            />
+                            <label htmlFor="odc-odc">{t('ODC → ODC Connection')}</label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <input
+                                type="radio"
+                                id="odc-odp"
+                                name="connection_type"
+                                value="odc-odp"
+                                checked={selectedConnectionType === 'odc-odp'}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleConnectionTypeChange(e.target.value as 'odc-odc' | 'odc-odp' | '')}
+                            />
+                            <label htmlFor="odc-odp">{t('ODC → ODP Connection')}</label>
+                        </div>
+                    </div>
                 </Element>
             )}
 
             {/* ODC→ODC Fields */}
-            {showOdcToOdcFields && (
+            {connectionEnabled && selectedConnectionType === 'odc-odc' && (
                 <>
                     <Element leftSide={t('Source ODC')} required>
-                        <SelectField
-                            required
-                            value={form.odc_id || ''}
-                            onValueChange={v => {
-                                handleChange('odc_id', v);
+                        <Select
+                            name="odc_id"
+                            options={filteredOdcs.map((o) => ({
+                                value: o.id,
+                                label: `${o.nama_odc}${o.lokasi_name ? ` - ${o.lokasi_name}` : ''}`
+                            }))}
+                            value={filteredOdcs.find((o) => o.id === form.odc_id) ? {
+                                value: form.odc_id,
+                                label: (() => {
+                                    const odc = filteredOdcs.find((o) => o.id === form.odc_id);
+                                    return odc ? `${odc.nama_odc}${odc.lokasi_name ? ` - ${odc.lokasi_name}` : ''}` : '';
+                                })()
+                            } : null}
+                            onChange={(option: any) => {
+                                handleChange('odc_id', option?.value || '');
                                 // Reset dependent selections when source ODC changes
                                 setForm(f => ({ ...f, odp_id: '', odc_2_id: '' }));
                             }}
-                            errorMessage={errors?.errors?.odc_id}
-                        >
-                            <option value="">{t('Pilih ODC Sumber')}</option>
-                            {filteredOdcs.map(o => (
-                                <option key={o.id} value={o.id}>
-                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
+                            placeholder={odcsLoading ? t('Loading ODCs...') : t('Search and select source ODC...')}
+                            isClearable
+                            isSearchable
+                            className="w-full"
+                            classNamePrefix="select"
+                            noOptionsMessage={() => t('No ODCs found')}
+                            loadingMessage={() => t('Loading ODCs...')}
+                            isLoading={odcsLoading}
+                            isDisabled={!form.kabel_odc_id}
+                        />
+                        {errors?.errors?.odc_id && (
+                            <div className="text-red-500 text-sm mt-1">{errors.errors.odc_id}</div>
+                        )}
                     </Element>
                     <Element leftSide={t('Target ODC')} required>
-                        <SelectField
-                            required
-                            value={form.odc_2_id}
-                            onValueChange={v => handleChange('odc_2_id', v)}
-                            errorMessage={errors?.errors?.odc_2_id}
-                        >
-                            <option value="">{t('Pilih ODC Target')}</option>
-                            {filteredOdcs.filter(odc => odc.id !== form.odc_id).map(o => (
-                                <option key={o.id} value={o.id}>
-                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
+                        <Select
+                            name="odc_2_id"
+                            options={filteredOdcs.filter(odc => odc.id !== form.odc_id).map((o) => ({
+                                value: o.id,
+                                label: `${o.nama_odc}${o.lokasi_name ? ` - ${o.lokasi_name}` : ''}`
+                            }))}
+                            value={filteredOdcs.find((o) => o.id === form.odc_2_id) ? {
+                                value: form.odc_2_id,
+                                label: (() => {
+                                    const odc = filteredOdcs.find((o) => o.id === form.odc_2_id);
+                                    return odc ? `${odc.nama_odc}${odc.lokasi_name ? ` - ${odc.lokasi_name}` : ''}` : '';
+                                })()
+                            } : null}
+                            onChange={(option: any) => handleChange('odc_2_id', option?.value || '')}
+                            placeholder={odcsLoading ? t('Loading ODCs...') : t('Search and select target ODC...')}
+                            isClearable
+                            isSearchable
+                            className="w-full"
+                            classNamePrefix="select"
+                            noOptionsMessage={() => t('No ODCs found')}
+                            loadingMessage={() => t('Loading ODCs...')}
+                            isLoading={odcsLoading}
+                            isDisabled={!form.odc_id}
+                        />
+                        {errors?.errors?.odc_2_id && (
+                            <div className="text-red-500 text-sm mt-1">{errors.errors.odc_2_id}</div>
+                        )}
                     </Element>
                 </>
             )}
 
             {/* ODC→ODP Fields */}
-            {showOdcToOdpFields && (
+            {connectionEnabled && selectedConnectionType === 'odc-odp' && (
                 <>
                     <Element leftSide={t('Source ODC')} required>
-                        <SelectField
-                            required
-                            value={form.odc_id || ''}
-                            onValueChange={v => {
-                                handleChange('odc_id', v);
+                        <Select
+                            name="odc_id"
+                            options={filteredOdcs.map((o) => ({
+                                value: o.id,
+                                label: `${o.nama_odc}${o.lokasi_name ? ` - ${o.lokasi_name}` : ''}`
+                            }))}
+                            value={filteredOdcs.find((o) => o.id === form.odc_id) ? {
+                                value: form.odc_id,
+                                label: (() => {
+                                    const odc = filteredOdcs.find((o) => o.id === form.odc_id);
+                                    return odc ? `${odc.nama_odc}${odc.lokasi_name ? ` - ${odc.lokasi_name}` : ''}` : '';
+                                })()
+                            } : null}
+                            onChange={(option: any) => {
+                                handleChange('odc_id', option?.value || '');
                                 // Reset dependent selections when source ODC changes
                                 setForm(f => ({ ...f, odp_id: '', odc_2_id: '' }));
                             }}
-                            errorMessage={errors?.errors?.odc_id}
-                        >
-                            <option value="">{t('Pilih ODC Sumber')}</option>
-                            {filteredOdcs.map(o => (
-                                <option key={o.id} value={o.id}>
-                                    {o.nama_odc}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
+                            placeholder={odcsLoading ? t('Loading ODCs...') : t('Search and select source ODC...')}
+                            isClearable
+                            isSearchable
+                            className="w-full"
+                            classNamePrefix="select"
+                            noOptionsMessage={() => t('No ODCs found')}
+                            loadingMessage={() => t('Loading ODCs...')}
+                            isLoading={odcsLoading}
+                            isDisabled={!form.kabel_odc_id}
+                        />
+                        {errors?.errors?.odc_id && (
+                            <div className="text-red-500 text-sm mt-1">{errors.errors.odc_id}</div>
+                        )}
                     </Element>
                     <Element leftSide={t('Target ODP')} required>
-                        <SelectField
-                            required
-                            value={form.odp_id}
-                            onValueChange={v => handleChange('odp_id', v)}
-                            errorMessage={errors?.errors?.odp_id}
-                        >
-                            <option value="">{t('Pilih ODP Target')}</option>
-                            {filteredOdps.map(o => (
-                                <option key={o.id} value={o.id}>
-                                    {o.nama_odp}{o.lokasi_name ? ` - ${o.lokasi_name}` : ''}
-                                </option>
-                            ))}
-                        </SelectField>
+                        <Select
+                            name="odp_id"
+                            options={filteredOdps.map((o) => ({
+                                value: o.id,
+                                label: `${o.nama_odp}${o.lokasi_name ? ` - ${o.lokasi_name}` : ''}`
+                            }))}
+                            value={filteredOdps.find((o) => o.id === form.odp_id) ? {
+                                value: form.odp_id,
+                                label: (() => {
+                                    const odp = filteredOdps.find((o) => o.id === form.odp_id);
+                                    return odp ? `${odp.nama_odp}${odp.lokasi_name ? ` - ${odp.lokasi_name}` : ''}` : '';
+                                })()
+                            } : null}
+                            onChange={(option: any) => handleChange('odp_id', option?.value || '')}
+                            placeholder={odpsLoading ? t('Loading ODPs...') : t('Search and select target ODP...')}
+                            isClearable
+                            isSearchable
+                            className="w-full"
+                            classNamePrefix="select"
+                            noOptionsMessage={() => t('No ODPs found')}
+                            loadingMessage={() => t('Loading ODPs...')}
+                            isLoading={odpsLoading}
+                            isDisabled={!form.odc_id}
+                        />
+                        {errors?.errors?.odp_id && (
+                            <div className="text-red-500 text-sm mt-1">{errors.errors.odp_id}</div>
+                        )}
                     </Element>
                 </>
             )}
 
             {/* Visual feedback for connection types */}
-            {(showOdcToOdcFields || showOdcToOdpFields) && (
+            {connectionEnabled && (
                 <div className="px-5 sm:px-6 py-3">
                     <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4">
                         <div className="text-sm text-blue-800">
                             <strong>{t('Active Connections')}:</strong>
-                            {showOdcToOdcFields && <div>• {t('ODC → ODC')}</div>}
-                            {showOdcToOdpFields && <div>• {t('ODC → ODP')}</div>}
+                            {selectedConnectionType === 'odc-odc' && <div>• {t('ODC → ODC')}</div>}
+                            {selectedConnectionType === 'odc-odp' && <div>• {t('ODC → ODP')}</div>}
                         </div>
                     </div>
                 </div>

@@ -43,6 +43,7 @@ export default function Edit() {
     const [odcs, setOdcs] = useState<KabelOdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
+    const [odcsLoading, setOdcsLoading] = useState(true);
 
     useEffect(() => {
         if (!id) {
@@ -75,6 +76,7 @@ export default function Edit() {
                         jumlah_core_in_tube: o.jumlah_core_in_tube,
                     }))
                 );
+                setOdcsLoading(false);
             })
             .catch(() => {
                 toast.error('error refresh page');
@@ -185,6 +187,7 @@ export default function Edit() {
                 toast.success('updated tube kabel with cores');
                 queryClient.invalidateQueries('fo-kabel-tube-odcs');
                 queryClient.invalidateQueries('fo-kabel-core-odcs');
+                navigate('/fo-kabel-tube-odcs');
             })
             .catch((error) => {
                 if (error.response?.status === 422) {
@@ -220,6 +223,7 @@ export default function Edit() {
                         setForm={setForm}
                         errors={errors}
                         odcs={odcs}
+                        odcsLoading={odcsLoading}
                         mode="edit"
                     />
                 </form>

@@ -49,6 +49,7 @@ export default function Create() {
     const [tubes, setTubes] = useState<TubeOdcOption[]>([]);
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
+    const [tubesLoading, setTubesLoading] = useState(true);
 
     useEffect(() => {
         request('GET', endpoint('/api/v1/fo-kabel-tube-odcs?per_page=250&status=active')).then(
@@ -62,8 +63,9 @@ export default function Create() {
                         deskripsi: o.deskripsi,
                     }))
                 );
+                setTubesLoading(false);
             }
-        );
+        ).catch(() => setTubesLoading(false));
     }, []);
 
     const handleSave = (e: FormEvent) => {
@@ -102,6 +104,7 @@ export default function Create() {
                         setForm={setForm}
                         errors={errors}
                         tubes={tubes}
+                        tubesLoading={tubesLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

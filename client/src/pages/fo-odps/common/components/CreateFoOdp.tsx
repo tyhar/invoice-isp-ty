@@ -4,7 +4,8 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { InputField, SelectField, Checkbox } from '$app/components/forms';
+import { InputField, Checkbox } from '$app/components/forms';
+import Select from 'react-select';
 
 export interface FoOdpFormValues {
     create_new_lokasi: boolean;
@@ -51,6 +52,12 @@ interface Props {
     kabelTubes: { id: number; warna_tube: string; kabel_odc_id: number; deskripsi?: string }[]; // Add deskripsi field
     cores: CoreOption[];
     errors?: ValidationBag;
+    // Loading flags per field
+    lokasisLoading?: boolean;
+    kabelOdcsLoading?: boolean;
+    kabelTubesLoading?: boolean;
+    coresLoading?: boolean;
+    odcsLoading?: boolean;
 }
 
 export function CreateFoOdp({
@@ -61,6 +68,11 @@ export function CreateFoOdp({
     kabelTubes,
     cores,
     errors,
+    lokasisLoading = false,
+    kabelOdcsLoading = false,
+    kabelTubesLoading = false,
+    coresLoading = false,
+    odcsLoading = false,
 }: Props) {
     const [t] = useTranslation();
     const onChange = <K extends keyof FoOdpFormValues>(
@@ -161,19 +173,29 @@ export function CreateFoOdp({
                 </>
             ) : (
                 <Element leftSide={t('Select Lokasi')} required>
-                    <SelectField
-                        required
-                        value={values.lokasi_id}
-                        onValueChange={(v) => onChange('lokasi_id', v)}
-                        errorMessage={errors?.errors.lokasi_id}
-                    >
-                        <option value="">{t('select lokasi')}</option>
-                        {lokasis.map((l) => (
-                            <option key={l.id} value={l.id.toString()}>
-                                {l.nama_lokasi}
-                            </option>
-                        ))}
-                    </SelectField>
+                    <Select
+                        name="lokasi_id"
+                        options={lokasis.map((l) => ({
+                            value: l.id.toString(),
+                            label: l.nama_lokasi
+                        }))}
+                        value={lokasis.find((l) => l.id.toString() === values.lokasi_id) ? {
+                            value: values.lokasi_id,
+                            label: lokasis.find((l) => l.id.toString() === values.lokasi_id)?.nama_lokasi || ''
+                        } : null}
+                        onChange={(option: any) => onChange('lokasi_id', option?.value || '')}
+                        placeholder={lokasisLoading ? t('Loading locations...') : t('Search and select location...')}
+                        isClearable
+                        isSearchable
+                        className="w-full"
+                        classNamePrefix="select"
+                        noOptionsMessage={() => t('No locations found')}
+                        loadingMessage={() => t('Loading locations...')}
+                        isLoading={lokasisLoading}
+                    />
+                    {errors?.errors.lokasi_id && (
+                        <div className="text-red-500 text-sm mt-1">{errors.errors.lokasi_id}</div>
+                    )}
                 </Element>
             )}
 
@@ -220,75 +242,124 @@ export function CreateFoOdp({
             </div>
 
             <Element leftSide={t('Kabel')}>
-                <SelectField
-                    required
-                    value={values.kabel_odc_id}
-                    onValueChange={(v) => {
-                        onChange('kabel_odc_id', v);
+                <Select
+                    name="kabel_odc_id"
+                    options={kabelOptions.map((k) => ({
+                        value: k.id.toString(),
+                        label: k.nama_kabel
+                    }))}
+                    value={kabelOptions.find((k) => k.id.toString() === values.kabel_odc_id) ? {
+                        value: values.kabel_odc_id,
+                        label: kabelOptions.find((k) => k.id.toString() === values.kabel_odc_id)?.nama_kabel || ''
+                    } : null}
+                    onChange={(option: any) => {
+                        onChange('kabel_odc_id', option?.value || '');
                         // reset dependent
                         onChange('kabel_tube_odc_id', '');
                         onChange('kabel_core_odc_id', '');
                     }}
-                    errorMessage={errors?.errors.kabel_odc_id}
-                >
-                    <option value="">{t('select kabel odc')}</option>
-                    {kabelOptions.map((k) => (
-                        <option key={k.id} value={k.id.toString()}>
-                            {k.nama_kabel}
-                        </option>
-                    ))}
-                </SelectField>
+                    placeholder={kabelOdcsLoading ? t('Loading cables...') : t('Search and select cable...')}
+                    isClearable
+                    isSearchable
+                    className="w-full"
+                    classNamePrefix="select"
+                    noOptionsMessage={() => t('No cables found')}
+                    loadingMessage={() => t('Loading cables...')}
+                    isLoading={kabelOdcsLoading}
+                />
+                {errors?.errors.kabel_odc_id && (
+                    <div className="text-red-500 text-sm mt-1">{errors.errors.kabel_odc_id}</div>
+                )}
             </Element>
 
             <Element leftSide={t('Kabel Tube')}>
-                <SelectField
-                    required
-                    value={values.kabel_tube_odc_id}
-                    onValueChange={(v) => {
-                        onChange('kabel_tube_odc_id', v);
+                <Select
+                    name="kabel_tube_odc_id"
+                    options={tubeOptions.map((t) => ({
+                        value: t.id.toString(),
+                        label: `${t.warna_tube} - ${t.deskripsi || `Tube ${t.warna_tube}`}`
+                    }))}
+                    value={tubeOptions.find((t) => t.id.toString() === values.kabel_tube_odc_id) ? {
+                        value: values.kabel_tube_odc_id,
+                        label: (() => {
+                            const tube = tubeOptions.find((t) => t.id.toString() === values.kabel_tube_odc_id);
+                            return tube ? `${tube.warna_tube} - ${tube.deskripsi || `Tube ${tube.warna_tube}`}` : '';
+                        })()
+                    } : null}
+                    onChange={(option: any) => {
+                        onChange('kabel_tube_odc_id', option?.value || '');
                         onChange('kabel_core_odc_id', '');
                     }}
-                    errorMessage={errors?.errors.kabel_tube_odc_id}
-                >
-                    <option value="">{t('select tube odc')}</option>
-                    {tubeOptions.map((t) => (
-                        <option key={t.id} value={t.id.toString()}>
-                            {t.warna_tube} - {t.deskripsi || `Tube ${t.warna_tube}`}
-                        </option>
-                    ))}
-                </SelectField>
+                    placeholder={kabelTubesLoading ? t('Loading tubes...') : t('Search and select tube...')}
+                    isClearable
+                    isSearchable
+                    className="w-full"
+                    classNamePrefix="select"
+                    noOptionsMessage={() => t('No tubes found')}
+                    loadingMessage={() => t('Loading tubes...')}
+                    isLoading={kabelTubesLoading}
+                    isDisabled={!values.kabel_odc_id}
+                />
+                {errors?.errors.kabel_tube_odc_id && (
+                    <div className="text-red-500 text-sm mt-1">{errors.errors.kabel_tube_odc_id}</div>
+                )}
             </Element>
 
             <Element leftSide={t('Kabel Core ODC')}>
-                <SelectField
-                    required
-                    value={values.kabel_core_odc_id}
-                    onValueChange={(v) => onChange('kabel_core_odc_id', v)}
-                    errorMessage={errors?.errors.kabel_core_odc_id}
-                >
-                    <option value="">{t('unassigned core') || '—'}</option>
-                    {coreOptions.map((c) => (
-                        <option key={c.id} value={c.id.toString()}>
-                            {c.warna_core} - {c.deskripsi || `Core ${c.warna_core} for tube ${c.warna_tube}`}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="kabel_core_odc_id"
+                    options={coreOptions.map((c) => ({
+                        value: c.id.toString(),
+                        label: `${c.warna_core} - ${c.deskripsi || `Core ${c.warna_core} for tube ${c.warna_tube}`}`
+                    }))}
+                    value={coreOptions.find((c) => c.id.toString() === values.kabel_core_odc_id) ? {
+                        value: values.kabel_core_odc_id,
+                        label: (() => {
+                            const core = coreOptions.find((c) => c.id.toString() === values.kabel_core_odc_id);
+                            return core ? `${core.warna_core} - ${core.deskripsi || `Core ${core.warna_core} for tube ${core.warna_tube}`}` : '';
+                        })()
+                    } : null}
+                    onChange={(option: any) => onChange('kabel_core_odc_id', option?.value || '')}
+                    placeholder={coresLoading ? t('Loading cores...') : t('Search and select core...')}
+                    isClearable
+                    isSearchable
+                    className="w-full"
+                    classNamePrefix="select"
+                    noOptionsMessage={() => t('No cores found')}
+                    loadingMessage={() => t('Loading cores...')}
+                    isLoading={coresLoading}
+                    isDisabled={!values.kabel_tube_odc_id}
+                />
+                {errors?.errors.kabel_core_odc_id && (
+                    <div className="text-red-500 text-sm mt-1">{errors.errors.kabel_core_odc_id}</div>
+                )}
             </Element>
 
             <Element leftSide={t('ODC')} required={!!values.kabel_odc_id}>
-                <SelectField
-                    required={!!values.kabel_odc_id}
-                    value={values.odc_id}
-                    onValueChange={(v) => onChange('odc_id', v)}
-                    errorMessage={errors?.errors.odc_id}
-                >
-                    <option value="">{t('select odc')}</option>
-                    {odcOptions.map((odc: any) => (
-                        <option key={odc.id} value={odc.id.toString()}>
-                            {odc.nama_odc}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="odc_id"
+                    options={odcOptions.map((odc: any) => ({
+                        value: odc.id.toString(),
+                        label: odc.nama_odc
+                    }))}
+                    value={odcOptions.find((odc: any) => odc.id.toString() === values.odc_id) ? {
+                        value: values.odc_id,
+                        label: odcOptions.find((odc: any) => odc.id.toString() === values.odc_id)?.nama_odc || ''
+                    } : null}
+                    onChange={(option: any) => onChange('odc_id', option?.value || '')}
+                    placeholder={odcsLoading ? t('Loading ODCs...') : t('Search and select ODC...')}
+                    isClearable
+                    isSearchable
+                    className="w-full"
+                    classNamePrefix="select"
+                    noOptionsMessage={() => t('No ODCs found')}
+                    loadingMessage={() => t('Loading ODCs...')}
+                    isLoading={odcsLoading}
+                    isDisabled={!values.kabel_odc_id}
+                />
+                {errors?.errors.odc_id && (
+                    <div className="text-red-500 text-sm mt-1">{errors.errors.odc_id}</div>
+                )}
             </Element>
         </Card>
     );

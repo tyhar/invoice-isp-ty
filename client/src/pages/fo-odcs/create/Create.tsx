@@ -84,6 +84,12 @@ export default function Create() {
     const [cores, setCores] = useState<CoreOption[]>([]);
     const [kabelTubes, setKabelTubes] = useState<TubeOption[]>([]);
     const [isBusy, setIsBusy] = useState(false);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [kabelOdcsLoading, setKabelOdcsLoading] = useState(true);
+    const [odcsLoading, setOdcsLoading] = useState(true);
+    const [coresLoading, setCoresLoading] = useState(true);
+    const [kabelTubesLoading, setKabelTubesLoading] = useState(true);
 
     // Fetch Lokasi list
     useEffect(() => {
@@ -101,12 +107,14 @@ export default function Create() {
                         nama_lokasi: l.nama_lokasi,
                     }))
                 );
+                setLokasisLoading(false);
                 setKabelOdcs(
                     kabelRes.data.data.map((k: any) => ({
                         id: k.id,
                         nama_kabel: k.nama_kabel,
                     }))
                 );
+                setKabelOdcsLoading(false);
                 setOdcs(
                     odcRes.data.data.map((o: any) => ({
                         id: o.id,
@@ -115,6 +123,7 @@ export default function Create() {
                         kabel_odc_id: o.kabel_odc_id,
                     }))
                 );
+                setOdcsLoading(false);
                 setCores(
                     coreRes.data.data.map((c: any) => ({
                         id: c.id,
@@ -125,6 +134,7 @@ export default function Create() {
                         warna_tube: c.kabel_tube_odc.warna_tube,
                     }))
                 );
+                setCoresLoading(false);
                 setKabelTubes(
                     tubeRes.data.data.map((t: any) => ({
                         id: t.id,
@@ -133,9 +143,15 @@ export default function Create() {
                         deskripsi: t.deskripsi,
                     }))
                 );
+                setKabelTubesLoading(false);
             })
             .catch(() => {
                 toast.error('error refresh page');
+                setLokasisLoading(false);
+                setKabelOdcsLoading(false);
+                setOdcsLoading(false);
+                setCoresLoading(false);
+                setKabelTubesLoading(false);
             });
     }, []);
 
@@ -217,6 +233,11 @@ export default function Create() {
                         cores={cores}
                         kabelTubes={kabelTubes}
                         errors={errors}
+                        lokasisLoading={lokasisLoading}
+                        kabelOdcsLoading={kabelOdcsLoading}
+                        odcsLoading={odcsLoading}
+                        coresLoading={coresLoading}
+                        kabelTubesLoading={kabelTubesLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

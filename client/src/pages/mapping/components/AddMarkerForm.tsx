@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react';
 import L, { LatLng } from 'leaflet';
 import { Marker, useMapEvents } from 'react-leaflet';
 import axios from 'axios';
+import Select from 'react-select';
 
-export type FormMode = 'client' | 'odp' | 'odc';
+export type FormMode = 'client' | 'odp' | 'odc' | 'joint_box';
 
 export interface MarkerData {
   id: number;
@@ -24,6 +25,7 @@ export interface MarkerData {
   nama_odc?: string;
   nama_joint_box?: string;
   odc_id?: string;
+  odc_2_id?: string;
 }
 
 interface ODC {
@@ -40,6 +42,16 @@ interface AddMarkerFormProps {
 }
 
 export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCancel, initialData, editingId }) => {
+  const [isOptionsLoading, setIsOptionsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const selectCommonProps: any = useMemo(() => ({
+    menuPortalTarget: document.body,
+    menuPosition: 'fixed',
+    styles: {
+      menuPortal: (base: any) => ({ ...base, zIndex: 10000 }),
+      menu: (base: any) => ({ ...base, zIndex: 10000 }),
+    },
+  }), []);
   const parseCoordinate = (value: any): number | null => {
     const parsed = parseFloat(value);
     return isNaN(parsed) ? null : parsed;
@@ -61,7 +73,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
     deskripsi: initialData?.deskripsi || '',
     deskripsi_odc: mode === 'odc' ? initialData?.deskripsi || '' : '',
     deskripsi_odp: mode === 'odp' ? initialData?.deskripsi || '' : '',
-    nama: initialData?.nama_client || initialData?.nama_odp || initialData?.nama_odc || '',
+    nama: initialData?.nama_client || initialData?.nama_odp || initialData?.nama_odc || initialData?.nama_joint_box || '',
     alamat: initialData?.alamat || '',
     odp_id: initialData?.odp_id || '',
     kabel_core_odc_id: initialData?.kabel_core_odc_id || '',
@@ -72,6 +84,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
     kabel_odc_id: initialData?.kabel_odc_id || '',
     kabel_tube_odc_id: initialData?.kabel_tube_odc_id || '',
     odc_id: initialData?.odc_id || '',
+    odc_2_id: (initialData as any)?.odc_2_id || '',
   });
 
   const allowMapClick = !position && form.nama_lokasi.trim() === '' && form.nama.trim() === '';
@@ -83,6 +96,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
   const [kabelTubeList, setKabelTubeList] = useState<any[]>([]);
   const [odcList, setOdcList] = useState<ODC[]>([]);
   const [formError, setFormError] = useState<string | null>(null);
+  const [jbConnectionType, setJbConnectionType] = useState<'odc-odc' | 'odc-odp' | ''>('');
 
   // Derived selections/filters to align with Create forms
   const selectedCore = useMemo(() => {
@@ -143,7 +157,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
         deskripsi: initialData.deskripsi || '',
         deskripsi_odc: mode === 'odc' ? initialData.deskripsi || '' : '',
         deskripsi_odp: mode === 'odp' ? initialData.deskripsi || '' : '',
-        nama: initialData.nama_client || initialData.nama_odp || initialData.nama_odc || '',
+        nama: initialData.nama_client || initialData.nama_odp || initialData.nama_odc || (initialData as any).nama_joint_box || '',
         alamat: initialData.alamat || '',
         odp_id: initialData.odp_id || '',
         kabel_core_odc_id: initialData.kabel_core_odc_id || '',
@@ -154,12 +168,19 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
         kabel_odc_id: initialData.kabel_odc_id || '',
         kabel_tube_odc_id: initialData.kabel_tube_odc_id || '',
         odc_id: initialData.odc_id || '',
+        odc_2_id: (initialData as any).odc_2_id || '',
       });
+      if (mode === 'joint_box') {
+        const hasOdcOdc = Boolean(initialData.odc_id) && Boolean((initialData as any).odc_2_id);
+        const hasOdcOdp = Boolean(initialData.odc_id) && Boolean((initialData as any).odp_id);
+        setJbConnectionType(hasOdcOdc ? 'odc-odc' : hasOdcOdp ? 'odc-odp' : '');
+      }
     }
   }, [initialData, mode]);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsOptionsLoading(true);
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
@@ -193,9 +214,20 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
           setKabelTubeList(tubeRes.data.data);
           setOdcCoreList(coreRes.data.data);
           setOdcList(odcRes.data.data);
+        } else if (mode === 'joint_box') {
+          const [lokOdcRes, odcRes, odpRes] = await Promise.all([
+            axios.get(`${api}/api/v1/fo-kabel-odcs`, headers),
+            axios.get(`${api}/api/v1/fo-odcs`, headers),
+            axios.get(`${api}/api/v1/fo-odps`, headers),
+          ]);
+          setKabelOdcList(lokOdcRes.data.data);
+          setOdcList(odcRes.data.data as any);
+          setOdpList(odpRes.data.data);
         }
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsOptionsLoading(false);
       }
     };
 
@@ -248,6 +280,8 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
     } else if (mode === 'odc') {
       if (!form.kabel_odc_id) return 'Kabel harus dipilih untuk ODC.';
       if (!form.tipe_splitter) return 'Tipe Splitter harus dipilih untuk ODC.';
+    } else if (mode === 'joint_box') {
+      if (!form.kabel_odc_id) return 'Kabel harus dipilih untuk Joint Box.';
     }
 
     return null;
@@ -263,6 +297,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
     }
 
     try {
+      setIsSubmitting(true);
       const token = localStorage.getItem('X-API-TOKEN');
       const headers = { headers: { 'X-API-TOKEN': token || '' } };
 
@@ -273,6 +308,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
         kabel_core_odc_id: form.kabel_core_odc_id ? parseInt(String(form.kabel_core_odc_id), 10) : null,
         kabel_odc_id: form.kabel_odc_id ? parseInt(String(form.kabel_odc_id), 10) : null,
         odc_id: form.odc_id ? parseInt(String(form.odc_id), 10) : null,
+        odc_2_id: form.odc_2_id ? parseInt(String(form.odc_2_id), 10) : null,
       };
 
       if (editingId) {
@@ -321,6 +357,21 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
               nama_odc: form.nama,
               tipe_splitter: form.tipe_splitter,
               deskripsi: form.deskripsi_odc,
+            },
+            headers
+          );
+        } else if (mode === 'joint_box') {
+          await axios.put(
+            `${api}/api/v1/fo-joint-boxes/${editingId}`,
+            {
+              lokasi_id: initialData?.lokasi_id,
+              kabel_odc_id: parsedIds.kabel_odc_id,
+              odc_id: parsedIds.odc_id,
+              odc_2_id: parsedIds.odc_2_id,
+              odp_id: parsedIds.odp_id,
+              nama_joint_box: form.nama,
+              deskripsi: form.deskripsi,
+              status: 'active',
             },
             headers
           );
@@ -379,6 +430,21 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
             },
             headers
           );
+        } else if (mode === 'joint_box') {
+          await axios.post(
+            `${api}/api/v1/fo-joint-boxes`,
+            {
+              lokasi_id,
+              kabel_odc_id: parsedIds.kabel_odc_id,
+              odc_id: parsedIds.odc_id,
+              odc_2_id: parsedIds.odc_2_id,
+              odp_id: parsedIds.odp_id,
+              nama_joint_box: form.nama,
+              deskripsi: form.deskripsi,
+              status: 'active',
+            },
+            headers
+          );
         }
 
         setFormError(null);
@@ -403,6 +469,8 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
         console.error(error);
         setFormError('Gagal menyimpan data.');
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -433,6 +501,15 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
     shadowSize: [41, 41],
   });
 
+  const jointBoxIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    shadowSize: [41, 41],
+  });
+
   return (
     <>
       {position && (
@@ -444,7 +521,9 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
               ? clientIcon
               : mode === 'odp'
                 ? odpIcon
-                : odcIcon
+                : mode === 'odc'
+                  ? odcIcon
+                  : jointBoxIcon
           }
           eventHandlers={{ dragend: onMarkerDragEnd }}
         />
@@ -452,7 +531,20 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
 
       <div className="absolute top-10 right-4 bg-white p-4 shadow-md rounded z-[999] w-[320px] max-h-[80vh] overflow-auto">
         <h3 className="font-semibold mb-2">
-          {editingId ? mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : 'Edit ODC' : mode === 'client' ? 'Tambah Client' : mode === 'odp' ? 'Tambah ODP' : 'Tambah ODC'}</h3>
+          {editingId
+            ? (mode === 'client' ? 'Edit Client' : mode === 'odp' ? 'Edit ODP' : mode === 'odc' ? 'Edit ODC' : 'Edit Joint Box')
+            : (mode === 'client' ? 'Tambah Client' : mode === 'odp' ? 'Tambah ODP' : mode === 'odc' ? 'Tambah ODC' : 'Tambah Joint Box')}
+        </h3>
+        {isOptionsLoading && (
+          <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-3 py-2">
+            Memuat data pilihan... Mohon tunggu.
+          </div>
+        )}
+        {isSubmitting && (
+          <div className="mb-2 text-xs text-blue-700 bg-blue-50 border border-blue-200 rounded px-3 py-2">
+            Menyimpan data... Mohon tunggu.
+          </div>
+        )}
         <p className="mb-2 text-xs text-gray-600">Klik peta untuk memilih lokasi atau edit latitude dan longitude di bawah</p>
         <div className="max-h-[55vh] overflow-y-auto px-4">
           {formError && (
@@ -486,7 +578,7 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
 
             <div>
               <label className="block mb-1">
-                {mode === 'client' ? 'Nama Client' : mode === 'odp' ? 'Nama ODP' : 'Nama ODC'}
+                {mode === 'client' ? 'Nama Client' : mode === 'odp' ? 'Nama ODP' : mode === 'odc' ? 'Nama ODC' : 'Nama Joint Box'}
               </label>
               <input
                 type="text"
@@ -513,35 +605,32 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
 
                 <div>
                   <label className="block mb-1">ODP</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.odp_id}
-                    onChange={(e) => setForm({ ...form, odp_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih ODP</option>
-                    {odpList.map((odp) => (
-                      <option key={odp.id} value={odp.id}>
-                        {odp.nama_odp}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={odpList.map((o:any)=>({ value: o.id.toString(), label: o.nama_odp }))}
+                    value={odpList.find((o:any)=> o.id.toString()===form.odp_id) ? { value: form.odp_id, label: odpList.find((o:any)=> o.id.toString()===form.odp_id)?.nama_odp } : null}
+                    onChange={(opt:any)=> setForm({ ...form, odp_id: opt?.value || '' })}
+                    placeholder="Pilih ODP"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
                   <label className="block mb-1">Client ID</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.client_id}
-                    onChange={(e) => setForm({ ...form, client_id: e.target.value })}
-                  >
-                    <option value="">Pilih Client ID</option>
-                    {clientList.map((client) => (
-                      <option key={client.id} value={client.id}>
-                        {client.name || client.nama_client || `Client #${client.id}`}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={clientList.map((c:any)=>({ value: c.id.toString(), label: c.name || c.nama_client || `Client #${c.id}` }))}
+                    value={clientList.find((c:any)=> c.id.toString()===String(form.client_id)) ? { value: String(form.client_id), label: clientList.find((c:any)=> c.id.toString()===String(form.client_id))?.name || clientList.find((c:any)=> c.id.toString()===String(form.client_id))?.nama_client || `Client #${form.client_id}` } : null}
+                    onChange={(opt:any)=> setForm({ ...form, client_id: opt?.value || '' })}
+                    placeholder="Pilih Client ID"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                 </div>
               </>
             )}
@@ -561,52 +650,48 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
 
                 <div>
                   <label className="block mb-1">Kabel</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_odc_id: e.target.value, kabel_tube_odc_id: '', kabel_core_odc_id: '' })}
-                  >
-                    <option value="">Pilih Kabel</option>
-                    {kabelOdcList.map((kabel) => (
-                      <option key={kabel.id} value={kabel.id}>
-                        {kabel.nama_kabel}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={kabelOdcList.map((k:any)=>({ value: k.id.toString(), label: k.nama_kabel }))}
+                    value={kabelOdcList.find((k:any)=> k.id.toString()===form.kabel_odc_id) ? { value: form.kabel_odc_id, label: kabelOdcList.find((k:any)=> k.id.toString()===form.kabel_odc_id)?.nama_kabel } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_odc_id: opt?.value || '', kabel_tube_odc_id: '', kabel_core_odc_id: '' })}
+                    placeholder="Pilih Kabel"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
                   <label className="block mb-1">Kabel Tube</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_tube_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_tube_odc_id: e.target.value, kabel_core_odc_id: '' })}
-                    disabled={!form.kabel_odc_id}
-                  >
-                    <option value="">Pilih Kabel Tube</option>
-                    {filteredTubesForOdp.map((tube: any) => (
-                      <option key={tube.id} value={tube.id}>
-                        {tube.warna_tube}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={filteredTubesForOdp.map((t:any)=>({ value: t.id.toString(), label: t.warna_tube }))}
+                    value={filteredTubesForOdp.find((t:any)=> t.id.toString()===form.kabel_tube_odc_id) ? { value: form.kabel_tube_odc_id, label: filteredTubesForOdp.find((t:any)=> t.id.toString()===form.kabel_tube_odc_id)?.warna_tube } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_tube_odc_id: opt?.value || '', kabel_core_odc_id: '' })}
+                    placeholder="Pilih Kabel Tube"
+                    isClearable
+                    isSearchable
+                    isDisabled={!form.kabel_odc_id}
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
                   <label className="block mb-1">Kabel Core</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_core_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_core_odc_id: e.target.value })}
-                    required
-                  >
-                    <option value="">Pilih Kabel Core</option>
-                    {filteredCoresForOdp.map((core: any) => (
-                      <option key={core.id} value={core.id}>
-                        {core.warna_core}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={filteredCoresForOdp.map((c:any)=>({ value: c.id.toString(), label: c.warna_core }))}
+                    value={filteredCoresForOdp.find((c:any)=> c.id.toString()===form.kabel_core_odc_id) ? { value: form.kabel_core_odc_id, label: filteredCoresForOdp.find((c:any)=> c.id.toString()===form.kabel_core_odc_id)?.warna_core } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_core_odc_id: opt?.value || '' })}
+                    placeholder="Pilih Kabel Core"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
@@ -647,69 +732,64 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
                 </div>
                 <div>
                   <label className="block mb-1">Kabel</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_odc_id: e.target.value, kabel_tube_odc_id: '', kabel_core_odc_id: '' })}
-                    required
-                  >
-                    <option value="">Pilih Kabel</option>
-                    {kabelOdcList.map((kabel) => (
-                      <option key={kabel.id} value={kabel.id}>
-                        {kabel.nama_kabel}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={kabelOdcList.map((k:any)=>({ value: k.id.toString(), label: k.nama_kabel }))}
+                    value={kabelOdcList.find((k:any)=> k.id.toString()===form.kabel_odc_id) ? { value: form.kabel_odc_id, label: kabelOdcList.find((k:any)=> k.id.toString()===form.kabel_odc_id)?.nama_kabel } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_odc_id: opt?.value || '', kabel_tube_odc_id: '', kabel_core_odc_id: '' })}
+                    placeholder="Pilih Kabel"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
                   <label className="block mb-1">Kabel Tube</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_tube_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_tube_odc_id: e.target.value, kabel_core_odc_id: '' })}
-                    disabled={!form.kabel_odc_id}
-                  >
-                    <option value="">Pilih Kabel Tube</option>
-                    {filteredTubesForOdc.map((tube: any) => (
-                      <option key={tube.id} value={tube.id}>
-                        {tube.warna_tube}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={filteredTubesForOdc.map((t:any)=>({ value: t.id.toString(), label: t.warna_tube }))}
+                    value={filteredTubesForOdc.find((t:any)=> t.id.toString()===form.kabel_tube_odc_id) ? { value: form.kabel_tube_odc_id, label: filteredTubesForOdc.find((t:any)=> t.id.toString()===form.kabel_tube_odc_id)?.warna_tube } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_tube_odc_id: opt?.value || '', kabel_core_odc_id: '' })}
+                    placeholder="Pilih Kabel Tube"
+                    isClearable
+                    isSearchable
+                    isDisabled={!form.kabel_odc_id}
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
                   <label className="block mb-1">Kabel Core (opsional)</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.kabel_core_odc_id}
-                    onChange={(e) => setForm({ ...form, kabel_core_odc_id: e.target.value })}
-                    disabled={!form.kabel_tube_odc_id}
-                  >
-                    <option value="">Pilih Kabel Core</option>
-                    {filteredCoresForOdc.map((core: any) => (
-                      <option key={core.id} value={core.id}>
-                        {core.warna_core}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={filteredCoresForOdc.map((c:any)=>({ value: c.id.toString(), label: c.warna_core }))}
+                    value={filteredCoresForOdc.find((c:any)=> c.id.toString()===form.kabel_core_odc_id) ? { value: form.kabel_core_odc_id, label: filteredCoresForOdc.find((c:any)=> c.id.toString()===form.kabel_core_odc_id)?.warna_core } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_core_odc_id: opt?.value || '' })}
+                    placeholder="Pilih Kabel Core"
+                    isClearable
+                    isSearchable
+                    isDisabled={!form.kabel_tube_odc_id}
+                    {...selectCommonProps}
+                  />
                 </div>
 
                 <div>
                   <label className="block mb-1">ODC ID (Opsional)</label>
-                  <select
-                    className="w-full border p-1"
-                    value={form.odc_id}
-                    onChange={(e) => setForm({ ...form, odc_id: e.target.value })}
-                  >
-                    <option value="">Pilih ODC</option>
-                    {filteredOdcForOdc.map((odc) => (
-                      <option key={odc.id} value={odc.id}>
-                        {odc.nama_odc}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={filteredOdcForOdc.map((o:any)=>({ value: o.id.toString(), label: o.nama_odc }))}
+                    value={filteredOdcForOdc.find((o:any)=> o.id.toString()===form.odc_id) ? { value: form.odc_id, label: filteredOdcForOdc.find((o:any)=> o.id.toString()===form.odc_id)?.nama_odc } : null}
+                    onChange={(opt:any)=> setForm({ ...form, odc_id: opt?.value || '' })}
+                    placeholder="Pilih ODC"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
                   {form.kabel_odc_id && (
                     <p className="text-xs text-gray-500 mt-1">
                       Menampilkan ODC yang terhubung dengan kabel yang sama
@@ -733,6 +813,114 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
                     <option value="1:128">1:128</option>
                   </select>
                 </div>
+              </>
+            )}
+
+            {mode === 'joint_box' && (
+              <>
+                <div>
+                  <label className="block mb-1">Kabel</label>
+                  <Select
+                    className="w-full"
+                    classNamePrefix="select"
+                    options={kabelOdcList.map((k:any)=>({ value: k.id.toString(), label: k.nama_kabel }))}
+                    value={kabelOdcList.find((k:any)=> k.id.toString()===form.kabel_odc_id) ? { value: form.kabel_odc_id, label: kabelOdcList.find((k:any)=> k.id.toString()===form.kabel_odc_id)?.nama_kabel } : null}
+                    onChange={(opt:any)=> setForm({ ...form, kabel_odc_id: opt?.value || '', odc_id: '', odc_2_id: '', odp_id: '' })}
+                    placeholder="Pilih Kabel"
+                    isClearable
+                    isSearchable
+                    {...selectCommonProps}
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-1">Aktifkan Koneksi</label>
+                  <select
+                    className="w-full border p-1"
+                    value={jbConnectionType}
+                    onChange={(e) => {
+                      const val = e.target.value as any;
+                      setJbConnectionType(val);
+                      setForm({ ...form, odc_id: '', odc_2_id: '', odp_id: '' });
+                    }}
+                  >
+                    <option value="">Tidak Ada</option>
+                    <option value="odc-odc">ODC → ODC</option>
+                    <option value="odc-odp">ODC → ODP</option>
+                  </select>
+                </div>
+
+                {jbConnectionType === 'odc-odc' && (
+                  <>
+                    <div>
+                      <label className="block mb-1">Source ODC</label>
+                      <Select
+                        className="w-full"
+                        classNamePrefix="select"
+                        options={odcList.filter((o:any)=> !form.kabel_odc_id || String(o.kabel_odc_id)===String(form.kabel_odc_id)).map((o:any)=>({ value: o.id.toString(), label: o.nama_odc }))}
+                        value={odcList.find((o:any)=> o.id.toString()===form.odc_id) ? { value: form.odc_id, label: odcList.find((o:any)=> o.id.toString()===form.odc_id)?.nama_odc } : null}
+                        onChange={(opt:any)=> setForm({ ...form, odc_id: opt?.value || '', odc_2_id: '' })}
+                        placeholder="Pilih ODC"
+                        isClearable
+                        isSearchable
+                        isDisabled={!form.kabel_odc_id}
+                        {...selectCommonProps}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block mb-1">Target ODC</label>
+                      <Select
+                        className="w-full"
+                        classNamePrefix="select"
+                        options={odcList.filter((o:any)=> String(o.id)!==String(form.odc_id)).filter((o:any)=> !form.kabel_odc_id || String(o.kabel_odc_id)===String(form.kabel_odc_id)).map((o:any)=>({ value: o.id.toString(), label: o.nama_odc }))}
+                        value={odcList.find((o:any)=> o.id.toString()===form.odc_2_id) ? { value: form.odc_2_id, label: odcList.find((o:any)=> o.id.toString()===form.odc_2_id)?.nama_odc } : null}
+                        onChange={(opt:any)=> setForm({ ...form, odc_2_id: opt?.value || '' })}
+                        placeholder="Pilih ODC"
+                        isClearable
+                        isSearchable
+                        isDisabled={!form.odc_id}
+                        {...selectCommonProps}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {jbConnectionType === 'odc-odp' && (
+                  <>
+                    <div>
+                      <label className="block mb-1">Source ODC</label>
+                      <Select
+                        className="w-full"
+                        classNamePrefix="select"
+                        options={odcList.filter((o:any)=> !form.kabel_odc_id || String(o.kabel_odc_id)===String(form.kabel_odc_id)).map((o:any)=>({ value: o.id.toString(), label: o.nama_odc }))}
+                        value={odcList.find((o:any)=> o.id.toString()===form.odc_id) ? { value: form.odc_id, label: odcList.find((o:any)=> o.id.toString()===form.odc_id)?.nama_odc } : null}
+                        onChange={(opt:any)=> setForm({ ...form, odc_id: opt?.value || '', odp_id: '' })}
+                        placeholder="Pilih ODC"
+                        isClearable
+                        isSearchable
+                        isDisabled={!form.kabel_odc_id}
+                        {...selectCommonProps}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block mb-1">Target ODP</label>
+                      <Select
+                        className="w-full"
+                        classNamePrefix="select"
+                        options={odpList.filter((p:any)=> !form.odc_id || String(p.odc_id ?? p.odc?.id)===String(form.odc_id)).map((p:any)=>({ value: p.id.toString(), label: p.nama_odp }))}
+                        value={odpList.find((p:any)=> p.id.toString()===form.odp_id) ? { value: form.odp_id, label: odpList.find((p:any)=> p.id.toString()===form.odp_id)?.nama_odp } : null}
+                        onChange={(opt:any)=> setForm({ ...form, odp_id: opt?.value || '' })}
+                        placeholder="Pilih ODP"
+                        isClearable
+                        isSearchable
+                        isDisabled={!form.odc_id}
+                        {...selectCommonProps}
+                      />
+                    </div>
+                  </>
+                )}
               </>
             )}
 
@@ -761,10 +949,10 @@ export const AddMarkerForm: React.FC<AddMarkerFormProps> = ({ mode, onSave, onCa
             </div>
 
             <div className="flex gap-2 justify-end pt-2">
-              <button type="button" className="bg-gray-300 px-2 py-1 rounded" onClick={onCancel}>
+              <button type="button" className="bg-gray-300 px-2 py-1 rounded" onClick={onCancel} disabled={isSubmitting}>
                 Batal
               </button>
-              <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded">
+              <button type="submit" className="bg-blue-600 text-white px-2 py-1 rounded disabled:opacity-50" disabled={isSubmitting}>
                 Simpan
               </button>
             </div>

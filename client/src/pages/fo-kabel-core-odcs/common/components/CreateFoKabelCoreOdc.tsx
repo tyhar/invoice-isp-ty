@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, Element } from '$app/components/cards';
 import { ValidationBag } from '$app/common/interfaces/validation-bag';
-import { SelectField, InputField } from '$app/components/forms';
+import { InputField } from '$app/components/forms';
+import Select from 'react-select';
+import { SingleCoreColorPicker } from './SingleCoreColorPicker';
 
 interface FoKabelCoreOdcCreate {
     kabel_tube_odc_id: number;
@@ -28,22 +30,10 @@ interface Props {
     tubes: TubeOdcOption[];
     selectedCable?: number;
     setSelectedCable?: React.Dispatch<React.SetStateAction<number>>;
+    tubesLoading?: boolean;
 }
 
-const CORE_COLORS = [
-    'biru',
-    'jingga',
-    'hijau',
-    'coklat',
-    'abu_abu',
-    'putih',
-    'merah',
-    'hitam',
-    'kuning',
-    'ungu',
-    'merah_muda',
-    'aqua',
-];
+//
 
 export function CreateFoKabelCoreOdc({
     form,
@@ -52,6 +42,7 @@ export function CreateFoKabelCoreOdc({
     tubes,
     selectedCable: selectedCableProp,
     setSelectedCable: setSelectedCableProp,
+    tubesLoading = false,
 }: Props) {
     const [t] = useTranslation();
     // internal state for create mode
@@ -115,35 +106,47 @@ export function CreateFoKabelCoreOdc({
 
             {/* Select parent cable */}
             <Element leftSide={t('Select Kabel')} required>
-                <SelectField
-                    required
-                    value={selectedCable || ''}
-                    onValueChange={(v) => setSelectedCable(parseInt(v))}
-                >
-                    <option value="">{t('select kabel odc')}</option>
-                    {cableOptions.map((opt) => (
-                        <option key={opt.id} value={opt.id}>
-                            {opt.name}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="selectedCable"
+                    options={cableOptions.map((opt) => ({
+                        value: opt.id.toString(),
+                        label: opt.name,
+                    }))}
+                    value={cableOptions.map((opt) => ({
+                        value: opt.id.toString(),
+                        label: opt.name,
+                    })).find((option) => option.value === selectedCable?.toString())}
+                    onChange={(option) => setSelectedCable(option ? parseInt(option.value) : 0)}
+                    placeholder={tubesLoading ? t('Loading cables...') : t('Search and select cable ODC...')}
+                    isClearable
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isLoading={tubesLoading}
+                />
             </Element>
 
             {/* Select tube under chosen cable */}
             <Element leftSide={t('Select Tube')} required>
-                <SelectField
-                    required
-                    value={form.kabel_tube_odc_id || ''}
-                    onValueChange={(v) => change('kabel_tube_odc_id', parseInt(v))}
-                    errorMessage={errors?.errors.kabel_tube_odc_id}
-                >
-                    <option value="">{t('select warna tube')}</option>
-                    {filteredTubes.map((tub) => (
-                        <option key={tub.id} value={tub.id}>
-                            {tub.warna_tube} - {tub.deskripsi || `Tube ${tub.warna_tube} for cable ${tub.nama_kabel}`}
-                        </option>
-                    ))}
-                </SelectField>
+                <Select
+                    name="kabel_tube_odc_id"
+                    options={filteredTubes.map((tub) => ({
+                        value: tub.id.toString(),
+                        label: `${tub.warna_tube} - ${tub.deskripsi || `Tube ${tub.warna_tube} for cable ${tub.nama_kabel}`}`,
+                    }))}
+                    value={filteredTubes.map((tub) => ({
+                        value: tub.id.toString(),
+                        label: `${tub.warna_tube} - ${tub.deskripsi || `Tube ${tub.warna_tube} for cable ${tub.nama_kabel}`}`,
+                    })).find((option) => option.value === form.kabel_tube_odc_id?.toString())}
+                    onChange={(option) => change('kabel_tube_odc_id', option ? parseInt(option.value) : 0)}
+                    placeholder={tubesLoading ? t('Loading tubes...') : t('Search and select tube...')}
+                    isClearable
+                    className="basic-single"
+                    classNamePrefix="select"
+                    isLoading={tubesLoading}
+                />
+                {errors?.errors.kabel_tube_odc_id && (
+                    <p className="text-red-500 text-xs mt-1">{errors.errors.kabel_tube_odc_id}</p>
+                )}
                 {tubeFull && (
                     <div className="text-red-600 font-semibold mb-2">
                         Tube is full (maximum {selectedTube.jumlah_core_in_tube} cores per tube).
@@ -152,21 +155,15 @@ export function CreateFoKabelCoreOdc({
             </Element>
 
             {/* Select core color */}
-            <Element leftSide={t('Warna Core')} required>
-                <SelectField
-                    required
+            <Element leftSide={t('Select Warna Core')} required>
+                <SingleCoreColorPicker
                     value={form.warna_core}
-                    onValueChange={(v) => change('warna_core', v)}
-                    errorMessage={errors?.errors.warna_core}
+                    onChange={(color) => change('warna_core', color)}
                     disabled={tubeFull}
-                >
-                    <option value="">{t('select warna core')}</option>
-                    {CORE_COLORS.map((color) => (
-                        <option key={color} value={color}>
-                            {t(color)}
-                        </option>
-                    ))}
-                </SelectField>
+                />
+                {errors?.errors.warna_core && (
+                    <p className="text-red-500 text-xs mt-1">{errors.errors.warna_core}</p>
+                )}
             </Element>
 
             <Element leftSide={t('Deskripsi')}>

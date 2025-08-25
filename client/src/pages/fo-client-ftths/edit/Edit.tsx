@@ -38,6 +38,10 @@ export default function Edit() {
     const [lokasis, setLokasis] = useState<any[]>([]);
     const [odps, setOdps] = useState<any[]>([]);
     const [clients, setClients] = useState<any[]>([]);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [odpsLoading, setOdpsLoading] = useState(true);
+    const [clientsLoading, setClientsLoading] = useState(true);
 
     useEffect(() => {
         setLoading(true);
@@ -73,6 +77,9 @@ export default function Edit() {
             setOdps(odpsData);
             setClients(clientsData);
             setDataReady(true);
+            setLokasisLoading(false);
+            setOdpsLoading(false);
+            setClientsLoading(false);
         }).catch(() => {
             toast.error('error refresh page');
             navigate('/fo-client-ftths');
@@ -167,6 +174,9 @@ export default function Edit() {
                         odps={odps}
                         clients={clients}
                         isEdit
+                        lokasisLoading={lokasisLoading}
+                        odpsLoading={odpsLoading}
+                        clientsLoading={clientsLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

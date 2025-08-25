@@ -83,6 +83,12 @@ export default function Edit() {
     const [loading, setLoading] = useState(true);
     const [cores, setCores] = useState<CoreOption[]>([]);
     const [kabelTubes, setKabelTubes] = useState<TubeOption[]>([]);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [kabelOdcsLoading, setKabelOdcsLoading] = useState(true);
+    const [odcsLoading, setOdcsLoading] = useState(true);
+    const [coresLoading, setCoresLoading] = useState(true);
+    const [kabelTubesLoading, setKabelTubesLoading] = useState(true);
 
     // Fetch existing ODC and Lokasi list
     useEffect(() => {
@@ -114,12 +120,14 @@ export default function Edit() {
                         nama_lokasi: l.nama_lokasi,
                     }))
                 );
+                setLokasisLoading(false);
                 setKabelOdcs(
                     kabelOdcRes.data.data.map((k: any) => ({
                         id: k.id,
                         nama_kabel: k.nama_kabel,
                     }))
                 );
+                setKabelOdcsLoading(false);
                 setOdcs(
                     odcsRes.data.data.map((o: any) => ({
                         id: o.id,
@@ -128,6 +136,7 @@ export default function Edit() {
                         kabel_odc_id: o.kabel_odc_id,
                     }))
                 );
+                setOdcsLoading(false);
                 setCores(
                     coreRes.data.data.map((c: any) => ({
                         id: c.id,
@@ -138,6 +147,7 @@ export default function Edit() {
                         warna_tube: c.kabel_tube_odc.warna_tube,
                     }))
                 );
+                setCoresLoading(false);
                 setKabelTubes(
                     tubeRes.data.data.map((t: any) => ({
                         id: t.id,
@@ -146,6 +156,7 @@ export default function Edit() {
                         deskripsi: t.deskripsi,
                     }))
                 );
+                setKabelTubesLoading(false);
             })
             .catch(() => {
                 toast.error('error refresh page');
@@ -180,6 +191,7 @@ export default function Edit() {
                     // Invalidate related queries
                     queryClient.invalidateQueries(['/api/v1/fo-odcs']);
                     queryClient.invalidateQueries(['/api/v1/fo-lokasis']);
+                    navigate('/fo-odcs');
                 })
                 .catch((err) => {
                     if (err.response?.status === 422) {
@@ -238,6 +250,11 @@ export default function Edit() {
                         cores={cores}
                         kabelTubes={kabelTubes}
                         errors={errors}
+                        lokasisLoading={lokasisLoading}
+                        kabelOdcsLoading={kabelOdcsLoading}
+                        odcsLoading={odcsLoading}
+                        coresLoading={coresLoading}
+                        kabelTubesLoading={kabelTubesLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}

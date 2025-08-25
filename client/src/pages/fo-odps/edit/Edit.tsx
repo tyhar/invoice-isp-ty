@@ -54,6 +54,12 @@ export default function Edit() {
     const [errors, setErrors] = useState<ValidationBag>();
     const [isBusy, setIsBusy] = useState(false);
     const [loading, setLoading] = useState(true);
+    // per-field loading flags
+    const [lokasisLoading, setLokasisLoading] = useState(true);
+    const [kabelOdcsLoading, setKabelOdcsLoading] = useState(true);
+    const [kabelTubesLoading, setKabelTubesLoading] = useState(true);
+    const [coresLoading, setCoresLoading] = useState(true);
+    const [odcsLoading, setOdcsLoading] = useState(true);
 
     useEffect(() => {
         Promise.all([
@@ -85,6 +91,7 @@ export default function Edit() {
                         nama_lokasi: l.nama_lokasi,
                     }))
                 );
+                setLokasisLoading(false);
                 setCores(
                     coreRes.data.data.map((c: any) => ({
                         id: c.id,
@@ -96,6 +103,7 @@ export default function Edit() {
                         deskripsi: c.deskripsi,
                     }))
                 );
+                setCoresLoading(false);
                 setKabelOdcs(
                     kabelOdcRes.data.data.map((k: any) => ({
                         id: k.id,
@@ -104,6 +112,8 @@ export default function Edit() {
                         odcs: k.odcs || [],
                     }))
                 );
+                setKabelOdcsLoading(false);
+                setOdcsLoading(false);
                 setKabelTubes(
                     kabelTubeRes.data.data.map((t: any) => ({
                         id: t.id,
@@ -112,6 +122,7 @@ export default function Edit() {
                         deskripsi: t.deskripsi,
                     }))
                 );
+                setKabelTubesLoading(false);
             })
             .catch(() => {
                 toast.error('error refresh page');
@@ -149,7 +160,10 @@ export default function Edit() {
                 ...payload,
                 lokasi_id,
             })
-                .then(() => toast.success('updated odp'))
+                .then(() => {
+                    toast.success('updated odp');
+                    navigate('/fo-odps');
+                })
                 .catch((err) => {
                     if (err.response?.status === 422) {
                         setErrors(err.response.data);
@@ -207,6 +221,11 @@ export default function Edit() {
                         kabelTubes={kabelTubes} // Pass all kabel tubes
                         cores={cores}
                         errors={errors}
+                        lokasisLoading={lokasisLoading}
+                        kabelOdcsLoading={kabelOdcsLoading}
+                        kabelTubesLoading={kabelTubesLoading}
+                        coresLoading={coresLoading}
+                        odcsLoading={odcsLoading}
                     />
                 </form>
                 {isBusy && <Spinner />}
