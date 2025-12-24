@@ -4,7 +4,9 @@
     "scripts": {
         "dev": "vite --host 0.0.0.0",
         "build": "vite build",
-        "production": "vite build"
+        "production": "vite build",
+        "setup-vendor": "node scripts/setup-vendor.js",
+        "vercel-build": "npm run setup-vendor && npm run build"
     },
     "devDependencies": {
         "@babel/compat-data": "7.15.0",
