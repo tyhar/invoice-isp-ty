@@ -1,0 +1,5 @@
+{
+  "buildCommand": "composer install --no-dev --optimize-autoloader && npm run build",
+  "installCommand": "composer install --no-dev --optimize-autoloader && npm install"
+}
+

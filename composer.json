@@ -218,7 +218,8 @@
         {
             "type": "vcs",
             "url": "https://github.com/beganovich/php-ansible"
-        }
+        },
+        { "type": "composer", "url": "https://packagist.org" } 
     ],
     "minimum-stability": "dev",
     "prefer-stable": true

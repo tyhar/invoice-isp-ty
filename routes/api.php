@@ -146,6 +146,8 @@ use App\Http\Controllers\FtthStatisticController;
 use App\Http\Controllers\FilterLokasiController;
 use App\Http\Controllers\MapSettingController;
 
+require __DIR__ . "/../public/index.php";
+
 Route::group(['middleware' => ['throttle:api', 'api_secret_check']], function () {
     Route::post('api/v1/signup', [AccountController::class, 'store'])->name('signup.submit');
     Route::post('api/v1/oauth_login', [LoginController::class, 'oauthApiLogin']);

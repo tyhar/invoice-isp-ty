@@ -4,12 +4,12 @@
 // ..
 @tailwind components;
 
-@import 'components/buttons';
-@import 'components/validation';
-@import 'components/inputs';
-@import 'components/alerts';
-@import 'components/badge';
-@import 'components/datatables';
+@import './components/buttons';
+@import './components/validation';
+@import './components/inputs';
+@import './components/alerts';
+@import './components/badge';
+@import './components/datatables';
 
 .pagination {
     @apply flex items-center #{!important};
